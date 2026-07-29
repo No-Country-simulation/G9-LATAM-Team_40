@@ -1,0 +1,8 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pandas==2.2.2
+scikit-learn==1.5.1
+nltk==3.9.1
+yake==0.4.8
+joblib==1.4.2
+python-multipart==0.0.9
