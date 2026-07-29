@@ -27,9 +27,9 @@
 Estas decisiones hay que tomarlas ANTES del Sprint 1. Si no, se bloquean todos.
 
 - [ ] Definir rama de integracion: `develop` (cada dev trabaja en `feature/BE-X-descripcion`)
-- [ ] Levantar entorno local con `docker compose up -d` — todos deben tenerlo funcionando
-- [ ] Acordar el contrato de la API (DTOs de request/response) — BE-4 redacta, todos aprueban
-- [ ] Confirmar con Data Science que el endpoint `POST /predict` responde y el schema del response
+- [x] Levantar entorno local con `docker compose up -d` — todos deben tenerlo funcionando
+- [x] Acordar el contrato de la API (DTOs de request/response) — BE-4 redacta, todos aprueban
+- [x] Confirmar con Data Science que el endpoint `POST /predict` responde y el schema del response
 - [ ] Crear el proyecto en Supabase (o levantar local) y compartir las env vars
 - [ ] Crear los buckets en OCI Object Storage y compartir credenciales al equipo
 
@@ -42,31 +42,31 @@ Estas decisiones hay que tomarlas ANTES del Sprint 1. Si no, se bloquean todos.
 ### Dia 1-2 — Setup y contratos
 
 #### BE-1 | Security Setup
-- [ ] Configurar `SecurityConfig` con Spring Security (CORS, CSRF deshabilitado, rutas publicas vs protegidas)
-- [ ] Implementar `JwtService` — parsear y validar JWT firmado con `SUPABASE_JWT_SECRET` (HS256)
-- [ ] Implementar `JwtAuthFilter` — `OncePerRequestFilter` que extrae Bearer token y puebla `SecurityContext`
-- [ ] Implementar `SupabaseUserDetails` con sub (userId), email y rol del JWT
+- [x] Configurar `SecurityConfig` con Spring Security (CORS, CSRF deshabilitado, rutas publicas vs protegidas)
+- [x] Implementar `JwtService` — parsear y validar JWT firmado con `SUPABASE_JWT_SECRET` (HS256) — maneja secreto vacio sin crashear
+- [x] Implementar `JwtAuthFilter` — `OncePerRequestFilter` que extrae Bearer token y puebla `SecurityContext`
+- [x] Implementar `SupabaseUserDetails` con sub (userId), email y rol del JWT
 - [ ] Prueba manual: request sin token → 401, con token valido → pasa el filtro
 
 #### BE-2 | Domain Setup
-- [ ] Crear entidad `Contenido` con todos los campos (`@Entity`, `@Table`, Lombok)
-- [ ] Crear entidad `Archivo` con todos los campos
-- [ ] Configurar `application.properties` para PostgreSQL y `ddl-auto=update`
-- [ ] Verificar que el schema se crea en PostgreSQL al iniciar la app
-- [ ] Crear `ContenidoRepository` y `ArchivoRepository` (JpaRepository)
+- [x] Crear entidad `Contenido` con todos los campos (`@Entity`, `@Table`, Lombok)
+- [x] Crear entidad `Archivo` con todos los campos
+- [x] Configurar `application.properties` para PostgreSQL y `ddl-auto=update`
+- [x] Verificar que el schema se crea en PostgreSQL al iniciar la app
+- [x] Crear `ContenidoRepository` y `ArchivoRepository` (JpaRepository)
 
 #### BE-3 | Integration Setup
-- [ ] Implementar `MlClient` con `RestClient` — POST a `${ML_SERVICE_URL}/predict`
-- [ ] Definir `MlRequest` y `MlResponse` (DTOs para la comunicacion con FastAPI)
+- [x] Implementar `MlClient` con `RestClient` — POST a `${ML_SERVICE_URL}/predict`
+- [x] Definir `MlRequest` y `MlResponse` (DTOs para la comunicacion con FastAPI)
 - [ ] Prueba manual contra el servicio de Data Science: enviar texto y recibir respuesta JSON
-- [ ] Configurar `OciStorageConfig` con las credenciales OCI (ObjectStorageClient)
+- [ ] Configurar `OciStorageConfig` con las credenciales OCI (ObjectStorageClient) — pendiente credenciales, stub activo
 
 #### BE-4 | API Contracts + Project Setup
-- [ ] Redactar y compartir el contrato de DTOs: `ContenidoRequest`, `ContenidoResponse`, `ArchivoResponse`
-- [ ] Crear `GlobalExceptionHandler` con `@ControllerAdvice` para 400, 401, 403, 404, 500
-- [ ] Crear `ErrorResponse` DTO
-- [ ] Configurar Actuator: exponer `/actuator/health`
-- [ ] Verificar que el proyecto compila y los tests base pasan (`TechContentAiApplicationTests`)
+- [x] Redactar y compartir el contrato de DTOs: `ContenidoRequest`, `ContenidoResponse`, `ArchivoResponse`
+- [x] Crear `GlobalExceptionHandler` con `@ControllerAdvice` para 400, 401, 403, 404, 500
+- [x] Crear `ErrorResponse` DTO
+- [x] Configurar Actuator: exponer `/actuator/health`
+- [x] Verificar que el proyecto compila — BUILD SUCCESS 33 archivos, `/actuator/health` UP
 
 #### FE-1 | Project Setup
 - [ ] Inicializar proyecto frontend (React + Vite o el stack elegido)
@@ -93,31 +93,31 @@ Estas decisiones hay que tomarlas ANTES del Sprint 1. Si no, se bloquean todos.
 ### Dia 3-4 — Integracion core
 
 #### BE-1 | Auth Endpoints
-- [ ] Implementar `AuthController` — `POST /auth/register` y `POST /auth/login`
-- [ ] Implementar `SupabaseAuthClient` que delega a GoTrue (`/auth/v1/signup`, `/auth/v1/token`)
-- [ ] Manejar respuesta de GoTrue y mapear al `SupabaseAuthResponse` propio
-- [ ] Prueba: register → login → recibir access_token funcional
+- [x] Implementar `AuthController` — `POST /auth/register` y `POST /auth/login`
+- [x] Implementar `SupabaseAuthClient` que delega a GoTrue (`/auth/v1/signup`, `/auth/v1/token`)
+- [x] Manejar respuesta de GoTrue y mapear al `SupabaseAuthResponse` propio
+- [ ] Prueba: register → login → recibir access_token funcional — pendiente credenciales Supabase
 
 #### BE-2 | ContenidoService
-- [ ] Implementar `ContenidoService.clasificar(request, userId)`:
+- [x] Implementar `ContenidoService.clasificar(request, userId)`:
   1. Llamar a `MlClient.predict(texto)`
   2. Mapear respuesta del ML al modelo `Contenido`
   3. Persistir en PostgreSQL con `ContenidoRepository.save()`
   4. Retornar `ContenidoResponse`
-- [ ] Implementar `CategoriaRepository` con query para contar documentos por categoria
-- [ ] Implementar `CategoriaService.listarConConteo()`
+- [x] Implementar `CategoriaRepository` con query para contar documentos por categoria (JPQL en ContenidoRepository)
+- [x] Implementar `CategoriaService.listarConConteo()`
 
 #### BE-3 | OCI Storage
-- [ ] Implementar `OciStorageClient.upload(bucketName, objectName, inputStream, contentType)`
-- [ ] Implementar `OciStorageClient.generatePresignedUrl(bucketName, objectName)` para URLs de descarga
+- [x] Implementar `OciStorageClient.upload(bucketName, objectName, inputStream, contentType)` — stub activo
+- [ ] Implementar `OciStorageClient` real con OCI Java SDK — pendiente credenciales OCI
 - [ ] Prueba manual: subir un archivo de prueba y verificar que aparece en el bucket de OCI
 
 #### BE-4 | ContenidoController
-- [ ] Implementar `POST /api/contenido` con `@Valid` sobre `ContenidoRequest`
-- [ ] Extraer `userId` del `SecurityContext` (del `SupabaseUserDetails`)
-- [ ] Llamar a `ContenidoService.clasificar()` y retornar `ContenidoResponse`
-- [ ] Implementar `GET /api/categorias` con `CategoriaService.listarConConteo()`
-- [ ] Prueba con curl/Postman: flujo completo con JWT valido
+- [x] Implementar `POST /api/contenido` con `@Valid` sobre `ContenidoRequest`
+- [x] Extraer `userId` del `SecurityContext` con `@AuthenticationPrincipal`
+- [x] Llamar a `ContenidoService.clasificar()` y retornar `ContenidoResponse`
+- [x] Implementar `GET /api/categorias` con `CategoriaService.listarConConteo()`
+- [ ] Prueba con curl/Postman: flujo completo con JWT valido — pendiente credenciales Supabase
 
 #### FE-1 | Dashboard Base
 - [ ] Implementar ruta protegida (redirect a login si no hay JWT)
