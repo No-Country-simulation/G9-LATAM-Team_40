@@ -2,7 +2,7 @@
 
 **Hackathon ONE – Proyectos G9 | Alura + Oracle**
 
-Solución para la organización inteligente de contenido técnico mediante técnicas de Ciencia de Datos, expuesta a través de una API REST en Java/Spring Boot con integración a OCI Object Storage.
+Solución para la organización inteligente de contenido técnico mediante técnicas de Ciencia de Datos, expuesta a través de una API REST en Java/Spring Boot con integración a OCI Object Storage y Supabase para persistencia y autenticación.
 
 ---
 
@@ -11,10 +11,8 @@ Solución para la organización inteligente de contenido técnico mediante técn
 - [Descripción](#descripción)
 - [Arquitectura](#arquitectura)
 - [Tecnologías](#tecnologías)
-- [Estructura del Proyecto](#estructura-del-proyecto)
 - [CI/CD y Despliegue](#ci-y-despliegue)
 - [API Endpoints](#api-endpoints)
-- [Ejemplos de Uso](#ejemplos-de-uso)
 - [Requisitos](#requisitos)
 - [Instalación y Ejecución](#instalación-y-ejecución)
 - [Equipo](#equipo)
@@ -35,50 +33,99 @@ El resultado se expone en formato JSON para su consumo por otras aplicaciones, p
 
 ## Arquitectura
 
-```
-                         ┌───────────────────────────────┐
-                         │           VPS                  │
-                         │                                │
-  ┌──────────┐           │  ┌─────────────────┐          │       ┌──────────────┐
-  │ Cliente  │──────────▶│  │  Spring Boot    │          │       │ OCI Object   │
-  │ (REST)   │           │  │  (Java 17)      │──────────┼──────▶│ Storage      │
-  └──────────┘           │  │  :8080          │          │◀──────│ (modelos,    │
-                         │  └───────┬─────────┘          │       │  datasets)   │
-                         │          │                     │       └──────────────┘
-                         │          │ llamada HTTP interna │
-                         │          ▼                     │
-                         │  ┌─────────────────┐           │
-                         │  │  Python ML API  │           │
-                         │  │  (FastAPI)      │           │
-                         │  │  :5000          │           │
-                         │  └─────────────────┘           │
-                         │                                │
-                         └────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Cliente"
+        Client[Aplicación REST<br>Web / Mobile / CLI]
+    end
+
+    subgraph "VPS - Docker Compose"
+        subgraph "Spring Boot API"
+            SB[Spring Boot 3<br>Java 17<br>:8080]
+            SB -->|Validación| Controller[Controllers]
+            Controller -->|Orquestación| Service[Services]
+            Service -->|HTTP POST| MLClient[ML Client]
+        end
+
+        subgraph "Python ML Service"
+            FastAPI[FastAPI<br>Python 3.11<br>:5000]
+            FastAPI -->|Carga modelo| ModelLoader[Model Loader]
+            FastAPI -->|Inferencia| Classifier[Classifier]
+            FastAPI -->|Keywords| YAKE[YAKE Extractor]
+        end
+
+        subgraph "Supabase Local"
+            SupaDB[(PostgreSQL<br>:5432)]
+            SupaAuth[GoTrue Auth<br>:9999]
+            SupaREST[PostgREST<br>:3000]
+            SupaMeta[Supabase Meta<br>:8000]
+            SupaREST -->|Query| SupaDB
+            SupaAuth -->|Users| SupaDB
+        end
+    end
+
+    subgraph "Oracle Cloud Infrastructure"
+        OCI[OCI Object Storage<br>S3-compatible]
+        Models[Modelos .joblib]
+        Datasets[Datasets entrenamiento]
+        Files[Archivos documentos]
+        OCI --- Models
+        OCI --- Datasets
+        OCI --- Files
+    end
+
+    Client -->|HTTP POST /api/contenido<br>JSON| SB
+    Client -->|POST /api/archivos<br>multipart/form-data| SB
+    MLClient -->|HTTP POST /predict<br>localhost:5000| FastAPI
+    Service -->|JDBC<br>postgresql://localhost:5432| SupaDB
+    Service -->|Auth API<br>localhost:9999| SupaAuth
+    Service -->|Upload/Download| OCI
+    FastAPI -->|Download models| OCI
+    FastAPI -->|JSON response| MLClient
+    SB -->|JSON response| Client
+
+    style SB fill:#6DB33F,stroke:#333,color:#fff
+    style FastAPI fill:#3776AB,stroke:#333,color:#fff
+    style SupaDB fill:#3ECF8E,stroke:#333,color:#fff
+    style SupaAuth fill:#3ECF8E,stroke:#333,color:#fff
+    style OCI fill:#FF0000,stroke:#333,color:#fff
 ```
 
 ### Componentes
 
-| Componente | Tecnología | Descripción |
-|---|---|---|
-| **API Principal** | Java 17 + Spring Boot 3 | Recibe peticiones REST, valida entrada, orquesta el procesamiento y devuelve resultados JSON. |
-| **Motor ML** | Python 3.11 + FastAPI | Servicio interno que carga el modelo serializado y ejecuta inferencia (clasificación, keywords, similitud). |
-| **Notebook DS** | Jupyter / Google Colab | Exploración de datos (EDA), preprocesamiento de texto, entrenamiento y evaluación de modelos, serialización. |
-| **VPS** | Linux (Ubuntu 22.04) | Servidor que aloja el backend Spring Boot y el microservicio Python ML. |
-| **OCI Object Storage** | Bucket S3-compatible | Almacenamiento de modelos serializados (`.joblib`), datasets de entrenamiento y documentos procesados. |
-| **Base de Datos** | PostgreSQL / H2 (desarrollo) | Persistencia opcional de resultados y metadatos de contenido procesado. |
+| Componente | Tecnología | Puerto | Descripción |
+|---|---|---|---|
+| **API Principal** | Java 17 + Spring Boot 3 | `:8080` | Recibe peticiones REST, valida entrada, orquesta el procesamiento y devuelve resultados JSON. |
+| **Motor ML** | Python 3.11 + FastAPI | `:5000` | Servicio interno que carga el modelo serializado y ejecuta inferencia (clasificación, keywords, similitud). |
+| **Base de Datos** | PostgreSQL (Supabase) | `:5432` | Persistencia de resultados, metadatos de contenido procesado y usuarios. |
+| **Autenticación** | GoTrue (Supabase Auth) | `:9999` | Gestión de usuarios, JWT tokens, registro y login. |
+| **REST API Auto** | PostgREST | `:3000` | API REST generada automáticamente desde el esquema de PostgreSQL. |
+| **OCI Object Storage** | Bucket S3-compatible | - | Almacenamiento de modelos serializados (`.joblib`), datasets de entrenamiento y documentos/archivos de usuarios. |
 
 ### Flujo de Procesamiento
 
+**Clasificación de texto:**
 ```
-1. Cliente → POST /api/contenido  (JSON con título y texto)
-2. Spring Boot valida la entrada
-3. Spring Boot → POST http://localhost:5000/predict  (texto preprocesado)
-4. FastAPI carga modelo desde Object Storage y ejecuta:
+1. Cliente → POST /api/contenido  (JSON con título y texto + JWT token)
+2. Spring Boot valida JWT con Supabase Auth
+3. Spring Boot valida la entrada
+4. Spring Boot → POST http://localhost:5000/predict  (texto preprocesado)
+5. FastAPI carga modelo desde Object Storage y ejecuta:
    - TF-IDF + vectorización del texto
    - Clasificación con Regresión Logística / Random Forest
    - Extracción de keywords con YAKE / TF-IDF scores
-5. FastAPI → JSON con categoría, keywords, scores  →  Spring Boot
-6. Spring Boot enriquece respuesta y la retorna al cliente
+6. FastAPI → JSON con categoría, keywords, scores  →  Spring Boot
+7. Spring Boot persiste resultado en Supabase PostgreSQL
+8. Spring Boot enriquece respuesta y la retorna al cliente
+```
+
+**Almacenamiento de archivos:**
+```
+1. Cliente → POST /api/archivos  (multipart/form-data + JWT token)
+2. Spring Boot valida JWT y tipo de archivo
+3. Spring Boot sube archivo a OCI Object Storage
+4. Spring Boot guarda metadata (URL, tamaño, tipo) en Supabase PostgreSQL
+5. Spring Boot retorna URL de acceso al cliente
 ```
 
 ---
@@ -90,6 +137,7 @@ El resultado se expone en formato JSON para su consumo por otras aplicaciones, p
 - **Spring Web** (REST API)
 - **Spring Boot Actuator** (health checks, métricas)
 - **Spring Validation** (validación de entrada)
+- **Spring Security** (integración con Supabase Auth)
 - **Lombok** (reducción de boilerplate)
 - **Maven** (gestión de dependencias y build)
 - **JUnit 5 + Mockito** (pruebas)
@@ -103,71 +151,10 @@ El resultado se expone en formato JSON para su consumo por otras aplicaciones, p
 - **Joblib** — serialización del modelo
 
 ### Infraestructura
-- **Oracle Cloud Infrastructure (OCI)**
+- **Supabase Local** (Docker) — PostgreSQL + Auth + PostgREST
+- **Oracle Cloud Infrastructure (OCI)** — Object Storage
 - **Docker / Docker Compose** — containerización
 - **Nginx** (opcional) — reverse proxy
-
----
-
-## Estructura del Proyecto
-
-```
-hackaton-alura/
-├── README.md
-├── backend/                          # API REST en Java/Spring Boot
-│   ├── pom.xml
-│   ├── Dockerfile
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/techcontent/ai/
-│   │   │   │   ├── TechContentAiApplication.java
-│   │   │   │   ├── controller/
-│   │   │   │   │   └── ContenidoController.java
-│   │   │   │   ├── dto/
-│   │   │   │   │   ├── ContenidoRequest.java
-│   │   │   │   │   └── ContenidoResponse.java
-│   │   │   │   ├── service/
-│   │   │   │   │   ├── MlService.java
-│   │   │   │   │   └── ContenidoService.java
-│   │   │   │   ├── client/
-│   │   │   │   │   └── PythonMlClient.java   # Cliente HTTP para FastAPI
-│   │   │   │   ├── config/
-│   │   │   │   │   ├── AppConfig.java
-│   │   │   │   │   └── OciConfig.java
-│   │   │   │   └── exception/
-│   │   │   │       └── GlobalExceptionHandler.java
-│   │   │   └── resources/
-│   │   │       ├── application.yml
-│   │   │       └── application-oci.yml
-│   │   └── test/
-│   │       └── java/com/techcontent/ai/
-│   │           └── controller/
-│   │               └── ContenidoControllerTest.java
-│   └── .mvn/
-│
-├── ml-service/                       # Microservicio Python para inferencia
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── app/
-│   │   ├── main.py                   # FastAPI app entrypoint
-│   │   ├── model_loader.py           # Carga del modelo desde OCI
-│   │   ├── preprocessor.py           # Limpieza y vectorización de texto
-│   │   ├── classifier.py             # Clasificación temática
-│   │   ├── keywords.py               # Extracción de palabras clave
-│   │   └── similarity.py             # Similitud entre documentos
-│   └── models/                       # Modelos serializados (local/dev)
-│       └── .gitkeep
-│
-├── notebooks/                        # Notebooks de Ciencia de Datos
-│   ├── 01_eda_limpieza.ipynb         # Exploración y limpieza de datos
-│   ├── 02_preprocesamiento.ipynb     # Tokenización, stopwords, TF-IDF
-│   ├── 03_entrenamiento.ipynb        # Entrenamiento y evaluación
-│   └── 04_serializacion.ipynb        # Serialización del modelo final
-│
-├── docker-compose.yml                # Orquestación backend + ML + DB (opcional)
-├── .gitignore
-└── .env.example
-```
 
 ---
 
@@ -179,9 +166,9 @@ El proyecto utiliza **OCI Object Storage** como servicio obligatorio de Oracle C
 
 | Servicio | Uso |
 |---|---|
-| **OCI Object Storage** | Bucket para almacenar modelos serializados (`.joblib`), datasets de entrenamiento y documentos procesados. |
+| **OCI Object Storage** | Bucket para almacenar modelos serializados (`.joblib`), datasets de entrenamiento y documentos/archivos de usuarios. |
 
-El resto de la infraestructura corre en **VPS (Linux)**.
+El resto de la infraestructura corre en **VPS (Linux)** con Docker Compose.
 
 ### Pipeline CI/CD (GitHub Actions)
 
@@ -198,6 +185,7 @@ OCI_CLI_TENANCY=ocid1.tenancy.oc1...
 OCI_CLI_REGION=sa-santiago-1
 OCI_MODEL_BUCKET=techcontent-models
 OCI_DATASET_BUCKET=techcontent-datasets
+OCI_FILES_BUCKET=techcontent-files
 ```
 
 ---
@@ -207,6 +195,12 @@ OCI_DATASET_BUCKET=techcontent-datasets
 ### `POST /api/contenido`
 
 Clasifica un texto técnico y extrae palabras clave.
+
+**Headers:**
+```
+Authorization: Bearer <supabase-jwt-token>
+Content-Type: application/json
+```
 
 **Request Body:**
 ```json
@@ -234,23 +228,44 @@ Clasifica un texto técnico y extrae palabras clave.
 }
 ```
 
+### `POST /api/archivos`
+
+Sube un archivo a OCI Object Storage y guarda su metadata.
+
+**Headers:**
+```
+Authorization: Bearer <supabase-jwt-token>
+Content-Type: multipart/form-data
+```
+
+**Request Body:**
+```
+file: <archivo>
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": "f1g2h3i4",
+  "nombre": "documentacion-spring.pdf",
+  "url": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/.../documentacion-spring.pdf",
+  "tamano": 1048576,
+  "tipo": "application/pdf",
+  "subido_en": "2026-07-23T14:30:00Z"
+}
+```
+
+### `GET /api/archivos`
+
+Lista todos los archivos del usuario autenticado.
+
+### `GET /api/archivos/{id}`
+
+Obtiene la URL de descarga de un archivo específico.
+
 ### `POST /api/contenido/lote`
 
 Procesa múltiples documentos en una sola petición.
-
-**Request Body:**
-```json
-[
-  {
-    "titulo": "Guía de Docker",
-    "texto": "Docker permite crear contenedores para aplicaciones..."
-  },
-  {
-    "titulo": "Python para Data Science",
-    "texto": "Pandas y NumPy son librerías fundamentales..."
-  }
-]
-```
 
 ### `GET /api/contenido/buscar?q=spring+boot`
 
@@ -260,46 +275,17 @@ Búsqueda semántica por palabras clave entre contenidos previamente procesados.
 
 Lista todas las categorías disponibles con la cantidad de documentos por categoría.
 
+### `POST /auth/register`
+
+Registro de nuevos usuarios (delegado a Supabase Auth).
+
+### `POST /auth/login`
+
+Inicio de sesión y obtención de JWT token (delegado a Supabase Auth).
+
 ### `GET /actuator/health`
 
 Health check del servicio.
-
----
-
-## Ejemplos de Uso
-
-### Ejemplo 1: Clasificación de contenido Backend
-```bash
-curl -X POST http://localhost:8080/api/contenido \
-  -H "Content-Type: application/json" \
-  -d '{
-    "titulo": "Introducción a Spring Boot",
-    "texto": "Conceptos básicos para crear APIs REST con Java y Spring Boot."
-  }'
-```
-**Respuesta:** Categoría `Backend` con probabilidad alta, keywords: Java, Spring Boot, API REST.
-
-### Ejemplo 2: Clasificación de contenido Frontend
-```bash
-curl -X POST http://localhost:8080/api/contenido \
-  -H "Content-Type: application/json" \
-  -d '{
-    "titulo": "Fundamentos de React",
-    "texto": "React es una librería de JavaScript para construir interfaces de usuario con componentes reutilizables y virtual DOM."
-  }'
-```
-**Respuesta:** Categoría `Frontend`, keywords: React, JavaScript, Componentes, Virtual DOM.
-
-### Ejemplo 3: Clasificación de contenido DevOps
-```bash
-curl -X POST http://localhost:8080/api/contenido \
-  -H "Content-Type: application/json" \
-  -d '{
-    "titulo": "CI/CD con GitHub Actions",
-    "texto": "Automatización de builds, tests y despliegues usando GitHub Actions y Docker para integración continua."
-  }'
-```
-**Respuesta:** Categoría `DevOps`, keywords: CI/CD, GitHub Actions, Docker, Automatización.
 
 ---
 
@@ -334,16 +320,20 @@ cd G9-LATAM-Team_40
 ### 2. Configurar variables de entorno
 ```bash
 cp .env.example .env
-# Editar .env con credenciales OCI y configuraciones
+# Editar .env con credenciales OCI y configuraciones de Supabase
 ```
 
 ### 3. Ejecutar con Docker Compose
 ```bash
 docker compose up -d
 ```
+
 Esto levanta:
-- Backend Spring Boot en `http://localhost:8080`
-- ML Service Python en `http://localhost:5000`
+- **Spring Boot API** en `http://localhost:8080`
+- **ML Service Python** en `http://localhost:5000`
+- **Supabase PostgreSQL** en `http://localhost:5432`
+- **Supabase Auth** en `http://localhost:9999`
+- **Supabase REST** en `http://localhost:3000`
 
 ### 4. Ejecutar sin Docker (desarrollo local)
 
@@ -360,17 +350,24 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-### 5. Notebooks de Ciencia de Datos
+### 5. Probar la API
 ```bash
-cd notebooks
-jupyter notebook
-# Ejecutar en orden: 01 → 02 → 03 → 04
-```
+# Registrar usuario
+curl -X POST http://localhost:9999/auth/v1/signup \
+  -H "Content-Type: application/json" \
+  -H "apikey: <anon-key>" \
+  -d '{"email":"test@example.com","password":"password123"}'
 
-### 6. Probar la API
-```bash
+# Login (obtener token)
+curl -X POST http://localhost:9999/auth/v1/token?grant_type=password \
+  -H "Content-Type: application/json" \
+  -H "apikey: <anon-key>" \
+  -d '{"email":"test@example.com","password":"password123"}'
+
+# Clasificar contenido
 curl -X POST http://localhost:8080/api/contenido \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
   -d '{"titulo":"Test","texto":"Spring Boot y Java para APIs REST"}'
 ```
 
@@ -383,8 +380,8 @@ curl -X POST http://localhost:8080/api/contenido \
 | Rol | Stack |
 |---|---|
 | Data Science | Python, Pandas, Scikit-learn, NLTK |
-| Backend | Java 17, Spring Boot 3, Maven |
-| Infraestructura / DevOps | OCI, Docker, CI/CD |
+| Backend | Java 17, Spring Boot 3, Maven, Supabase |
+| Infraestructura / DevOps | OCI, Docker, Supabase Local, CI/CD |
 | Frontend (opcional) | React / HTML+CSS+JS |
 
 ---
