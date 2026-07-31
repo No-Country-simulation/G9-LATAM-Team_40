@@ -1,4 +1,4 @@
-# TechContent AI — Organización Inteligente de Contenido Técnico
+# ISContent AI — Organización Inteligente de Contenido Técnico
 
 **Hackathon ONE – Proyectos G9 | Alura + Oracle**
 
@@ -29,6 +29,8 @@ Solución para la organización inteligente de contenido técnico mediante técn
 
 El resultado se expone en formato JSON para su consumo por otras aplicaciones, plataformas educativas o equipos técnicos que deseen construir repositorios inteligentes de conocimiento.
 
+La plataforma incluye un frontend web construido con **Next.js** que consume la API y expone la clasificación de contenido al usuario final.
+
 ---
 
 ## Arquitectura
@@ -36,7 +38,7 @@ El resultado se expone en formato JSON para su consumo por otras aplicaciones, p
 ```mermaid
 graph TB
     subgraph "Cliente"
-        Client[Aplicación REST<br>Web / Mobile / CLI]
+        Client[Frontend Web<br>Next.js 16 + React 19<br>App Router + Tailwind CSS]
     end
 
     subgraph "VPS - Docker Compose"
@@ -95,6 +97,7 @@ graph TB
 
 | Componente | Tecnología | Puerto | Descripción |
 |---|---|---|---|
+| **Frontend Web** | Next.js 16 + React 19 + TypeScript | dev: `:3000` | Aplicación web (App Router, Tailwind CSS 4, shadcn/ui). Corre en desarrollo local; no forma parte del docker-compose. |
 | **API Principal** | Java 17 + Spring Boot 3 | `:8080` | Recibe peticiones REST, valida entrada, orquesta el procesamiento y devuelve resultados JSON. |
 | **Motor ML** | Python 3.11 + FastAPI | `:5000` | Servicio interno que carga el modelo serializado y ejecuta inferencia (clasificación, keywords, similitud). |
 | **Base de Datos** | PostgreSQL (Supabase) | `:5432` | Persistencia de resultados, metadatos de contenido procesado y usuarios. |
@@ -141,6 +144,15 @@ graph TB
 - **Lombok** (reducción de boilerplate)
 - **Maven** (gestión de dependencias y build)
 - **JUnit 5 + Mockito** (pruebas)
+
+### Frontend
+- **Next.js 16** (App Router) — SSR/SSG y routing por convención
+- **React 19** + **TypeScript 5**
+- **Tailwind CSS 4** — estilizado utilitario
+- **shadcn/ui** (Base UI) — componentes accesibles
+- **lucide-react** — iconografía · **next-themes** — dark/light mode
+- **Bun** — package manager (`bun.lock`)
+- Ubicación: `frontend/techisolutions/`
 
 ### Ciencia de Datos
 - **Python 3.11**
@@ -296,6 +308,11 @@ Health check del servicio.
 - Maven 3.8+
 - Spring Boot 3.2
 
+### Frontend (Next.js)
+- Node.js 20.9+ (requerido por Next.js 16)
+- Bun 1.x (package manager; `bun.lock` en el repo)
+- Proyecto: `frontend/techisolutions/`
+
 ### ML Service (Python)
 - Python 3.11+
 - pip 23+
@@ -350,7 +367,16 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-### 5. Probar la API
+**Frontend (Next.js):**
+```bash
+cd frontend/techisolutions
+bun install
+bun run dev
+```
+
+> **Nota:** el dev server de Next.js usa el puerto `3000` por defecto. Si el stack de Docker está levantado, PostgREST ya ocupa ese puerto — usa `bun run dev -- --port 3001`.
+
+### 6. Probar la API
 ```bash
 # Registrar usuario
 curl -X POST http://localhost:9999/auth/v1/signup \
@@ -382,7 +408,7 @@ curl -X POST http://localhost:8080/api/contenido \
 | Data Science | Python, Pandas, Scikit-learn, NLTK |
 | Backend | Java 17, Spring Boot 3, Maven, Supabase |
 | Infraestructura / DevOps | OCI, Docker, Supabase Local, CI/CD |
-| Frontend (opcional) | React / HTML+CSS+JS |
+| Frontend | Next.js 16, React 19, TypeScript, Tailwind CSS 4, shadcn/ui |
 
 ---
 
