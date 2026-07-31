@@ -69,7 +69,7 @@ Estas decisiones hay que tomarlas ANTES del Sprint 1. Si no, se bloquean todos.
 - [x] Verificar que el proyecto compila — BUILD SUCCESS 33 archivos, `/actuator/health` UP
 
 #### FE-1 | Project Setup
-- [ ] Inicializar proyecto frontend (React + Vite o el stack elegido)
+- [x] Inicializar proyecto frontend — Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 + shadcn/ui (Bun) en `frontend/techisolutions/`
 - [ ] Configurar routing y layout base
 - [ ] Implementar pantalla de Login con formulario email/password
 - [ ] Implementar pantalla de Register

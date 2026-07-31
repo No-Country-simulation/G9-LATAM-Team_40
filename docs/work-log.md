@@ -272,4 +272,36 @@ GET http://localhost:8080/actuator/health
 
 ---
 
-*Ultima actualizacion: 2026-07-29*
+## 2026-07-30
+
+### Stack frontend — decision final
+**Responsable:** Equipo Frontend
+**Tipo:** Decision
+
+Se confirma el stack del frontend, descartando el supuesto inicial de **React 18 + Vite + TypeScript + React Router v6** (entrada del 2026-07-29):
+
+- **Next.js 16 (App Router)** + **React 19** + **TypeScript 5**
+- **Tailwind CSS 4** + **shadcn/ui** (Base UI) + **lucide-react**
+- **Bun** como package manager (`bun.lock`)
+- Routing por convencion del App Router (`app/`), sin React Router
+- Ubicacion: `frontend/techisolutions/`
+
+**Impacto:** `README.md`, `AGENTS.md` (raiz) y `docs/sprint-plan.md` (FE-1) actualizados para reflejar el stack real.
+
+---
+
+### Inicializacion del proyecto frontend
+**Responsable:** Equipo Frontend
+**Tipo:** Implementacion
+
+Se inicializo `frontend/techisolutions/` con Next.js 16.2.6 + React 19.2.4:
+
+- `app/` con `layout.tsx` (fuentes Geist/Inter, ThemeProvider dark/light), `page.tsx` y `globals.css`
+- shadcn/ui configurado (`components.json`) con primer componente base: `components/ui/button.tsx`
+- Scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `format` (ESLint 9 + Prettier + `tsc`)
+
+**Pendiente (FE-1):** rutas de Login/Register y pantallas de auth.
+
+---
+
+*Ultima actualizacion: 2026-07-30*
