@@ -37,6 +37,24 @@ services:
       - techcontent-net
     restart: unless-stopped
 
+  # ── Frontend Web (Next.js) ─────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend/techisolutions
+      dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_* se inyecta en el bundle en build-time
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    container_name: techcontent-frontend
+    ports:
+      - "${FRONTEND_PORT:-3001}:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - techcontent-net
+    restart: unless-stopped
+
   # ── Python ML Service (FastAPI) ──────────────────────────────────
   ml-service:
     build:

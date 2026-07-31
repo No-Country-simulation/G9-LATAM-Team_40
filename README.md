@@ -97,7 +97,7 @@ graph TB
 
 | Componente | Tecnología | Puerto | Descripción |
 |---|---|---|---|
-| **Frontend Web** | Next.js 16 + React 19 + TypeScript | dev: `:3000` | Aplicación web (App Router, Tailwind CSS 4, shadcn/ui). Corre en desarrollo local; no forma parte del docker-compose. |
+| **Frontend Web** | Next.js 16 + React 19 + TypeScript | host `${FRONTEND_PORT:-3001}` → `:3000` | Aplicación web (App Router, Tailwind CSS 4, shadcn/ui). Corre en Docker Compose (puerto 3001) o en dev local (puerto 3000). |
 | **API Principal** | Java 17 + Spring Boot 3 | `:8080` | Recibe peticiones REST, valida entrada, orquesta el procesamiento y devuelve resultados JSON. |
 | **Motor ML** | Python 3.11 + FastAPI | `:5000` | Servicio interno que carga el modelo serializado y ejecuta inferencia (clasificación, keywords, similitud). |
 | **Base de Datos** | PostgreSQL (Supabase) | `:5432` | Persistencia de resultados, metadatos de contenido procesado y usuarios. |
@@ -346,6 +346,7 @@ docker compose up -d
 ```
 
 Esto levanta:
+- **Frontend Next.js** en `http://localhost:3001`
 - **Spring Boot API** en `http://localhost:8080`
 - **ML Service Python** en `http://localhost:5000`
 - **Supabase PostgreSQL** en `http://localhost:5432`
@@ -374,7 +375,7 @@ bun install
 bun run dev
 ```
 
-> **Nota:** el dev server de Next.js usa el puerto `3000` por defecto. Si el stack de Docker está levantado, PostgREST ya ocupa ese puerto — usa `bun run dev -- --port 3001`.
+> **Nota:** el dev server de Next.js usa el puerto `3000` por defecto. Si el stack de Docker está levantado, PostgREST ocupa el `3000` y el frontend de Compose el `3001` — usa `bun run dev -- --port 3002`.
 
 ### 6. Probar la API
 ```bash
