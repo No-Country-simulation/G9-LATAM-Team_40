@@ -1,0 +1,69 @@
+{
+  "title": "TechISOlutions — mundo visual",
+  "question": "El roll asignó Registro de inspección en campo. ¿Lo confirmas, eliges un alternativo, o re-roll?",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Registro de inspección en campo",
+      "kicker": "EL ROLL",
+      "lineage": "portapapeles de inspección SST en planta, formularios carbón, matrices de verificación",
+      "thesis": "La clasificación ISO como acto de inspección: cada documento recibe sello, categoría y trazabilidad en un registro de campo.",
+      "palette": ["#f4f0e6", "#1a3a5c", "#f0c419", "#c0392b", "#2c5282"],
+      "materials": ["papel formulario", "tinta carbón", "sello de categoría", "cinta adhesiva amarilla"],
+      "viewport": "Portapapeles a pantalla completa con TechISOlutions en el encabezado del formulario; filas de categorías ISO como celdas de verificación ya marcadas; CTA Iniciar sesión como sello de aprobación.",
+      "risk": "Puede leerse genérico si los formularios no muestran categorías ISO reales y probabilidades del modelo.",
+      "sketch": ".impeccable/sketches/assigned.webp"
+    },
+    {
+      "id": "challenger-darkroom",
+      "label": "Laboratorio de revelado",
+      "lineage": "cuarto oscuro bajo luz ámbar, bandejas de revelado, tiras de prueba de exposición",
+      "thesis": "El texto crudo se vuelve documento normativo como una imagen que emerge en la bandeja.",
+      "case": "Gana claridad del mecanismo ML en la landing; el dashboard operativo necesita traducción explícita.",
+      "palette": ["#3d2200", "#ffb347", "#8a8a8a", "#0a0a0a"],
+      "materials": ["luz ámbar", "plata húmeda", "bandeja enamel", "tiras de prueba"],
+      "viewport": "Escena ámbar con título TechISOlutions en etiqueta de botella; bandeja central donde el texto se oscurece hacia categoría Política SST.",
+      "risk": "La metáfora química puede distraer del trabajo diario del coordinador SST.",
+      "sketch": ".impeccable/sketches/challenger-darkroom.webp",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-darkroom-safelight-bay-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-darkroom-safelight-bay.webp"
+    },
+    {
+      "id": "challenger-onebit",
+      "label": "Escritorio one-bit",
+      "lineage": "interfaz Macintosh System 1, ventanas superpuestas, iconos 32px, selección marching ants",
+      "thesis": "El repositorio documental como escritorio de oficina donde cada categoría ISO es una ventana o carpeta.",
+      "case": "Gana familiaridad operativa para el hub de acciones del dashboard; la landing persuasiva exige traducción del mundo retro.",
+      "palette": ["#ffffff", "#000000"],
+      "materials": ["píxeles dither", "chrome de ventana", "iconos bitmap"],
+      "viewport": "Escritorio negro sobre blanco con ventana titulada TechISOlutions y menú Clasificar / Archivos / Dashboard.",
+      "risk": "Puede parecer gimmick retro sin tipografía y densidad de datos reales.",
+      "sketch": ".impeccable/sketches/challenger-onebit.webp",
+      "hero": "https://impeccable.style/worlds/cards/medium-native-one-bit-desktop-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/medium-native-one-bit-desktop.webp"
+    },
+    {
+      "id": "challenger-matrix",
+      "label": "Matriz de riesgos",
+      "lineage": "matriz probabilidad × severidad en cartelería SST, celdas codificadas por color",
+      "thesis": "Cada documento ocupa una celda de la matriz; el ML asigna posición normativa visible de inmediato.",
+      "case": "Gana identificación con coordinadores SST; la landing debe evitar parecer solo una hoja de cálculo.",
+      "palette": ["#1e293b", "#22c55e", "#eab308", "#ef4444", "#f8fafc"],
+      "materials": ["grid de evaluación", "código de color SST", "etiquetas de celda"],
+      "viewport": "Matriz grande con encabezado TechISOlutions; una celda activa muestra Política SST al 91%.",
+      "risk": "Demasiado analítico en frío si no hay narrativa de producto alrededor.",
+      "sketch": ".impeccable/sketches/challenger-matrix.webp",
+      "hero": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn.webp"
+    }
+  ],
+  "reroll": true,
+  "canon": true,
+  "canonCard": {
+    "label": "El estándar de categoría",
+    "thesis": "SaaS B2B de compliance: sidebar, hero limpio, cards de métricas, azul institucional.",
+    "viewport": "Nav lateral + hero con titular + CTAs + sección cómo funciona en layout convencional pulido.",
+    "sketch": ".impeccable/sketches/canon.webp"
+  },
+  "steer": true
+}
