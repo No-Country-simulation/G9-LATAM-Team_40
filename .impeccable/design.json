@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-04T06:10:00.000Z",
+  "title": "Design System: TechISOlutions",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper Cream",
+        "canonical": "#f4f0e6",
+        "tonalRamp": ["#2a2520", "#4a433c", "#6b6358", "#8c8376", "#a89f92", "#c9c0b4", "#e8e2d6", "#f4f0e6"]
+      },
+      "institutional": {
+        "role": "primary",
+        "displayName": "Institutional Blue",
+        "canonical": "#1a3a5c",
+        "tonalRamp": ["#0a1524", "#0f2238", "#142f4c", "#1a3a5c", "#2c5282", "#4a7ab5", "#6b9fd4", "#a8c8e8"]
+      },
+      "sst-yellow": {
+        "role": "secondary",
+        "displayName": "SST Yellow",
+        "canonical": "#f0c419",
+        "tonalRamp": ["#3d2800", "#5c3d00", "#7a5200", "#a06b00", "#c88a00", "#e8b800", "#f0c419", "#f8e08a"]
+      },
+      "stamp-red": {
+        "role": "tertiary",
+        "displayName": "Stamp Red",
+        "canonical": "#c0392b",
+        "tonalRamp": ["#3d0f0a", "#5c1812", "#7a2219", "#9c2d22", "#c0392b", "#d45a4d", "#e87a6f", "#f5b5ad"]
+      },
+      "carbon": {
+        "role": "secondary",
+        "displayName": "Carbon Blue",
+        "canonical": "#2c5282",
+        "tonalRamp": ["#0f1a2e", "#162544", "#1d3159", "#243d6f", "#2c5282", "#4a7ab5", "#6b9fd4", "#a8c8e8"]
+      },
+      "paper-ink": {
+        "role": "neutral",
+        "displayName": "Paper Ink",
+        "canonical": "#2a2520",
+        "tonalRamp": ["#0a0908", "#141210", "#1e1b18", "#2a2520", "#3d3830", "#5c5348", "#8c8376", "#c9c0b4"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Landing hero and major page titles in institutional blue."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings inside app surfaces."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles, document names, semibold emphasis."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default UI copy and form descriptions."
+      },
+      "label": {
+        "displayName": "Label / Mono",
+        "purpose": "Form codes, field labels, IDs, probabilities, dates."
+      }
+    },
+    "shadows": [
+      {
+        "name": "stamp-shadow",
+        "value": "2px 3px 0 color-mix(in srgb, #1a3a5c 35%, transparent)",
+        "purpose": "Offset ink shadow on CTAs, stamps, and mode toggles."
+      },
+      {
+        "name": "form-paper",
+        "value": "4px 4px 0 rgba(26, 58, 92, 0.12)",
+        "purpose": "Clipboard document lift on FormPaper containers."
+      },
+      {
+        "name": "tape-strip",
+        "value": "0 1px 2px rgb(0 0 0 / 12%)",
+        "purpose": "Subtle lift on yellow tape accent labels."
+      }
+    ],
+    "motion": [
+      {
+        "name": "stamp-lift",
+        "value": "transform 150ms ease, translateY(-1px) on hover",
+        "purpose": "Tactile lift on stamp buttons and CTAs."
+      },
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Default transition for color and border state changes."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary CTA Button",
+      "kind": "button",
+      "refersTo": "button-cta",
+      "description": "Main call to action — yellow stamp on institutional border.",
+      "html": "<button class=\"ds-btn-cta\">Procesar, clasificar y guardar</button>",
+      "css": ".ds-btn-cta { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: #f0c419; color: #1a3a5c; border: 2px solid #1a3a5c; padding: 12px 32px; font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.875rem; font-weight: 700; border-radius: 0.25rem; box-shadow: 2px 3px 0 color-mix(in srgb, #1a3a5c 35%, transparent); cursor: pointer; transition: transform 150ms ease; } .ds-btn-cta:hover { transform: translateY(-1px); } .ds-btn-cta:focus-visible { outline: 2px solid #2c5282; outline-offset: 2px; } .ds-btn-cta:active { transform: translateY(0); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary actions — card fill with institutional border.",
+      "html": "<button class=\"ds-btn-secondary\">Iniciar sesión</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; background: #faf8f3; color: #1a3a5c; border: 2px solid #1a3a5c; padding: 10px 20px; font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; border-radius: 0.25rem; cursor: pointer; transition: background 150ms ease, transform 150ms ease; } .ds-btn-secondary:hover { background: color-mix(in srgb, #e8e2d6 60%, transparent); } .ds-btn-secondary:focus-visible { outline: 2px solid #2c5282; outline-offset: 2px; }"
+    },
+    {
+      "name": "Primary Ink Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Institutional fill for auth register and active text-mode toggle.",
+      "html": "<button class=\"ds-btn-primary\">Registrarse</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; background: #1a3a5c; color: #f8f6f0; border: 2px solid #1a3a5c; padding: 6px 12px; font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; border-radius: 0.25rem; box-shadow: 2px 3px 0 color-mix(in srgb, #1a3a5c 35%, transparent); cursor: pointer; transition: transform 150ms ease; } .ds-btn-primary:hover { transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid #2c5282; outline-offset: 2px; }"
+    },
+    {
+      "name": "Form Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Standard text field with mono uppercase label.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-input\">Título del documento <span class=\"ds-required\">*</span></label><input class=\"ds-input\" id=\"ds-input\" type=\"text\" placeholder=\"Política de SST\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.375rem; } .ds-field-label { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #1a3a5c; } .ds-required { color: #c0392b; } .ds-input { width: 100%; background: #f4f0e6; color: #2a2520; border: 2px solid #c9c0b4; padding: 10px 12px; font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.875rem; border-radius: 0.25rem; outline: none; transition: border-color 150ms ease; } .ds-input::placeholder { color: color-mix(in srgb, #5c5348 70%, transparent); } .ds-input:focus-visible { border-color: #2c5282; box-shadow: 0 0 0 2px color-mix(in srgb, #2c5282 25%, transparent); }"
+    },
+    {
+      "name": "Category Badge",
+      "kind": "chip",
+      "refersTo": "category-badge",
+      "description": "ISO 45001 document category stamp — institutional variant.",
+      "html": "<span class=\"ds-category-badge\">Política SST</span>",
+      "css": ".ds-category-badge { display: inline-block; background: #1a3a5c; color: #f8f6f0; border: 1px solid color-mix(in srgb, #1a3a5c 20%, transparent); padding: 2px 8px; font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; border-radius: 0.15rem; }"
+    },
+    {
+      "name": "Stamp Action",
+      "kind": "custom",
+      "refersTo": "button-cta",
+      "description": "Dashboard clipboard stamp link — yellow tone for primary action.",
+      "html": "<a class=\"ds-stamp-action ds-stamp-yellow\" href=\"#\"><span class=\"ds-stamp-label\">Importar documento</span><span class=\"ds-stamp-desc\">Texto RAW o archivo → clasificar</span></a>",
+      "css": ".ds-stamp-action { display: flex; flex-direction: column; gap: 0.25rem; padding: 12px 20px; border: 2px solid #1a3a5c; text-decoration: none; border-radius: 0.25rem; box-shadow: 2px 3px 0 color-mix(in srgb, #1a3a5c 35%, transparent); transition: transform 150ms ease; } .ds-stamp-yellow { background: #f0c419; color: #1a3a5c; } .ds-stamp-label { font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.875rem; font-weight: 700; } .ds-stamp-desc { font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.75rem; color: #5c5348; line-height: 1.35; } .ds-stamp-action:hover { transform: translateY(-2px); } .ds-stamp-action:focus-visible { outline: 2px solid #2c5282; outline-offset: 2px; }"
+    },
+    {
+      "name": "Form Paper Container",
+      "kind": "card",
+      "refersTo": "button-secondary",
+      "description": "Ruled paper surface for forms and landing hero.",
+      "html": "<div class=\"ds-form-paper\"><p class=\"ds-form-paper-title\">Organiza documentación ISO 45001</p><p class=\"ds-form-paper-body\">Clasificación normativa con trazabilidad para coordinadores SST.</p></div>",
+      "css": ".ds-form-paper { background-color: #faf8f3; background-image: linear-gradient(#c9c0b4 1px, transparent 1px); background-size: 100% 1.75rem; background-position: 0 0.875rem; border: 2px solid #1a3a5c; box-shadow: 4px 4px 0 rgba(26, 58, 92, 0.12); padding: 24px 32px; } .ds-form-paper-title { font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 1.5rem; font-weight: 700; color: #1a3a5c; margin: 0 0 0.5rem; line-height: 1.25; } .ds-form-paper-body { font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.875rem; color: #5c5348; line-height: 1.625; margin: 0; max-width: 42rem; }"
+    },
+    {
+      "name": "App Nav Link Active",
+      "kind": "nav",
+      "refersTo": "button-primary",
+      "description": "Desktop nav tab with stamp-red active underline.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link ds-nav-active\" href=\"#\">Importar</a><a class=\"ds-nav-link\" href=\"#\">Repositorio</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 0.25rem; background: #ebe6dc; border-bottom: 2px solid #1a3a5c; padding: 0 1rem; } .ds-nav-link { display: flex; align-items: center; gap: 0.5rem; padding: 12px 16px; font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; color: #5c5348; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 150ms ease, border-color 150ms ease; } .ds-nav-link:hover { color: #1a3a5c; border-bottom-color: #c9c0b4; } .ds-nav-active { color: #1a3a5c; border-bottom-color: #c0392b; } .ds-nav-link:focus-visible { outline: 2px solid #2c5282; outline-offset: 2px; }"
+    },
+    {
+      "name": "Pipeline Step Active",
+      "kind": "custom",
+      "refersTo": "button-cta",
+      "description": "Active step in import pipeline — yellow highlight cell.",
+      "html": "<ol class=\"ds-pipeline\"><li class=\"ds-pipeline-step ds-pipeline-active\"><span class=\"ds-pipeline-num\">2</span><span>Procesar</span></li></ol>",
+      "css": ".ds-pipeline { display: flex; gap: 1.5rem; list-style: none; padding: 0; margin: 0; } .ds-pipeline-step { display: flex; align-items: center; gap: 0.5rem; font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: #5c5348; } .ds-pipeline-num { display: flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border: 2px solid #c9c0b4; background: #faf8f3; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.625rem; } .ds-pipeline-active { color: #1a3a5c; } .ds-pipeline-active .ds-pipeline-num { border-color: #1a3a5c; background: #f0c419; color: #1a3a5c; }"
+    },
+    {
+      "name": "Tape Strip Label",
+      "kind": "chip",
+      "refersTo": "category-badge",
+      "description": "Yellow tape accent on header and form revision labels.",
+      "html": "<span class=\"ds-tape-strip\">ISO 45001</span>",
+      "css": ".ds-tape-strip { display: inline-block; background: color-mix(in srgb, #f0c419 85%, #e8b800); color: #1a3a5c; padding: 2px 8px; font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; box-shadow: 0 1px 2px rgb(0 0 0 / 12%); transform: rotate(-1deg); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Registro de inspección en campo",
+    "overview": "TechISOlutions looks like an SST coordinator's clipboard brought to screen: cream form paper, institutional blue ink, yellow hazard tape accents, and red approval stamps. Classification is framed as inspection and traceability — not generic SaaS dashboards. Every surface reads as a formulario normativo with IDs, revision numbers, and check cells.\n\nThe visual world commits to office-grade sans typography for prose and monospace for metadata (form codes, probabilities, dates). Corners stay nearly square; depth comes from hard offset shadows and 2px borders, not soft elevation. Motion is minimal: a slight lift on hover (translateY(-1px)) on stamps and CTAs.",
+    "keyCharacteristics": [
+      "Papel formulario crema (#f4f0e6) as default ground; cards slightly lighter (#faf8f3)",
+      "Azul institucional (#1a3a5c) for headings, borders, and primary actions",
+      "Franja SST amarilla (#f0c419) for tape strips, primary CTAs, and active pipeline steps",
+      "Sellos rojos (#c0392b) for destructive states, nav active underline, and approval accents",
+      "Source Sans 3 for UI text; JetBrains Mono for labels, IDs, stats, and form codes",
+      "border-2 + stamp-shadow instead of rounded cards and diffuse shadows",
+      "ISO category badges with fixed color mapping per document type"
+    ],
+    "rules": [
+      {
+        "name": "The Tape Accent Rule",
+        "body": "Yellow appears on tape strips, primary CTAs, and one active state per control group — never as large background fields except the demo banner stripe.",
+        "section": "colors"
+      },
+      {
+        "name": "The Stamp Rarity Rule",
+        "body": "Red is stamp ink: errors, approval accents, and a single nav active marker. It should not compete with institutional blue on the same row.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono Metadata Rule",
+        "body": "Probabilities, dates, document IDs, form revision codes, and table column headers use JetBrains Mono. Prose descriptions stay in Source Sans 3.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces are flat at rest. Depth appears on hover (translate + stamp shadow) or on FormPaper containers — not on every card.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use FormPaper for any surface that represents a document or formulario being filled.",
+      "Do show form codes (Form. IMP-01, Form. REP-01) in mono uppercase above page titles.",
+      "Do map ISO categories to CategoryBadge colors — never invent ad hoc badge colors per screen.",
+      "Do express ML output with visible probability in mono bold (NN% confianza / NN% probabilidad).",
+      "Do keep Spanish copy professional and compliance-oriented (SST, ISO 45001, trazabilidad)."
+    ],
+    "donts": [
+      "Don't use large border-radius, pill buttons, or glassmorphism — this is field paperwork, not consumer SaaS.",
+      "Don't use purple gradients, generic AI sparkle palettes, or dark-mode-first layouts (light is default).",
+      "Don't hide the import pipeline — file and RAW flows must show Recibir → Procesar → Clasificar → Guardar when processing.",
+      "Don't fabricate social proof, certification claims, or production metrics in UI chrome.",
+      "Don't use TechContent AI in user-facing strings — product name is TechISOlutions."
+    ]
+  }
+}
