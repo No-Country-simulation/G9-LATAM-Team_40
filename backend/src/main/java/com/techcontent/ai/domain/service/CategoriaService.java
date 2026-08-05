@@ -1,7 +1,7 @@
 package com.techcontent.ai.domain.service;
 
 import com.techcontent.ai.api.dto.response.CategoriaResponse;
-import com.techcontent.ai.domain.repository.ContenidoRepository;
+import com.techcontent.ai.domain.repository.CategoriaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +11,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoriaService {
 
-    private final ContenidoRepository contenidoRepository;
+    private final CategoriaRepository categoriaRepository;
 
     public List<CategoriaResponse> listarConConteo() {
-        return contenidoRepository.findCategoriasConConteo();
+        return categoriaRepository.findCategoriasConConteo();
     }
 }
