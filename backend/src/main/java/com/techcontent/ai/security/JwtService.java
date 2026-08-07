@@ -1,9 +1,11 @@
 package com.techcontent.ai.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,12 +37,16 @@ public class JwtService {
                 .getPayload();
     }
 
-    public boolean isTokenValid(String token) {
+    public boolean isTokenValid(String token, HttpServletRequest request) {
         if (secretKey == null) return false;
         try {
             extractClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            request.setAttribute("jwt_error", "TOKEN_EXPIRED");
+            return false;
         } catch (JwtException | IllegalArgumentException e) {
+            request.setAttribute("jwt_error", "TOKEN_INVALID");
             return false;
         }
     }
