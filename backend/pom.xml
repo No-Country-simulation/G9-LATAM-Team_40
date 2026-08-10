@@ -53,6 +53,20 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- OCI Java SDK - Object Storage -->
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-objectstorage</artifactId>
+            <version>3.27.0</version>
+        </dependency>
+
+        <!-- OCI Java SDK - Common (Autenticación) -->
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-common</artifactId>
+            <version>3.27.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
