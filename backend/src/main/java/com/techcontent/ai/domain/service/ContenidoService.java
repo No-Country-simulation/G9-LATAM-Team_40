@@ -59,7 +59,7 @@ public class ContenidoService {
     }
 
     private ContenidoResponse toResponse(Contenido contenido) {
-        // TODO: implementar busqueda de contenidos relacionados
+        // TODO: implementar relacionados
         List<ContenidoRelacionadoResponse> relacionados = List.of();
 
         return new ContenidoResponse(
