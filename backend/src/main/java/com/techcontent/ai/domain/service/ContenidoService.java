@@ -4,11 +4,9 @@ import com.techcontent.ai.api.dto.request.ContenidoLoteRequest;
 import com.techcontent.ai.api.dto.request.ContenidoRequest;
 import com.techcontent.ai.api.dto.response.ContenidoResponse;
 import com.techcontent.ai.api.dto.response.ContenidoRelacionadoResponse;
-import com.techcontent.ai.api.exception.ContenidoNotFoundException;
 import com.techcontent.ai.domain.model.Contenido;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
 import com.techcontent.ai.integration.ml.MlClient;
-import com.techcontent.ai.integration.ml.MlResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,15 +22,15 @@ public class ContenidoService {
     private final MlClient mlClient;
 
     public ContenidoResponse clasificar(ContenidoRequest request, UUID userId) {
-        MlResponse mlResponse = mlClient.predict(request.texto());
+        com.techcontent.ai.dto.MlResponse mlResponse = mlClient.predict(request.texto());
 
         Contenido contenido = Contenido.builder()
                 .userId(userId)
                 .titulo(request.titulo())
                 .texto(request.texto())
-                .categoria(mlResponse.categoria())
-                .probabilidad(mlResponse.probabilidad())
-                .palabrasClave(mlResponse.palabrasClave())
+                .categoria(mlResponse.getCategoria())
+                .probabilidad(mlResponse.getProbabilidad())
+                .palabrasClave(List.of(mlResponse.getPalabrasClave().split(",\\s*")))
                 .procesadoEn(LocalDateTime.now())
                 .build();
 
@@ -59,7 +57,6 @@ public class ContenidoService {
     }
 
     private ContenidoResponse toResponse(Contenido contenido) {
-        // TODO: implementar busqueda de contenidos relacionados
         List<ContenidoRelacionadoResponse> relacionados = List.of();
 
         return new ContenidoResponse(

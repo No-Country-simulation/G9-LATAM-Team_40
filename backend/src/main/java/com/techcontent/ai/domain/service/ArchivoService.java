@@ -44,6 +44,7 @@ public class ArchivoService {
                     filesBucket,
                     objectName,
                     file.getInputStream(),
+                    file.getSize(),
                     file.getContentType()
             );
 

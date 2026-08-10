@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 @Configuration
 public class OciStorageConfig {
 
@@ -31,7 +34,13 @@ public class OciStorageConfig {
                 .tenantId(tenancyId)
                 .userId(userId)
                 .fingerprint(fingerprint)
-                .privateKey(privateKeyPath)
+                .privateKeySupplier(() -> {
+                    try {
+                        return new FileInputStream(privateKeyPath);
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException("No se encontró el archivo de la llave privada en: " + privateKeyPath, e);
+                    }
+                })
                 .build();
 
         ObjectStorageClient client = ObjectStorageClient.builder().build(provider);
