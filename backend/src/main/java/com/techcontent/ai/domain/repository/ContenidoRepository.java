@@ -13,10 +13,17 @@ public interface ContenidoRepository extends JpaRepository<Contenido, UUID> {
     List<Contenido> findByUserId(UUID userId);
 
     @Query("""
-            SELECT c FROM Contenido c
-            WHERE c.userId = :userId
-            AND (LOWER(c.titulo) LIKE LOWER(CONCAT('%', :query, '%'))
-                 OR array_contains(c.palabrasClave, :query))
-            """)
-    List<Contenido> buscarPorKeyword(@Param("query") String query, @Param("userId") UUID userId);
+        SELECT DISTINCT c
+        FROM Contenido c
+        LEFT JOIN c.palabrasClave palabra
+        WHERE c.userId = :userId
+          AND (
+              LOWER(c.titulo) LIKE LOWER(CONCAT('%', :query, '%'))
+              OR LOWER(palabra) LIKE LOWER(CONCAT('%', :query, '%'))
+          )
+        """)
+    List<Contenido> buscarPorKeyword(
+        @Param("query") String query,
+        @Param("userId") UUID userId
+    );
 }

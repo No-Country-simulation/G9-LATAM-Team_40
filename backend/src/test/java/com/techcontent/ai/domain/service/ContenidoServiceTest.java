@@ -7,7 +7,7 @@ import com.techcontent.ai.domain.model.Contenido;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
 import com.techcontent.ai.domain.service.ContenidoService;
 import com.techcontent.ai.integration.ml.MlClient;
-import com.techcontent.ai.integration.ml.MlResponse;
+import com.techcontent.ai.dto.MlResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,7 @@ class ContenidoServiceTest {
     private ContenidoRepository repository;
 
     @Mock
-    private MlClient mlClient;
+    private MlClient MlClient;
 
     @InjectMocks
     private ContenidoService contenidoService;
@@ -53,7 +53,7 @@ class ContenidoServiceTest {
                 List.of("java", "spring")
         );
 
-        when(mlClient.predict(anyString())).thenReturn(mlResponseSimulado);
+        when(MlClient.predict(anyString())).thenReturn(mlResponseSimulado);
 
         when(repository.save(any(Contenido.class))).thenAnswer(invocation -> {
             Contenido c = invocation.getArgument(0);
@@ -68,7 +68,7 @@ class ContenidoServiceTest {
         assertEquals(0.92, response.probabilidad());
         assertEquals(List.of("java", "spring"), response.palabrasClave());
 
-        verify(mlClient, times(1)).predict(request.texto());
+        verify(MlClient, times(1)).predict(request.texto());
         verify(repository, times(1)).save(any(Contenido.class));
     }
 
@@ -80,7 +80,7 @@ class ContenidoServiceTest {
         ContenidoLoteRequest lote = new ContenidoLoteRequest(List.of(item1, item2));
 
         MlResponse mlResponseSimulado = new MlResponse("Frontend", 0.80, List.of("react"));
-        when(mlClient.predict(anyString())).thenReturn(mlResponseSimulado);
+        when(MlClient.predict(anyString())).thenReturn(mlResponseSimulado);
         when(repository.save(any(Contenido.class))).thenAnswer(invocation -> {
             Contenido c = invocation.getArgument(0);
             c.setId(UUID.randomUUID());
@@ -91,7 +91,7 @@ class ContenidoServiceTest {
         List<ContenidoResponse> resultados = contenidoService.procesarLote(lote, userId);
 
         assertEquals(2, resultados.size());
-        verify(mlClient, times(2)).predict(anyString());
+        verify(MlClient, times(2)).predict(anyString());
         verify(repository, times(2)).save(any(Contenido.class));
     }
 

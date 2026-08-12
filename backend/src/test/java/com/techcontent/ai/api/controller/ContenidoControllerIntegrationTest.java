@@ -5,7 +5,7 @@ import com.techcontent.ai.api.dto.request.ContenidoLoteRequest;
 import com.techcontent.ai.api.dto.request.ContenidoRequest;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
 import com.techcontent.ai.integration.ml.MlClient;
-import com.techcontent.ai.integration.ml.MlResponse;
+import com.techcontent.ai.dto.MlResponse;
 import com.techcontent.ai.security.SupabaseUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.oracle.bmc.objectstorage.ObjectStorageClient;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,8 +22,10 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -44,7 +45,10 @@ class ContenidoControllerIntegrationTest {
     private ContenidoRepository contenidoRepository;
 
     @MockBean
-    private MlClient mlClient;
+    private MlClient MlClient;
+
+    @MockBean
+        private ObjectStorageClient objectStorageSdkClient;
 
     private UUID userId;
 
@@ -55,13 +59,13 @@ class ContenidoControllerIntegrationTest {
 
         userId = UUID.randomUUID();
 
-        when(mlClient.predict(anyString())).thenReturn(
+        when(MlClient.predict(anyString())).thenReturn(
                 new MlResponse("Backend", 0.90, List.of("spring", "java"))
         );
     }
 
     private RequestPostProcessor usuarioAutenticado() {
-        SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, "test@example.com");
+        SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, "test@example.com","authenticated");
         return SecurityMockMvcRequestPostProcessors.user(userDetails);
     }
 
@@ -120,6 +124,19 @@ class ContenidoControllerIntegrationTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void optionsContenido_desdeFrontend_deberiaPermitirPreflight() throws Exception {
+        mockMvc.perform(options("/api/contenido")
+                        .header(ORIGIN, "http://localhost:3001")
+                        .header(ACCESS_CONTROL_REQUEST_METHOD, "POST")
+                        .header(ACCESS_CONTROL_REQUEST_HEADERS, "Authorization, Content-Type"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:3001"))
+                .andExpect(header().string(ACCESS_CONTROL_ALLOW_METHODS, containsString("POST")))
+                .andExpect(header().string(ACCESS_CONTROL_ALLOW_HEADERS, containsString("Authorization")))
+                .andExpect(header().string(ACCESS_CONTROL_ALLOW_HEADERS, containsString("Content-Type")));
     }
 
     @Test

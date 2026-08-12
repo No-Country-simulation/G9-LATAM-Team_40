@@ -62,8 +62,7 @@ class ArchivoServiceTest {
                 "contenido de prueba".getBytes()
         );
 
-        when(ociStorageClient.upload(anyString(), anyString(), any(), anyString()))
-                .thenReturn("https://storage.example.com/documento.pdf");
+        when(ociStorageClient.upload(anyString(),anyString(),any(),anyLong(),anyString() )).thenReturn("https://storage.example.com/documento.pdf");
 
         when(archivoRepository.save(any(Archivo.class))).thenAnswer(invocation -> {
             Archivo a = invocation.getArgument(0);
@@ -80,7 +79,7 @@ class ArchivoServiceTest {
         assertEquals("https://storage.example.com/documento.pdf", response.url());
         assertEquals("application/pdf", response.tipo());
 
-        verify(ociStorageClient, times(1)).upload(eq("techcontent-files-test"), anyString(), any(), eq("application/pdf"));
+        verify(ociStorageClient, times(1)).upload( eq("techcontent-files-test"),anyString(),any(),eq(file.getSize()),eq("application/pdf"));
         verify(archivoRepository, times(1)).save(any(Archivo.class));
     }
 
