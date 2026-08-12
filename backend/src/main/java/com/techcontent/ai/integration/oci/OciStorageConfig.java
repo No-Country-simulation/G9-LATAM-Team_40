@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import com.oracle.bmc.objectstorage.ObjectStorage;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 @Slf4j
@@ -31,6 +33,7 @@ public class OciStorageConfig {
     private String region;
 
     @Bean
+    @Lazy
     public ObjectStorageClient objectStorageClient() {
         log.info("Inicializando ObjectStorageClient para región: {}", region);
 
