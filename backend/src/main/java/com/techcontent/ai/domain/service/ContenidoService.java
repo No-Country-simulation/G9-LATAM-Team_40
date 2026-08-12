@@ -7,7 +7,7 @@ import com.techcontent.ai.api.dto.response.ContenidoRelacionadoResponse;
 import com.techcontent.ai.api.exception.ContenidoNotFoundException;
 import com.techcontent.ai.domain.model.Contenido;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
-import com.techcontent.ai.integration.ml.MLClient;
+import com.techcontent.ai.integration.ml.MlClient;
 import com.techcontent.ai.dto.MlResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,10 +21,10 @@ import java.util.UUID;
 public class ContenidoService {
 
     private final ContenidoRepository repository;
-    private final MLClient mlClient;
+    private final MlClient MlClient;
 
     public ContenidoResponse clasificar(ContenidoRequest request, UUID userId) {
-        MlResponse mlResponse = mlClient.predict(request.texto());
+        MlResponse mlResponse = MlClient.predict(request.texto());
 
         Contenido contenido = Contenido.builder()
                 .userId(userId)

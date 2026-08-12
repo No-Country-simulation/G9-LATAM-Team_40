@@ -5,18 +5,36 @@ import com.oracle.bmc.objectstorage.ObjectStorageClient;
 import com.oracle.bmc.objectstorage.requests.DeleteObjectRequest;
 import com.oracle.bmc.objectstorage.requests.GetObjectRequest;
 import com.oracle.bmc.objectstorage.requests.PutObjectRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.io.InputStream;
+import org.springframework.context.annotation.Lazy;
+
+import com.oracle.bmc.objectstorage.model.CreatePreauthenticatedRequestDetails;
+import com.oracle.bmc.objectstorage.model.PreauthenticatedRequest;
+import com.oracle.bmc.objectstorage.requests.CreatePreauthenticatedRequestRequest;
+import com.oracle.bmc.objectstorage.responses.CreatePreauthenticatedRequestResponse;
+import com.oracle.bmc.objectstorage.ObjectStorage;
+import org.springframework.context.annotation.Lazy;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.UUID;
 
 @Component
-@RequiredArgsConstructor
+
 @Slf4j
 public class OciStorageClient {
 
     private final ObjectStorageClient objectStorageClient;
+    
+    public OciStorageClient(
+        @Lazy ObjectStorageClient objectStorageClient
+        ) {
+            this.objectStorageClient = objectStorageClient;
+            }
 
     @Value("${oci.region}")
     private String region;
@@ -44,19 +62,98 @@ public class OciStorageClient {
             log.info("Archivo subido exitosamente a OCI");
             return publicUrl;
 
-        } catch (BmcException e) {
-            log.error("Error de OCI al subir archivo - HTTP {}: {}", e.getStatusCode(), e.getMessage(), e);
-            throw new RuntimeException("Fallo en OCI al subir archivo (HTTP " + e.getStatusCode() + ")", e);
-        } catch (Exception e) {
+         } catch (BmcException e) {
+                if (e.isTimeout()) {
+                    log.error("Timeout de red al subir archivo a OCI", e);
+
+                    throw new OciStorageTimeoutException(
+                            "Tiempo de espera agotado al subir el archivo a OCI",
+                            e
+                    );
+                }
+
+                log.error(
+                        "Error de OCI al subir archivo - HTTP {}: {}",
+                        e.getStatusCode(),
+                        e.getMessage(),
+                        e
+                );
+
+                throw new RuntimeException(
+                        "Fallo en OCI al subir archivo (HTTP "
+                                + e.getStatusCode() + ")",
+                        e
+                );
+            }catch (Exception e) {
             log.error("Error inesperado al subir archivo a OCI", e);
             throw new RuntimeException("Error inesperado en carga OCI", e);
         }
     }
 
-    public String getPresignedUrl(String bucketName, String objectName, int expirationMinutes) {
-        log.info("Generando URL para el objeto: {}", objectName);
-        // Retorna la URL pública/base como alternativa estable para la capa de servicios
-        return buildPublicUrl(bucketName, objectName);
+    public String getPresignedUrl(
+        String bucketName,
+        String objectName,
+        int expirationMinutes
+    ) {
+    try {
+        Date expiration = Date.from(
+                Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES)
+        );
+
+        CreatePreauthenticatedRequestDetails details =
+                CreatePreauthenticatedRequestDetails.builder()
+                        .name("download-" + UUID.randomUUID())
+                        .objectName(objectName)
+                        .accessType(
+                                CreatePreauthenticatedRequestDetails.AccessType.ObjectRead
+                        )
+                        .timeExpires(expiration)
+                        .build();
+
+        CreatePreauthenticatedRequestRequest request =
+                CreatePreauthenticatedRequestRequest.builder()
+                        .namespaceName(namespace)
+                        .bucketName(bucketName)
+                        .createPreauthenticatedRequestDetails(details)
+                        .build();
+
+        CreatePreauthenticatedRequestResponse response =
+                objectStorageClient.createPreauthenticatedRequest(request);
+
+        PreauthenticatedRequest preauthenticatedRequest =
+                response.getPreauthenticatedRequest();
+
+        String accessUri = preauthenticatedRequest.getAccessUri();
+
+        return String.format(
+                "https://objectstorage.%s.oraclecloud.com%s",
+                region,
+                accessUri
+        );
+
+        } catch (BmcException e) {
+        if (e.isTimeout()) {
+            log.error("Timeout de red al generar URL temporal de OCI", e);
+
+            throw new OciStorageTimeoutException(
+                    "Tiempo de espera agotado al generar la URL temporal de OCI",
+                    e
+            );
+        }
+
+        log.error(
+                "Error de OCI al generar URL temporal - HTTP {}: {}",
+                e.getStatusCode(),
+                e.getMessage(),
+                e
+        );
+
+        throw new RuntimeException(
+                "Fallo en OCI al generar URL temporal (HTTP "
+                        + e.getStatusCode() + ")",
+                e
+            );
+        }
     }
 
     public String getPublicUrl(String bucketName, String objectName) {
