@@ -7,18 +7,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.http.MediaType;
 
 @Component
 @Slf4j
-public class MLClient {
+public class MlClient {
 
     private final RestClient restClient;
 
     @Value("${ml.service.url}")
     private String mlServiceUrl;
 
-    public MLClient(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.build();
+    public MlClient(RestClient.Builder restClientBuilder) {
+    this.restClient = restClientBuilder.build();
     }
 
     public MlResponse predict(String texto) {
@@ -29,11 +30,13 @@ public class MLClient {
             log.debug("Texto a clasificar: {}", texto);
 
             MlResponse response = restClient
-                    .post()
-                    .uri(mlServiceUrl + "/predict")
-                    .body(request)
-                    .retrieve()
-                    .body(MlResponse.class);
+                .post()
+                .uri(mlServiceUrl + "/predict")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .body(MlResponse.class);
 
             log.info("Respuesta recibida exitosamente del servicio ML");
             return response;
@@ -42,7 +45,7 @@ public class MLClient {
             log.error("Error de conexión con el servicio ML en: {}", mlServiceUrl, e);
             throw new RuntimeException("Fallo en la predicción del modelo ML. Servicio: " + mlServiceUrl, e);
         } catch (Exception e) {
-            log.error("Error inesperado en MLClient.predict()", e);
+            log.error("Error inesperado en MlClient.predict()", e);
             throw new RuntimeException("Error inesperado en predicción del modelo ML", e);
         }
     }

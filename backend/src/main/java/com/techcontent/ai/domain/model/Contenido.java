@@ -2,8 +2,7 @@ package com.techcontent.ai.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,8 +35,12 @@ public class Contenido {
 
     private Double probabilidad;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "palabras_clave", columnDefinition = "text[]")
+    @ElementCollection
+    @CollectionTable(
+        name = "contenido_palabras_clave",
+        joinColumns = @JoinColumn(name = "contenido_id")
+    )
+    @Column(name = "palabra_clave", nullable = false)
     @Builder.Default
     private List<String> palabrasClave = new ArrayList<>();
 

@@ -1,5 +1,6 @@
 package com.techcontent.ai.api.controller;
 
+import com.oracle.bmc.objectstorage.ObjectStorageClient;
 import com.techcontent.ai.domain.repository.ArchivoRepository;
 import com.techcontent.ai.integration.oci.OciStorageClient;
 import com.techcontent.ai.security.SupabaseUserDetails;
@@ -36,6 +37,9 @@ class ArchivoControllerIntegrationTest {
     @MockBean
     private OciStorageClient ociStorageClient;
 
+    @MockBean
+        private ObjectStorageClient objectStorageSdkClient;
+
     private UUID userId;
 
     @BeforeEach
@@ -43,12 +47,11 @@ class ArchivoControllerIntegrationTest {
         archivoRepository.deleteAll();
         userId = UUID.randomUUID();
 
-        when(ociStorageClient.upload(anyString(), anyString(), any(), anyString()))
-                .thenReturn("https://storage.example.com/archivo-subido.pdf");
+        when(ociStorageClient.upload(anyString(),anyString(),any(),anyLong(),anyString())).thenReturn("https://storage.example.com/archivo-subido.pdf");
     }
 
     private RequestPostProcessor usuarioAutenticado() {
-        SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, "test@example.com");
+        SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, "test@example.com","authenticated");
         return SecurityMockMvcRequestPostProcessors.user(userDetails);
     }
 
