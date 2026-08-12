@@ -7,8 +7,8 @@ import com.techcontent.ai.api.dto.response.ContenidoRelacionadoResponse;
 import com.techcontent.ai.api.exception.ContenidoNotFoundException;
 import com.techcontent.ai.domain.model.Contenido;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
-import com.techcontent.ai.integration.ml.MlClient;
-import com.techcontent.ai.integration.ml.MlResponse;
+import com.techcontent.ai.integration.ml.MLClient;
+import com.techcontent.ai.dto.MlResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ import java.util.UUID;
 public class ContenidoService {
 
     private final ContenidoRepository repository;
-    private final MlClient mlClient;
+    private final MLClient mlClient;
 
     public ContenidoResponse clasificar(ContenidoRequest request, UUID userId) {
         MlResponse mlResponse = mlClient.predict(request.texto());
@@ -59,7 +59,6 @@ public class ContenidoService {
     }
 
     private ContenidoResponse toResponse(Contenido contenido) {
-        // TODO: implementar busqueda de contenidos relacionados
         List<ContenidoRelacionadoResponse> relacionados = List.of();
 
         return new ContenidoResponse(
