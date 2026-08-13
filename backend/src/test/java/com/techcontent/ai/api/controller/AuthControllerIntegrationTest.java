@@ -5,7 +5,9 @@ import com.techcontent.ai.api.exception.InvalidCredentialsException;
 import com.techcontent.ai.integration.supabase.SupabaseAuthClient;
 import com.techcontent.ai.integration.supabase.SupabaseAuthRequest;
 import com.techcontent.ai.integration.supabase.SupabaseAuthResponse;
+import com.techcontent.ai.security.JwtAccessDeniedHandler;
 import com.techcontent.ai.security.JwtAuthFilter;
+import com.techcontent.ai.security.JwtAuthenticationEntryPoint;
 import com.techcontent.ai.security.JwtService;
 import com.techcontent.ai.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, JwtAuthFilter.class})
+@Import({SecurityConfig.class, JwtAuthFilter.class, JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class})
 class AuthControllerIntegrationTest {
 
     @Autowired

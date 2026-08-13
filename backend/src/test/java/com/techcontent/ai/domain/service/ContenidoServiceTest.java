@@ -6,7 +6,7 @@ import com.techcontent.ai.api.dto.response.ContenidoResponse;
 import com.techcontent.ai.domain.model.Contenido;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
 import com.techcontent.ai.integration.ml.MlClient;
-import com.techcontent.ai.integration.ml.MlResponse;
+import com.techcontent.ai.dto.MlResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

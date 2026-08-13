@@ -3,6 +3,7 @@ package com.techcontent.ai.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +35,12 @@ public class Contenido {
 
     private Double probabilidad;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     @CollectionTable(
-            name = "contenido_palabras_clave",
-            joinColumns = @JoinColumn(name = "contenido_id")
+        name = "contenido_palabras_clave",
+        joinColumns = @JoinColumn(name = "contenido_id")
     )
-    @Column(name = "palabra")
+    @Column(name = "palabra_clave", nullable = false)
     @Builder.Default
     private List<String> palabrasClave = new ArrayList<>();
 
