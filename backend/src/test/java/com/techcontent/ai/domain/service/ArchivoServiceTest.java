@@ -21,6 +21,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -62,7 +63,7 @@ class ArchivoServiceTest {
                 "file", "documento.pdf", "application/pdf", "contenido pdf".getBytes()
         );
 
-        when(ociStorageClient.upload(anyString(), anyString(), any(), anyString()))
+        when(ociStorageClient.upload(anyString(), anyString(), any(), anyLong(), anyString()))
                 .thenReturn("https://oci/test-bucket/documento.pdf");
         when(archivoRepository.save(any(Archivo.class))).thenReturn(archivoGuardado());
 
@@ -70,7 +71,7 @@ class ArchivoServiceTest {
 
         assertThat(response.nombre()).isEqualTo("documento.pdf");
         assertThat(response.tipo()).isEqualTo("application/pdf");
-        verify(ociStorageClient).upload(eq("test-bucket"), anyString(), any(), eq("application/pdf"));
+        verify(ociStorageClient).upload(eq("test-bucket"), anyString(), any(), anyLong(), eq("application/pdf"));
         verify(archivoRepository).save(any(Archivo.class));
     }
 

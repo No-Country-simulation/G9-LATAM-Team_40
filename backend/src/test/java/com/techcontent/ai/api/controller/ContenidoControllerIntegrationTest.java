@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techcontent.ai.api.dto.request.ContenidoRequest;
 import com.techcontent.ai.api.dto.response.ContenidoResponse;
 import com.techcontent.ai.domain.service.ContenidoService;
+import com.techcontent.ai.security.JwtAccessDeniedHandler;
 import com.techcontent.ai.security.JwtAuthFilter;
+import com.techcontent.ai.security.JwtAuthenticationEntryPoint;
 import com.techcontent.ai.security.JwtService;
 import com.techcontent.ai.security.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ContenidoController.class)
-@Import({SecurityConfig.class, JwtAuthFilter.class})
+@Import({SecurityConfig.class, JwtAuthFilter.class, JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class})
 class ContenidoControllerIntegrationTest {
 
     @Autowired

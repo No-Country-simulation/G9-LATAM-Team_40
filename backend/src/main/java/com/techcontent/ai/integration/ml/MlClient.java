@@ -1,5 +1,7 @@
 package com.techcontent.ai.integration.ml;
 
+import com.techcontent.ai.dto.MlRequest;
+import com.techcontent.ai.dto.MlResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;

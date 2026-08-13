@@ -47,8 +47,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             UUID userId = UUID.fromString(jwtService.extractUserId(token));
             String email = jwtService.extractEmail(token);
+            String role = jwtService.extractRole(token);
 
-            SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, email);
+            SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, email, role);
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities()
             );

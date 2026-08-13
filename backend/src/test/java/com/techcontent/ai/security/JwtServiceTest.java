@@ -4,10 +4,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.spec.ECGenParameterSpec;
 import java.util.Date;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,11 +37,14 @@ class JwtServiceTest {
         return Jwts.builder()
                 .subject(USER_ID)
                 .claim("email", EMAIL)
+                .claim("role", "authenticated")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(secretKey)
                 .compact();
     }
+
+    // ───────── HS256 tests ─────────
 
     @Test
     void validateToken_tokenValido_deberiaRetornarVALID() {
@@ -45,7 +54,7 @@ class JwtServiceTest {
 
     @Test
     void validateToken_tokenExpirado_deberiaRetornarEXPIRED() {
-        String token = buildToken(-1000); // ya expirado
+        String token = buildToken(-1000);
         assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.TokenValidationResult.EXPIRED);
     }
 
@@ -86,14 +95,17 @@ class JwtServiceTest {
 
     @Test
     void extractUserId_deberiaRetornarElSubjectDelToken() {
-        String token = buildToken(60_000);
-        assertThat(jwtService.extractUserId(token)).isEqualTo(USER_ID);
+        assertThat(jwtService.extractUserId(buildToken(60_000))).isEqualTo(USER_ID);
     }
 
     @Test
     void extractEmail_deberiaRetornarElEmailDelToken() {
-        String token = buildToken(60_000);
-        assertThat(jwtService.extractEmail(token)).isEqualTo(EMAIL);
+        assertThat(jwtService.extractEmail(buildToken(60_000))).isEqualTo(EMAIL);
+    }
+
+    @Test
+    void extractRole_deberiaRetornarElRolDelToken() {
+        assertThat(jwtService.extractRole(buildToken(60_000))).isEqualTo("authenticated");
     }
 
     @Test
@@ -102,5 +114,86 @@ class JwtServiceTest {
         assertThatThrownBy(() -> sinSecreto.extractClaims("cualquier-token"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("JWT secret no configurado");
+    }
+
+    // ───────── ES256 tests ─────────
+
+    @Test
+    void validateToken_tokenES256_conJwksCargadas_deberiaRetornarVALID() throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(new ECGenParameterSpec("secp256r1"));
+        KeyPair keyPair = kpg.generateKeyPair();
+        String kid = "test-kid-es256";
+
+        String token = Jwts.builder()
+                .header().keyId(kid).and()
+                .subject(USER_ID)
+                .claim("email", EMAIL)
+                .claim("role", "authenticated")
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(keyPair.getPrivate())
+                .compact();
+
+        ReflectionTestUtils.setField(jwtService, "jwksKeys", Map.of(kid, keyPair.getPublic()));
+
+        assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.TokenValidationResult.VALID);
+    }
+
+    @Test
+    void validateToken_tokenES256_sinJwksCargadas_deberiaRetornarINVALID() throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(new ECGenParameterSpec("secp256r1"));
+        KeyPair keyPair = kpg.generateKeyPair();
+
+        String token = Jwts.builder()
+                .header().keyId("test-kid-es256").and()
+                .subject(USER_ID)
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(keyPair.getPrivate())
+                .compact();
+
+        // jwksKeys esta vacio — no se cargaron claves
+        assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.TokenValidationResult.INVALID);
+    }
+
+    @Test
+    void validateToken_tokenES256_kidDesconocido_usaClaveDisponible() throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(new ECGenParameterSpec("secp256r1"));
+        KeyPair keyPair = kpg.generateKeyPair();
+
+        String token = Jwts.builder()
+                .header().keyId("kid-desconocido").and()
+                .subject(USER_ID)
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(keyPair.getPrivate())
+                .compact();
+
+        // Cargamos la clave publica con diferente kid — fallback a primera disponible
+        ReflectionTestUtils.setField(jwtService, "jwksKeys",
+                Map.of("otra-kid", keyPair.getPublic()));
+
+        assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.TokenValidationResult.VALID);
+    }
+
+    @Test
+    void buildEcPublicKey_deberiaReconstruirClave() throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(new ECGenParameterSpec("secp256r1"));
+        KeyPair keyPair = kpg.generateKeyPair();
+        PublicKey original = keyPair.getPublic();
+
+        // Usamos el token ES256 para que JwtService valide con la clave reconstruida
+        String kid = "rebuild-kid";
+        String token = Jwts.builder()
+                .header().keyId(kid).and()
+                .subject(USER_ID)
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(keyPair.getPrivate())
+                .compact();
+
+        ReflectionTestUtils.setField(jwtService, "jwksKeys", Map.of(kid, original));
+
+        assertThat(jwtService.extractUserId(token)).isEqualTo(USER_ID);
     }
 }

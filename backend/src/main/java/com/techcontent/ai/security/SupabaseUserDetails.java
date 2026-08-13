@@ -12,11 +12,15 @@ public class SupabaseUserDetails implements UserDetails {
 
     private final UUID userId;
     private final String email;
+    private final String role;
 
-    public SupabaseUserDetails(UUID userId, String email) {
+    public SupabaseUserDetails(UUID userId, String email, String role) {
         this.userId = userId;
         this.email = email;
+        this.role = role;
     }
+
+    
 
     public UUID getUserId() {
         return userId;
@@ -24,7 +28,15 @@ public class SupabaseUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+       String effectiveRole = role == null || role.isBlank()
+            ? "authenticated"
+            : role;
+
+        String authority = effectiveRole.startsWith("ROLE_")
+            ? effectiveRole
+            : "ROLE_" + effectiveRole.toUpperCase();
+
+        return List.of(new SimpleGrantedAuthority(authority));
     }
 
     @Override
@@ -35,6 +47,11 @@ public class SupabaseUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+   
+    public String getRole() {
+        return role;
     }
 
     @Override
