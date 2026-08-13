@@ -1,6 +1,7 @@
 package com.techcontent.ai.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -15,6 +16,10 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class JwtService {
 
+    public enum TokenValidationResult {
+        VALID, EXPIRED, INVALID
+    }
+
     private final SecretKey secretKey;
 
     public JwtService(@Value("${supabase.jwt.secret}") String secret) {
@@ -26,6 +31,22 @@ public class JwtService {
         }
     }
 
+    public TokenValidationResult validateToken(String token) {
+        if (secretKey == null) return TokenValidationResult.INVALID;
+        try {
+            extractClaims(token);
+            return TokenValidationResult.VALID;
+        } catch (ExpiredJwtException e) {
+            return TokenValidationResult.EXPIRED;
+        } catch (JwtException | IllegalArgumentException e) {
+            return TokenValidationResult.INVALID;
+        }
+    }
+
+    public boolean isTokenValid(String token) {
+        return validateToken(token) == TokenValidationResult.VALID;
+    }
+
     public Claims extractClaims(String token) {
         if (secretKey == null) throw new IllegalStateException("JWT secret no configurado");
         return Jwts.parser()
@@ -33,16 +54,6 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
-
-    public boolean isTokenValid(String token) {
-        if (secretKey == null) return false;
-        try {
-            extractClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
     }
 
     public String extractUserId(String token) {
