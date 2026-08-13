@@ -76,6 +76,23 @@ public class ArchivoService {
         return toResponse(archivo);
     }
 
+    public void eliminar(UUID id, UUID userId) {
+        Archivo archivo = archivoRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ArchivoNotFoundException(id));
+
+        String objectName = extraerObjectNameDeUrl(archivo.getUrl());
+        ociStorageClient.delete(filesBucket, objectName);
+        archivoRepository.delete(archivo);
+    }
+
+    private String extraerObjectNameDeUrl(String url) {
+        if (url != null && url.contains("/o/")) {
+            String pathDespuesDeO = url.substring(url.indexOf("/o/") + 3);
+            return java.net.URLDecoder.decode(pathDespuesDeO, java.nio.charset.StandardCharsets.UTF_8);
+        }
+        return url;
+    }
+
     private void validarArchivo(MultipartFile file) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("El archivo no puede estar vacio");

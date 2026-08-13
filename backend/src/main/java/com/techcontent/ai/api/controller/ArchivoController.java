@@ -39,4 +39,13 @@ public class ArchivoController {
             @AuthenticationPrincipal SupabaseUserDetails userDetails) {
         return ResponseEntity.ok(archivoService.obtenerPorId(id, userDetails.getUserId()));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal SupabaseUserDetails userDetails) {
+
+        archivoService.eliminar(id, userDetails.getUserId());
+        return ResponseEntity.noContent().build();
+    }
 }
