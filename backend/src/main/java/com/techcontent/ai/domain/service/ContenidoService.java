@@ -4,13 +4,13 @@ import com.techcontent.ai.api.dto.request.ContenidoLoteRequest;
 import com.techcontent.ai.api.dto.request.ContenidoRequest;
 import com.techcontent.ai.api.dto.response.ContenidoResponse;
 import com.techcontent.ai.api.dto.response.ContenidoRelacionadoResponse;
-import com.techcontent.ai.api.exception.ContenidoNotFoundException;
 import com.techcontent.ai.domain.model.Contenido;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
 import com.techcontent.ai.integration.ml.MlClient;
 import com.techcontent.ai.integration.ml.MlResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,6 +40,7 @@ public class ContenidoService {
         return toResponse(saved);
     }
 
+    @Transactional
     public List<ContenidoResponse> procesarLote(ContenidoLoteRequest request, UUID userId) {
         return request.contenidos().stream()
                 .map(item -> clasificar(item, userId))
