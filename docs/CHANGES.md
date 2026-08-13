@@ -200,3 +200,117 @@ Se reemplazó la dependencia del stack local de Supabase (GoTrue + supabase/post
 | `SPRING_DATASOURCE_URL` | Supabase dashboard → Database → Connection string | JDBC URL de la DB |
 
 Ver `docs/env.example` para la lista completa.
+
+---
+
+# Merge origin/main + Soporte ES256 (JWKS) — 2026-08-13
+
+**Estado:** ✅ 60/60 tests pasando — verificación Docker end-to-end completa
+
+---
+
+## Resumen ejecutivo
+
+Se integró el trabajo de todos los integrantes (BE-1 a BE-4 completos: OCI Storage, nuevos DTOs, `JwtAuthenticationEntryPoint`, `JwtAccessDeniedHandler`) mediante merge de `origin/main` → rama `carlos`. Se resolvieron 15 conflictos preservando las correcciones de QA y toda la funcionalidad nueva. Adicionalmente se migró la validación JWT de HS256 a ES256 usando la JWKS pública de Supabase, motivado por la rotación de clave que Supabase realizó en el proyecto hosted.
+
+---
+
+## Resolución de merge (15 conflictos)
+
+### Estrategia aplicada
+
+- **Arquitectura/inyección (HEAD):** `MlClient`, `SupabaseAuthClient` — se mantuvo inyección correcta de `RestClient.Builder`, testeable con `MockRestServiceServer`.
+- **Funcionalidad nueva (origin/main):** OCI Storage completo (sin modificar), `JwtAuthenticationEntryPoint`, `JwtAccessDeniedHandler`, `SupabaseUserDetails` con campo `role`, `TechContentAiApplicationTests` con `@MockBean ObjectStorageClient`.
+- **Merge manual:** `pom.xml`, `application.properties`, `application-test.properties`, `SecurityConfig`, `JwtAuthFilter`.
+
+### Cambios clave post-merge
+
+| Archivo | Cambio |
+|---|---|
+| `pom.xml` | OCI SDK 3.47.0, JaCoCo 0.8.12, H2 explícita, postgresql 42.7.3, Lombok 1.18.42 (mantenido) |
+| `security/JwtAuthFilter.java` | Agregado `extractRole()` → `SupabaseUserDetails(userId, email, role)` |
+| `security/SecurityConfig.java` | Estructura con beans inyectados (origin/main) + CORS configurable (HEAD) |
+| `security/JwtAuthenticationEntryPoint.java` | Lee `JWT_ERROR_ATTRIBUTE` para distinguir EXPIRED vs INVALID |
+| `application.properties` | Props OCI con env vars: `OCI_NAMESPACE`, `OCI_CLI_REGION`, etc. |
+| `application-test.properties` | Props OCI vacías + `preferred_array_jdbc_type=ARRAY` |
+
+---
+
+## Migración JWT: HS256 → ES256 (JWKS)
+
+### Problema
+
+Supabase rotó la clave de firma JWT de HS256 (HMAC simétrico) a ES256 (ECDSA P-256) en el proyecto hosted. La migración es unidireccional desde el dashboard. Los tokens nuevos eran rechazados por el backend con 401.
+
+### Solución
+
+`JwtService` ahora soporta ambos algoritmos en paralelo:
+
+- **ES256:** carga la clave pública EC desde la JWKS de Supabase en `@PostConstruct`, cachea por `kid` en `ConcurrentHashMap`.
+- **HS256:** ruta legacy, sigue funcionando para entornos locales/tests.
+- La detección del algoritmo se hace inspeccionando el header del JWT (`alg` + `kid`) antes de validar.
+
+**JWKS URL configurada:**
+```
+supabase.jwks.url=${SUPABASE_JWKS_URL:https://bftvhnxtbahabwykqwni.supabase.co/auth/v1/.well-known/jwks.json}
+```
+
+En tests: `supabase.jwks.url=` (vacío → skip, se usa HS256 con secreto de prueba).
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---|---|
+| `security/JwtService.java` | Soporte ES256/JWKS: `loadJwks()`, `buildEcPublicKey()`, `resolveKey()` |
+| `application.properties` | `supabase.jwks.url` con fallback a JWKS de Supabase hosted |
+| `application-test.properties` | `supabase.jwks.url=` (vacío, sin conexión externa en tests) |
+
+### Tests nuevos (ES256)
+
+| Test | Qué verifica |
+|---|---|
+| `validateToken_tokenES256_conJwksCargadas_deberiaRetornarVALID` | Token ES256 válido con clave EC inyectada |
+| `validateToken_tokenES256_sinJwksCargadas_deberiaRetornarINVALID` | Token ES256 sin JWKS → INVALID |
+| `validateToken_tokenES256_kidDesconocido_usaClaveDisponible` | Fallback a primera clave cuando el kid no matchea |
+| `extractRole_deberiaRetornarElRolDelToken` | Extracción del claim `role` |
+
+**Total tests:** 60 (era 44 antes del merge) — 0 errores — 1 skip (Docker integration, requiere `RUN_ML_DOCKER_TEST=true`)
+
+---
+
+## Actualización de dependencias
+
+| Dependencia | Antes | Después | Motivo |
+|---|---|---|---|
+| `spring-boot-starter-parent` | 3.2.5 | 3.2.12 | Patch update, soporte OSS vencido en 3.2.5 |
+
+---
+
+## Verificación Docker (end-to-end)
+
+```
+docker compose up -d backend db ml-service
+```
+
+| Endpoint | Resultado |
+|---|---|
+| `GET /actuator/health` | `{"status":"UP"}` ✅ |
+| `POST /auth/register` | 200 + `access_token` (ES256) ✅ |
+| `POST /auth/login` | 200 + `access_token` (ES256) ✅ |
+| `GET /api/contenido` sin JWT | 401 `{"error":"UNAUTHORIZED","mensaje":"Token JWT invalido o ausente"}` ✅ |
+| `GET /api/contenido` con JWT ES256 | 200 ✅ |
+
+---
+
+## Correcciones adicionales — 2026-08-13
+
+### `docker-compose.yml`
+
+- **Qué:** Se eliminó `supabase-auth` del `depends_on` del servicio `backend`.
+- **Por qué:** El contenedor GoTrue local (`supabase/gotrue:v2.143.0`) crashea en loop por incompatibilidad de migración con `supabase/postgres:15.1.0.147` (`operator does not exist: uuid = text`). El backend ya no lo necesita — apunta a Supabase hosted. El servicio sigue definido en el compose para quienes quieran levantarlo manualmente con credenciales locales.
+
+### `docs/TechContent-AI.postman_collection.json`
+
+- **Qué:** Colección de Postman con todos los endpoints del backend.
+- **Incluye:** Auth (register/login), Contenido (clasificar, lote, buscar, listar), Archivos (subir, listar, obtener por ID), Categorías (listar), Health check.
+- **Feature:** Los requests de register y login guardan el `access_token` automáticamente en la variable `{{token}}` de la colección. Todos los endpoints protegidos la usan via Bearer sin configuración adicional.
