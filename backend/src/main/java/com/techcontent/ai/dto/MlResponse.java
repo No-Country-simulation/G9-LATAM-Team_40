@@ -1,19 +1,14 @@
 package com.techcontent.ai.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class MlResponse {
-    private String categoria;
-    private Double probabilidad;
-    
-    @JsonProperty("palabras_clave")
-    private String palabrasClave;
-}
+/**
+ * DTO para respuesta del servicio de ML (FastAPI)
+ * Mapea JSON con nomenclatura snake_case desde FastAPI
+ */
+public record MlResponse(
+        String categoria,
+        Double probabilidad,
+        @JsonProperty("palabras_clave") List<String> palabrasClave
+) {}

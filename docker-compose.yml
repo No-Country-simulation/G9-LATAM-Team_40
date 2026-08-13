@@ -109,8 +109,9 @@ services:
       GOTRUE_API_HOST: 0.0.0.0
       GOTRUE_API_PORT: 9999
       API_EXTERNAL_URL: ${GOTRUE_SITE_URL:-http://localhost:8080}
+      GOTRUE_DB_NAMESPACE: auth
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-techcontent}?sslmode=disable
+      GOTRUE_DB_DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-techcontent}?sslmode=disable&search_path=auth
       GOTRUE_SITE_URL: ${GOTRUE_SITE_URL:-http://localhost:8080}
       GOTRUE_URI_ALLOW_LIST: ""
       GOTRUE_DISABLE_SIGNUP: "false"
