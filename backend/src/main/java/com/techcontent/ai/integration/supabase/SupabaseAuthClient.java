@@ -21,7 +21,7 @@ public class SupabaseAuthClient {
 
     public SupabaseAuthResponse signUp(SupabaseAuthRequest request) {
         return restClient.post()
-                .uri("/auth/v1/signup")
+                .uri("/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
@@ -30,7 +30,7 @@ public class SupabaseAuthClient {
 
     public SupabaseAuthResponse signIn(SupabaseAuthRequest request) {
         return restClient.post()
-                .uri("/auth/v1/token?grant_type=password")
+                .uri("/token?grant_type=password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()

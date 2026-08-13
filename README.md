@@ -46,7 +46,7 @@ graph TB
             SB[Spring Boot 3<br>Java 17<br>:8080]
             SB -->|Validación| Controller[Controllers]
             Controller -->|Orquestación| Service[Services]
-            Service -->|HTTP POST| MLClient[ML Client]
+            Service -->|HTTP POST| MlClient[ML Client]
         end
 
         subgraph "Python ML Service"
@@ -78,12 +78,12 @@ graph TB
 
     Client -->|HTTP POST /api/contenido<br>JSON| SB
     Client -->|POST /api/archivos<br>multipart/form-data| SB
-    MLClient -->|HTTP POST /predict<br>localhost:5000| FastAPI
+    MlClient -->|HTTP POST /predict<br>localhost:5000| FastAPI
     Service -->|JDBC<br>postgresql://localhost:5432| SupaDB
     Service -->|Auth API<br>localhost:9999| SupaAuth
     Service -->|Upload/Download| OCI
     FastAPI -->|Download models| OCI
-    FastAPI -->|JSON response| MLClient
+    FastAPI -->|JSON response| MlClient
     SB -->|JSON response| Client
 
     style SB fill:#6DB33F,stroke:#333,color:#fff
