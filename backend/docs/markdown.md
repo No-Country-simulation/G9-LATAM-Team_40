@@ -138,7 +138,7 @@ Nucleo de la aplicacion. Contiene las entidades de negocio, los repositorios JPA
 - Modelar las entidades del negocio (Contenido, Archivo, Categoria)
 - Persistir y consultar datos en PostgreSQL a traves de Spring Data JPA
 - Implementar la logica de negocio: orchestar la clasificacion, la busqueda semantica y la gestion de archivos
-- Delegar al `MLClient` y al `OciStorageClient` (de la capa de Integracion)
+- Delegar al `MlClient` y al `OciStorageClient` (de la capa de Integracion)
 
 ### Estructura interna
 
@@ -153,7 +153,7 @@ domain/
 │   ├── ArchivoRepository.java       # JpaRepository + filtro por userId
 │   └── CategoriaRepository.java     # JpaRepository + count por categoria
 └── service/
-    ├── ContenidoService.java        # clasificar(), procesarLote(), buscar() — llama a MLClient
+    ├── ContenidoService.java        # clasificar(), procesarLote(), buscar() — llama a MlClient
     ├── ArchivoService.java          # subir(), listar(), obtenerUrl() — llama a OciStorageClient
     └── CategoriaService.java        # listarConConteo()
 ```

@@ -18,6 +18,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
+    static final String JWT_ERROR_ATTRIBUTE = "JWT_ERROR_TYPE";
+
     private final JwtService jwtService;
 
     @Override
@@ -33,13 +35,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
+        JwtService.TokenValidationResult result = jwtService.validateToken(token);
 
-        if (jwtService.isTokenValid(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (result == JwtService.TokenValidationResult.EXPIRED) {
+            request.setAttribute(JWT_ERROR_ATTRIBUTE, "EXPIRED");
+        } else if (result == JwtService.TokenValidationResult.INVALID) {
+            request.setAttribute(JWT_ERROR_ATTRIBUTE, "INVALID");
+        }
+
+        if (result == JwtService.TokenValidationResult.VALID
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
             UUID userId = UUID.fromString(jwtService.extractUserId(token));
             String email = jwtService.extractEmail(token);
+            String role = jwtService.extractRole(token);
 
-            SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, email);
-
+            SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, email, role);
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities()
             );

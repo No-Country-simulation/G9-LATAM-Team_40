@@ -4,13 +4,13 @@ import com.techcontent.ai.api.dto.request.ContenidoLoteRequest;
 import com.techcontent.ai.api.dto.request.ContenidoRequest;
 import com.techcontent.ai.api.dto.response.ContenidoResponse;
 import com.techcontent.ai.api.dto.response.ContenidoRelacionadoResponse;
-import com.techcontent.ai.api.exception.ContenidoNotFoundException;
 import com.techcontent.ai.domain.model.Contenido;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
 import com.techcontent.ai.integration.ml.MlClient;
-import com.techcontent.ai.integration.ml.MlResponse;
+import com.techcontent.ai.dto.MlResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,10 +21,10 @@ import java.util.UUID;
 public class ContenidoService {
 
     private final ContenidoRepository repository;
-    private final MlClient mlClient;
+    private final MlClient MlClient;
 
     public ContenidoResponse clasificar(ContenidoRequest request, UUID userId) {
-        MlResponse mlResponse = mlClient.predict(request.texto());
+        MlResponse mlResponse = MlClient.predict(request.texto());
 
         Contenido contenido = Contenido.builder()
                 .userId(userId)
@@ -40,6 +40,7 @@ public class ContenidoService {
         return toResponse(saved);
     }
 
+    @Transactional
     public List<ContenidoResponse> procesarLote(ContenidoLoteRequest request, UUID userId) {
         return request.contenidos().stream()
                 .map(item -> clasificar(item, userId))
@@ -59,7 +60,6 @@ public class ContenidoService {
     }
 
     private ContenidoResponse toResponse(Contenido contenido) {
-        // TODO: implementar busqueda de contenidos relacionados
         List<ContenidoRelacionadoResponse> relacionados = List.of();
 
         return new ContenidoResponse(

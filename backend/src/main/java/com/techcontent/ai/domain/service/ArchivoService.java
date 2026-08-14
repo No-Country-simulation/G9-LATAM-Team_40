@@ -40,10 +40,12 @@ public class ArchivoService {
         String objectName = userId + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
 
         try {
+            // El tamaño (file.getSize()) ha sido agregado aquí como 4to argumento
             String url = ociStorageClient.upload(
                     filesBucket,
                     objectName,
                     file.getInputStream(),
+                    file.getSize(),
                     file.getContentType()
             );
 
@@ -72,6 +74,29 @@ public class ArchivoService {
         Archivo archivo = archivoRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ArchivoNotFoundException(id));
         return toResponse(archivo);
+    }
+
+    public void eliminar(UUID id, UUID userId) {
+        Archivo archivo = archivoRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ArchivoNotFoundException(id));
+
+        String objectName = extraerObjectNameDeUrl(archivo.getUrl());
+        ociStorageClient.delete(filesBucket, objectName);
+        archivoRepository.delete(archivo);
+    }
+
+    private String extraerObjectNameDeUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return "";
+        }
+        String rawPath;
+        if (url.contains("/o/")) {
+            rawPath = url.substring(url.indexOf("/o/") + 3);
+        } else {
+            rawPath = url.substring(url.lastIndexOf('/') + 1);
+        }
+
+        return java.net.URLDecoder.decode(rawPath, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private void validarArchivo(MultipartFile file) {
