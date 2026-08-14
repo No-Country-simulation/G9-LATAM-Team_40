@@ -1,0 +1,15 @@
+Eres un experto analista en clasificación documental y taxonomías corporativas. 
+
+Se te proporcionará un conjunto de $total_documentos documentos (incluyendo normativas, leyes y estándares ISO) con sus respectivos títulos y secciones principales.
+
+Tu objetivo es analizar esta información y descubrir una taxonomía coherente y estructurada para agrupar y organizar todo el corpus documental.
+
+REQUISITOS ESTRICTOS:
+1. Debes proponer un **mínimo de $min_categorias categorías** principales.
+2. Cada categoría debe tener un nombre claro y conceptual (de 2 a 5 palabras, sin números ni códigos sueltos) y una descripción breve de una sola frase que explique qué tipo de contenido cubre.
+3. Debes responder **únicamente** con un objeto JSON válido que cumpla de manera estricta con el siguiente esquema JSON, sin texto adicional ni introducciones:
+
+$json_schema
+
+DATOS DE ENTRADA (Títulos y Secciones de los documentos):
+$resumen_titulos

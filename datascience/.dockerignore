@@ -1,0 +1,30 @@
+# Se coloca en la RAÍZ del repo (junto a db/ y proyecto/), no en docker/.
+
+.git
+.gitignore
+
+# db/ nunca debe entrar a la imagen (son datos, se montan por volumen)
+db/
+
+# Secretos: el .env real se monta por volumen, no se hornea en la imagen
+proyecto/.env
+**/.env
+
+# Cache local de Python
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.mypy_cache/
+
+# Entornos virtuales locales, si los tienes fuera de Docker
+**/.venv/
+**/venv/
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+
+# Modelos descargados localmente fuera de Docker (si existiera esa carpeta)
+modelo_local_class/
+models_cache/
