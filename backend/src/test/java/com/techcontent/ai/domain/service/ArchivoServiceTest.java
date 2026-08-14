@@ -140,4 +140,29 @@ class ArchivoServiceTest {
         assertThatThrownBy(() -> service.obtenerPorId(ARCHIVO_ID, USER_ID))
                 .isInstanceOf(ArchivoNotFoundException.class);
     }
+
+    @Test
+    void eliminar_existente_deberiaEliminarEnOciYPersistencia() {
+        Archivo archivo = archivoGuardado();
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, USER_ID))
+                .thenReturn(Optional.of(archivo));
+        service.eliminar(ARCHIVO_ID, USER_ID);
+
+        verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, USER_ID);
+        verify(ociStorageClient).delete(eq("test-bucket"), eq("documento.pdf"));
+        verify(archivoRepository).delete(archivo);
+    }
+
+    @Test
+    void eliminar_noExistente_deberiaLanzarArchivoNotFound() {
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, USER_ID))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.eliminar(ARCHIVO_ID, USER_ID))
+                .isInstanceOf(ArchivoNotFoundException.class);
+
+        verifyNoInteractions(ociStorageClient);
+        verify(archivoRepository, never()).delete(any());
+    }
+
 }
