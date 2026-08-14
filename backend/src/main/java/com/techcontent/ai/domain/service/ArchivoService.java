@@ -86,11 +86,17 @@ public class ArchivoService {
     }
 
     private String extraerObjectNameDeUrl(String url) {
-        if (url != null && url.contains("/o/")) {
-            String pathDespuesDeO = url.substring(url.indexOf("/o/") + 3);
-            return java.net.URLDecoder.decode(pathDespuesDeO, java.nio.charset.StandardCharsets.UTF_8);
+        if (url == null || url.isBlank()) {
+            return "";
         }
-        return url;
+        String rawPath;
+        if (url.contains("/o/")) {
+            rawPath = url.substring(url.indexOf("/o/") + 3);
+        } else {
+            rawPath = url.substring(url.lastIndexOf('/') + 1);
+        }
+
+        return java.net.URLDecoder.decode(rawPath, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private void validarArchivo(MultipartFile file) {
