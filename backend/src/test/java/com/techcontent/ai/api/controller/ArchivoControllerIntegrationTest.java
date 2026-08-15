@@ -1,6 +1,8 @@
 package com.techcontent.ai.api.controller;
 
 import com.techcontent.ai.api.dto.response.ArchivoResponse;
+import com.techcontent.ai.api.dto.response.PaginaResponse;
+import com.techcontent.ai.api.exception.ArchivoNotFoundException;
 import com.techcontent.ai.domain.service.ArchivoService;
 import com.techcontent.ai.security.JwtAccessDeniedHandler;
 import com.techcontent.ai.security.JwtAuthFilter;
@@ -21,6 +23,10 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -86,17 +92,125 @@ class ArchivoControllerIntegrationTest {
                 "https://oci/test/doc.pdf", 2048L,
                 "application/pdf", LocalDateTime.now()
         );
-        when(archivoService.listar(any(UUID.class))).thenReturn(List.of(archivo));
+        PaginaResponse<ArchivoResponse> pagina = new PaginaResponse<>(
+                List.of(archivo), 0, 20, 1, 1
+        );
+        when(archivoService.listar(any(UUID.class), eq(0), eq(20), eq(""), eq("")))
+                .thenReturn(pagina);
 
         mockMvc.perform(get("/api/archivos")
                         .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nombre").value("doc.pdf"));
+                .andExpect(jsonPath("$.items[0].nombre").value("doc.pdf"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1));
+
+        verify(archivoService).listar(TEST_USER_ID, 0, 20, "", "");
+    }
+
+    @Test
+    void GET_conPaginacionPersonalizada_deberiaDelegarParametros() throws Exception {
+        PaginaResponse<ArchivoResponse> pagina = new PaginaResponse<>(
+                List.of(), 2, 5, 0, 0
+        );
+        when(archivoService.listar(any(UUID.class), eq(2), eq(5), eq(""), eq("")))
+                .thenReturn(pagina);
+
+        mockMvc.perform(get("/api/archivos")
+                        .param("page", "2")
+                        .param("size", "5")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isEmpty())
+                .andExpect(jsonPath("$.page").value(2))
+                .andExpect(jsonPath("$.size").value(5));
+
+        verify(archivoService).listar(TEST_USER_ID, 2, 5, "", "");
+    }
+
+    @Test
+    void GET_conBusquedaPorNombre_deberiaDelegarQuery() throws Exception {
+        PaginaResponse<ArchivoResponse> pagina = new PaginaResponse<>(
+                List.of(), 0, 20, 0, 0
+        );
+        when(archivoService.listar(any(UUID.class), eq(0), eq(20), eq("manual"), eq("")))
+                .thenReturn(pagina);
+
+        mockMvc.perform(get("/api/archivos")
+                        .param("q", "manual")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isEmpty());
+
+        verify(archivoService).listar(TEST_USER_ID, 0, 20, "manual", "");
+    }
+
+    @Test
+    void GET_conBusquedaYTipo_deberiaDelegarFiltros() throws Exception {
+        PaginaResponse<ArchivoResponse> pagina = new PaginaResponse<>(
+                List.of(), 0, 5, 0, 0
+        );
+        when(archivoService.listar(
+                any(UUID.class), eq(0), eq(5), eq("manual"), eq("pdf")))
+                .thenReturn(pagina);
+
+        mockMvc.perform(get("/api/archivos")
+                        .param("page", "0")
+                        .param("size", "5")
+                        .param("q", "manual")
+                        .param("tipo", "pdf")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isEmpty())
+                .andExpect(jsonPath("$.size").value(5));
+
+        verify(archivoService).listar(TEST_USER_ID, 0, 5, "manual", "pdf");
     }
 
     @Test
     void GET_sinJwt_deberiaRetornar401() throws Exception {
         mockMvc.perform(get("/api/archivos"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void DELETE_conJwtValido_deberiaRetornar204() throws Exception {
+        UUID archivoId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+
+        mockMvc.perform(delete("/api/archivos/{id}", archivoId)
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(archivoService).eliminar(archivoId, TEST_USER_ID);
+    }
+
+    @Test
+    void DELETE_sinJwt_deberiaRetornar401() throws Exception {
+        UUID archivoId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+
+        mockMvc.perform(delete("/api/archivos/{id}", archivoId))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(archivoService);
+    }
+
+    @Test
+    void DELETE_archivoNoEncontrado_deberiaRetornar404() throws Exception {
+        UUID archivoId = UUID.fromString("00000000-0000-0000-0000-000000000099");
+        doThrow(new ArchivoNotFoundException(archivoId))
+                .when(archivoService).eliminar(archivoId, TEST_USER_ID);
+
+        mockMvc.perform(delete("/api/archivos/{id}", archivoId)
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.mensaje").value(
+                        "Archivo no encontrado con id: " + archivoId
+                ));
+
+        verify(archivoService).eliminar(archivoId, TEST_USER_ID);
     }
 }

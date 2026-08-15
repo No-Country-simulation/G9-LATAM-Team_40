@@ -1,6 +1,7 @@
 package com.techcontent.ai.domain.service;
 
 import com.techcontent.ai.api.dto.response.ArchivoResponse;
+import com.techcontent.ai.api.dto.response.PaginaResponse;
 import com.techcontent.ai.api.exception.ArchivoNotFoundException;
 import com.techcontent.ai.domain.model.Archivo;
 import com.techcontent.ai.domain.repository.ArchivoRepository;
@@ -11,6 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -38,6 +43,7 @@ class ArchivoServiceTest {
     private ArchivoService service;
 
     private static final UUID USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final UUID OTRO_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000003");
     private static final UUID ARCHIVO_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
 
     @org.junit.jupiter.api.BeforeEach
@@ -112,14 +118,95 @@ class ArchivoServiceTest {
     }
 
     @Test
-    void listar_deberiaRetornarTodosLosArchivosDelUsuario() {
-        when(archivoRepository.findByUserId(USER_ID)).thenReturn(List.of(archivoGuardado()));
+    void listar_conPaginacion_deberiaRetornarPaginaDelUsuario() {
+        when(archivoRepository.buscarPorUsuario(
+                eq(USER_ID), eq(""), eq(""), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(
+                        List.of(archivoGuardado()),
+                        PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "subidoEn")),
+                        1
+                ));
 
-        List<ArchivoResponse> responses = service.listar(USER_ID);
+        PaginaResponse<ArchivoResponse> response = service.listar(USER_ID, 0, 20, null, null);
 
-        assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).nombre()).isEqualTo("documento.pdf");
-        verify(archivoRepository).findByUserId(USER_ID);
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().get(0).nombre()).isEqualTo("documento.pdf");
+        assertThat(response.page()).isZero();
+        assertThat(response.size()).isEqualTo(20);
+        assertThat(response.totalElements()).isEqualTo(1);
+        assertThat(response.totalPages()).isEqualTo(1);
+        verify(archivoRepository).buscarPorUsuario(
+                eq(USER_ID), eq(""), eq(""), argThat(pageable ->
+                pageable.getPageNumber() == 0
+                        && pageable.getPageSize() == 20
+                        && pageable.getSort().getOrderFor("subidoEn") != null
+                        && pageable.getSort().getOrderFor("subidoEn").isDescending()
+        ));
+    }
+
+    @Test
+    void listar_conBusqueda_deberiaNormalizarYFiltrarPorNombre() {
+        when(archivoRepository.buscarPorUsuario(
+                eq(USER_ID), eq("DOC"), eq(""), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(archivoGuardado())));
+
+        PaginaResponse<ArchivoResponse> response = service.listar(USER_ID, 0, 20, "  DOC  ", "");
+
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().get(0).nombre()).isEqualTo("documento.pdf");
+        verify(archivoRepository).buscarPorUsuario(
+                eq(USER_ID), eq("DOC"), eq(""), any(Pageable.class));
+    }
+
+    @Test
+    void listar_conBusquedaYTipo_deberiaNormalizarYFiltrar() {
+        when(archivoRepository.buscarPorUsuario(
+                eq(USER_ID), eq("manual"), eq("application/pdf"), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(archivoGuardado())));
+
+        PaginaResponse<ArchivoResponse> response = service.listar(
+                USER_ID, 0, 20, "  manual  ", " PDF "
+        );
+
+        assertThat(response.items()).hasSize(1);
+        verify(archivoRepository).buscarPorUsuario(
+                eq(USER_ID), eq("manual"), eq("application/pdf"), any(Pageable.class));
+    }
+
+    @Test
+    void listar_conTipoNoPermitido_deberiaLanzarIllegalArgument() {
+        assertThatThrownBy(() -> service.listar(USER_ID, 0, 20, "", "xlsx"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("pdf, txt, md, docx");
+
+        verifyNoInteractions(archivoRepository);
+    }
+
+    @Test
+    void listar_conPaginaNegativa_deberiaLanzarIllegalArgument() {
+        assertThatThrownBy(() -> service.listar(USER_ID, -1, 20, "", ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("pagina");
+
+        verifyNoInteractions(archivoRepository);
+    }
+
+    @Test
+    void listar_conTamanoFueraDeRango_deberiaLanzarIllegalArgument() {
+        assertThatThrownBy(() -> service.listar(USER_ID, 0, 101, "", ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("entre 1 y 100");
+
+        verifyNoInteractions(archivoRepository);
+    }
+
+    @Test
+    void listar_conBusquedaDemasiadoLarga_deberiaLanzarIllegalArgument() {
+        assertThatThrownBy(() -> service.listar(USER_ID, 0, 20, "a".repeat(101), ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("100 caracteres");
+
+        verifyNoInteractions(archivoRepository);
     }
 
     @Test
@@ -162,6 +249,36 @@ class ArchivoServiceTest {
                 .isInstanceOf(ArchivoNotFoundException.class);
 
         verifyNoInteractions(ociStorageClient);
+        verify(archivoRepository, never()).delete(any());
+    }
+
+    @Test
+    void eliminar_archivoDeOtroUsuario_deberiaTratarloComoNoEncontrado() {
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, OTRO_USER_ID))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.eliminar(ARCHIVO_ID, OTRO_USER_ID))
+                .isInstanceOf(ArchivoNotFoundException.class);
+
+        verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, OTRO_USER_ID);
+        verifyNoInteractions(ociStorageClient);
+        verify(archivoRepository, never()).delete(any());
+    }
+
+    @Test
+    void eliminar_cuandoOciFalla_noDeberiaEliminarDePersistencia() {
+        Archivo archivo = archivoGuardado();
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, USER_ID))
+                .thenReturn(Optional.of(archivo));
+        doThrow(new RuntimeException("Error en eliminación desde OCI"))
+                .when(ociStorageClient).delete("test-bucket", "documento.pdf");
+
+        assertThatThrownBy(() -> service.eliminar(ARCHIVO_ID, USER_ID))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Error en eliminación desde OCI");
+
+        verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, USER_ID);
+        verify(ociStorageClient).delete("test-bucket", "documento.pdf");
         verify(archivoRepository, never()).delete(any());
     }
 
