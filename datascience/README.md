@@ -103,7 +103,7 @@ proyecto/
 
 ---
 
-###Instalación y Configuración
+### Instalación y Configuración
 
 1. **Clonar el repositorio e instalar dependencias**
 
