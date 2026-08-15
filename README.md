@@ -1,4 +1,4 @@
-# ISContent AI — Organización Inteligente de Contenido Técnico
+# TechISOlutions — Organización y Clasificación Inteligente de Archivos para el Cumplimiento de Normas ISO
 
 **Hackathon ONE – Proyectos G9 | Alura + Oracle**
 
@@ -21,15 +21,17 @@ Solución para la organización inteligente de contenido técnico mediante técn
 
 ## Descripción
 
-**TechContent AI** permite organizar, clasificar y enriquecer contenido técnico de forma automática. Recibe textos técnicos (documentación, tutoriales, anotaciones de estudio, artículos) y utiliza modelos de Machine Learning para:
+**TechISOlutions** es un sistema de organización y clasificación automática de archivos que ayuda a las organizaciones a cumplir con la norma **ISO 45001** (Seguridad y Salud en el Trabajo), con la posibilidad de incorporar **ISO 9001** (Calidad) e **ISO 14001** (Medio Ambiente) en etapas posteriores.
 
-- **Clasificación temática** del contenido (Backend, Frontend, DevOps, Data Science, etc.)
-- **Extracción de palabras clave** relevantes
-- **Agrupación por temas similares** y **recomendación de contenidos relacionados**
+Recibe documentos (políticas, procedimientos, matrices de riesgo, registros de capacitación, informes de auditoría) y utiliza modelos de Machine Learning para:
 
-El resultado se expone en formato JSON para su consumo por otras aplicaciones, plataformas educativas o equipos técnicos que deseen construir repositorios inteligentes de conocimiento.
+- **Clasificación automática de documentos** según su tipo y requisito normativo (Política SST, Procedimientos, Matrices de Riesgo, Registros, Auditorías, etc.)
+- **Extracción de palabras clave** para búsqueda y trazabilidad
+- **Agrupación por temas similares** y **recomendación de documentos relacionados**
 
-La plataforma incluye un frontend web construido con **Next.js** que consume la API y expone la clasificación de contenido al usuario final.
+El resultado se expone en formato JSON para su consumo por otras aplicaciones o equipos que deseen construir repositorios documentales alineados a la norma.
+
+La plataforma incluye un frontend web construido con **Next.js** que consume la API y expone la organización y clasificación de archivos al usuario final.
 
 ---
 
@@ -107,9 +109,9 @@ graph TB
 
 ### Flujo de Procesamiento
 
-**Clasificación de texto:**
+**Clasificación de documentos:**
 ```
-1. Cliente → POST /api/contenido  (JSON con título y texto + JWT token)
+1. Cliente → POST /api/contenido  (JSON con título y texto del documento + JWT token)
 2. Spring Boot valida JWT con Supabase Auth
 3. Spring Boot valida la entrada
 4. Spring Boot → POST http://localhost:5000/predict  (texto preprocesado)
@@ -117,7 +119,7 @@ graph TB
    - TF-IDF + vectorización del texto
    - Clasificación con Regresión Logística / Random Forest
    - Extracción de keywords con YAKE / TF-IDF scores
-6. FastAPI → JSON con categoría, keywords, scores  →  Spring Boot
+6. FastAPI → JSON con categoría documental, keywords, scores  →  Spring Boot
 7. Spring Boot persiste resultado en Supabase PostgreSQL
 8. Spring Boot enriquece respuesta y la retorna al cliente
 ```
@@ -195,9 +197,9 @@ push → Run Tests (JUnit + Pytest) → Build Docker images →
 OCI_CLI_USER=ocid1.user.oc1...
 OCI_CLI_TENANCY=ocid1.tenancy.oc1...
 OCI_CLI_REGION=sa-santiago-1
-OCI_MODEL_BUCKET=techcontent-models
-OCI_DATASET_BUCKET=techcontent-datasets
-OCI_FILES_BUCKET=techcontent-files
+OCI_MODEL_BUCKET=techisolutions-models
+OCI_DATASET_BUCKET=techisolutions-datasets
+OCI_FILES_BUCKET=techisolutions-files
 ```
 
 ---
@@ -217,8 +219,8 @@ Content-Type: application/json
 **Request Body:**
 ```json
 {
-  "titulo": "Introducción a Spring Boot",
-  "texto": "En este contenido se presentan los conceptos básicos para la creación de APIs REST utilizando Java y Spring Boot. Se abordan temas como controladores, servicios, inyección de dependencias y configuración de proyectos."
+  "titulo": "Política de Seguridad y Salud en el Trabajo",
+  "texto": "Esta política establece los compromisos de la organización en materia de seguridad y salud en el trabajo: prevención de riesgos laborales, formación de los trabajadores y mejora continua del sistema de gestión."
 }
 ```
 
@@ -226,14 +228,14 @@ Content-Type: application/json
 ```json
 {
   "id": "a1b2c3d4",
-  "categoria": "Backend",
-  "probabilidad": 0.89,
-  "palabras_clave": ["Java", "Spring Boot", "API REST", "Inyección de dependencias"],
+  "categoria": "Política SST",
+  "probabilidad": 0.91,
+  "palabras_clave": ["Seguridad", "Salud en el trabajo", "Política SST", "Prevención de riesgos"],
   "contenidos_relacionados": [
     {
       "id": "e5f6g7h8",
-      "titulo": "Spring Boot Avanzado: Seguridad con JWT",
-      "similitud": 0.76
+      "titulo": "Matriz de Riesgos Laborales 2026",
+      "similitud": 0.72
     }
   ],
   "procesado_en": "2026-07-23T14:30:00Z"
@@ -259,8 +261,8 @@ file: <archivo>
 ```json
 {
   "id": "f1g2h3i4",
-  "nombre": "documentacion-spring.pdf",
-  "url": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/.../documentacion-spring.pdf",
+  "nombre": "politica-sst.pdf",
+  "url": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/.../politica-sst.pdf",
   "tamano": 1048576,
   "tipo": "application/pdf",
   "subido_en": "2026-07-23T14:30:00Z"
@@ -281,11 +283,11 @@ Procesa múltiples documentos en una sola petición.
 
 ### `GET /api/contenido/buscar?q=spring+boot`
 
-Búsqueda semántica por palabras clave entre contenidos previamente procesados.
+Búsqueda semántica por palabras clave entre documentos previamente clasificados.
 
 ### `GET /api/categorias`
 
-Lista todas las categorías disponibles con la cantidad de documentos por categoría.
+Lista todas las categorías documentales disponibles con la cantidad de documentos por categoría.
 
 ### `POST /auth/register`
 
@@ -395,7 +397,7 @@ curl -X POST http://localhost:9999/auth/v1/token?grant_type=password \
 curl -X POST http://localhost:8080/api/contenido \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
-  -d '{"titulo":"Test","texto":"Spring Boot y Java para APIs REST"}'
+  -d '{"titulo":"Test","texto":"Política de seguridad y salud en el trabajo para la prevención de riesgos laborales"}'
 ```
 
 ---
