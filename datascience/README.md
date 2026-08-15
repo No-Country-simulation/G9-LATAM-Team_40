@@ -1,4 +1,4 @@
-#Sistema de Indexación y Grafo de Conocimiento RAG (GraphRAG)
+# Sistema de Indexación y Grafo de Conocimiento RAG (GraphRAG)
 
 Sistema integral en Python para el procesamiento, clasificación, estructuración en grafos de conocimiento y búsqueda avanzada mediante **GraphRAG de dos niveles**. El proyecto integra modelos de lenguaje (**Gemini** y **DeepSeek**) para la extracción, generación de taxonomías y síntesis de respuestas con contexto aumentado.
 
