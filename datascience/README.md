@@ -89,7 +89,7 @@ proyecto/
 
 ---
 
-###Detalle de Módulos y Funcionalidad
+### Detalle de Módulos y Funcionalidad
 
 * **src/api/:** Contiene la abstracción para interactuar con las APIs de Gemini y DeepSeek. Implementa rotación automática de modelos y manejo de fallos para garantizar que la ejecución no se interrumpa por cuotas de API.
 
