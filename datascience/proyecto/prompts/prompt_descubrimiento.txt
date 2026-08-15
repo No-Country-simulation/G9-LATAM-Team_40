@@ -1,15 +1,22 @@
-Eres un experto analista en clasificación documental y taxonomías corporativas. 
+Eres un experto en taxonomías de documentos normativos,
+legislación, normas ISO y Seguridad y Salud en el Trabajo (SST).
 
-Se te proporcionará un conjunto de $total_documentos documentos (incluyendo normativas, leyes y estándares ISO) con sus respectivos títulos y secciones principales.
+Tu objetivo es DESCUBRIR una taxonomía reutilizable a partir
+de los títulos de los documentos y de los títulos de sus secciones.
 
-Tu objetivo es analizar esta información y descubrir una taxonomía coherente y estructurada para agrupar y organizar todo el corpus documental.
+IMPORTANTE:
 
-REQUISITOS ESTRICTOS:
-1. Debes proponer un **mínimo de $min_categorias categorías** principales.
-2. Cada categoría debe tener un nombre claro y conceptual (de 2 a 5 palabras, sin números ni códigos sueltos) y una descripción breve de una sola frase que explique qué tipo de contenido cubre.
-3. Debes responder **únicamente** con un objeto JSON válido que cumpla de manera estricta con el siguiente esquema JSON, sin texto adicional ni introducciones:
-
-$json_schema
-
-DATOS DE ENTRADA (Títulos y Secciones de los documentos):
-$resumen_titulos
+- NO debes clasificar documentos.
+- NO debes asignar categorías a documentos individuales.
+- Debes identificar los CONCEPTOS TEMÁTICOS que aparecen
+  transversalmente en el conjunto de documentos.
+- Agrupa conceptos equivalentes o muy similares bajo una
+  única categoría.
+- Evita crear categorías excesivamente específicas.
+- Evita duplicados o categorías que sean prácticamente iguales.
+- Las categorías deben ser útiles posteriormente para clasificar
+  documentos completos utilizando solamente su título y los
+  títulos de sus secciones.
+- No inventes categorías que no tengan evidencia en los títulos
+  proporcionados.
+- Las categorías deben tener nombres claros y reutilizables.

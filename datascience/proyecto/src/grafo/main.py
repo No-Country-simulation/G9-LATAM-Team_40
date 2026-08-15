@@ -1,74 +1,80 @@
+"""
+Script principal (Orquestador) para la construcción del Grafo y GraphRAG.
+Ejecuta la actualización incremental de documentos nuevos o modificados de la Etapa 2.
+"""
 from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
+
 from settings import settings
 from .graph_builder import GraphRAGBuilder
 
-logger = logging.getLogger("GraphRAG_Etapa3")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
+logger = logging.getLogger("MAIN")
+
+
+def cargar_json_seguro(ruta: Path) -> list[dict]:
+    if not ruta.exists():
+        logger.warning("El archivo no existe: %s", ruta)
+        return []
+    try:
+        data = json.loads(ruta.read_text(encoding="utf-8"))
+        if isinstance(data, list):
+            return data
+        elif isinstance(data, dict):
+            return [data]
+    except Exception as e:
+        logger.error("Error al leer JSON en %s: %s", ruta, e)
+    return []
 
 
 def ejecutar_construccion_grafo() -> None:
-    """Ejecuta la Etapa 3: Construcción incremental del Grafo de Conocimiento y Embeddings."""
-    logger.info("Iniciando construcción del grafo normativo (modo incremental)...")
+    settings.ensure_dirs()
+    logger.info("Iniciando construcción y actualización incremental del Grafo de Conocimiento Global...")
 
-    # Inicializar constructor de grafo con las rutas centralizadas en settings
+    # Inicializa el constructor, que carga el grafo y los embeddings existentes (si ya existen)
     builder = GraphRAGBuilder(
         ruta_grafo=settings.FILE_GRAFO_JSON,
-        ruta_embeddings=settings.FILE_EMBEDDINGS_JSON,
+        ruta_embeddings=settings.FILE_EMBEDDINGS_JSON
     )
 
-    # Definir los archivos clasificados de entrada (ISO y Leyes)
-    archivos_a_procesar = [
+    archivos_clasificados = [
         ("ISO", settings.FILE_ISO_CLASIFICADO),
         ("LEYES", settings.FILE_LEYES_CLASIFICADO),
     ]
 
-    total_nuevos_procesados = 0
+    total_procesados = 0
 
-    for tipo, ruta_json in archivos_a_procesar:
-        if not ruta_json.exists():
-            logger.warning("No se encontró el archivo clasificado: %s. Se omite '%s'.", ruta_json, tipo)
-            continue
+    for tipo, ruta_archivo in archivos_clasificados:
+        documentos = cargar_json_seguro(ruta_archivo)
+        logger.info("Procesando %d documentos del grupo: %s", len(documentos), tipo)
 
-        try:
-            documentos = json.loads(ruta_json.read_text(encoding="utf-8"))
-        except Exception as e:
-            logger.error("Error al leer %s: %s", ruta_json, e)
-            continue
+        for doc in documentos:
+            try:
+                # El nuevo GraphRAGBuilder procesa todo a partir de la estructura del diccionario
+                builder.procesar_documento(doc)
+                total_procesados += 1
+            except Exception as e:
+                logger.error("Error procesando documento en el grupo [%s]: %s", tipo, e)
 
-        logger.info("Revisando %d documentos en '%s' para actualización incremental...", len(documentos), tipo)
+    logger.info("Documentos procesados: %d. Verificando nodos semánticos nuevos para embeddings...", total_procesados)
 
-        for idx, doc in enumerate(documentos):
-            document_id, _ = builder.obtener_identificador(doc, tipo, idx)
+    # La nueva versión de GraphRAGBuilder identifica automáticamente qué entidades, 
+    # conceptos y categorías no tienen embedding, los genera y guarda el store actualizado.
+    builder.generar_y_guardar_embeddings()
 
-            # VALIDACIÓN INCREMENTAL: Si ya está en el grafo, se omite
-            if builder.documento_ya_en_grafo(document_id):
-                continue
-
-            logger.info("Añadiendo nuevo documento al grafo: ID='%s' (%s)", document_id, tipo)
-            
-            # 1. Procesar nodos, secciones, conceptos y relaciones en el grafo
-            builder.procesar_documento(doc, tipo, idx)
-
-            # 2. Recolectar y generar embeddings solo para las entidades nuevas de este documento
-            entidades_nuevas = builder.recolectar_entidades_nuevas(doc)
-            if entidades_nuevas:
-                builder.generar_y_guardar_embeddings(entidades_nuevas)
-
-            total_nuevos_procesados += 1
-
-    if total_nuevos_procesados > 0:
-        # Guardar cambios persistentes en disco
-        builder.guardar_grafo()
-        builder.guardar_store_embeddings()
-        logger.info("Grafo actualizado incrementalmente. Se agregaron %d documentos nuevos.", total_nuevos_procesados)
-    else:
-        logger.info("El grafo ya está actualizado. No se encontraron documentos nuevos pendientes.")
-
-    logger.info("Etapa 3 completada con éxito.")
+    # Guarda el grafo consolidado final respetando la estructura JSON estricta (nodos, secciones, etc.)
+    builder.guardar_grafo()
+    
+    logger.info("¡Grafo Global GraphRAG actualizado y guardado con éxito en: %s!", settings.FILE_GRAFO_JSON)
+    logger.info("¡Archivo de embeddings consolidado en: %s!", settings.FILE_EMBEDDINGS_JSON)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    # Siempre ejecuta la actualización (el builder maneja internamente la carga incremental)
     ejecutar_construccion_grafo()

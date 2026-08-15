@@ -1,53 +1,36 @@
-# ==============================================================================
-# Docker Compose para KNOGMENT_NAYE (GraphRAG System)
-# ==============================================================================
-# Se ejecuta desde la RAÍZ del repositorio con los siguientes comandos:
-#
-# 1. Levantar el servidor API REST (FastAPI):
-#    docker compose -f docker/docker-compose.yml up -d
-#
-# 2. Ejecutar el pipeline completo vía CLI (run_pipeline.py):
-#    docker compose -f docker/docker-compose.yml run --rm app python scripts/run_pipeline.py --etapa all
-#
-# 3. Ejecutar una etapa específica (ej. Etapa 3: Grafo de Conocimiento):
-#    docker compose -f docker/docker-compose.yml run --rm app python scripts/run_pipeline.py --etapa 3
-#
-# 4. Modo interactivo CLI para preguntas RAG (Etapa 4):
-#    docker compose -f docker/docker-compose.yml run --rm app python scripts/run_pipeline.py --etapa 4
-# ==============================================================================
+version: '3.8'
 
 services:
   app:
     build:
-      context: ..                         # Raíz del repositorio (knogment_naye_v2/)
+      context: ..                  # Raíz del repositorio
       dockerfile: docker/Dockerfile
       args:
         SPACY_MODEL: ${SPACY_MODEL:-es_dep_news_trf}
     image: knogment_naye:latest
     container_name: knogment_naye_app
 
-    # Exponer puerto para consumir la API REST (localhost:8000/docs)
+    # Coincide con el puerto expuesto en el Dockerfile (5000)
     ports:
-      - "8000:8000"
+      - "5000:5000"
 
-    # Inyección de variables de entorno desde la raíz
     env_file:
       - ../.env
 
     volumes:
-      # 1. Datos e Entradas/Salidas JSON (Persisten fuera del contenedor)
+      # 1. Datos y persistencia fuera del contenedor
       - ../db:/app/db
 
       # 2. Archivo .env como solo lectura
-      - ../.env:/app/proyecto/.env:ro
+      - ../.env:/app/.env:ro
 
-      # 3. Caché persistente para modelos de Embeddings (HuggingFace / SentenceTransformers)
+      # 3. Caché persistente para modelos de Embeddings
       - models_cache:/app/.cache
 
       # 4. Volúmenes de código fuente para desarrollo (Hot-Reload)
-      - ../proyecto/src:/app/proyecto/src
-      - ../proyecto/scripts:/app/proyecto/scripts
-      - ../proyecto/prompts:/app/proyecto/prompts
+      - ../src:/app/src
+      - ../indexacion:/app/indexacion
+      - ../settings.py:/app/settings.py
 
     restart: unless-stopped
 

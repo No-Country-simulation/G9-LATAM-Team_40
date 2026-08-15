@@ -1,23 +1,32 @@
-"""Modelos Pydantic esenciales para la API REST."""
+"""
+Esquemas de Pydantic para la API de FastAPI.
+"""
 from __future__ import annotations
-
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
 class QueryRequest(BaseModel):
     pregunta: str = Field(
-        ..., 
-        example="¿Cuáles son las obligaciones del empleador según la Ley SST?",
-        description="Pregunta realizada por el usuario."
+        ...,
+        description="Pregunta o consulta del usuario basada en ISOs y leyes.",
+        example="¿Cuáles son las principales exigencias?"
     )
-    top_k: Optional[int] = Field(
-        default=None, 
-        description="Número opcional de nodos a consultar en el grafo."
-    )
+
+
+class TrazabilidadSeccion(BaseModel):
+    seccion_id: str
+    documento_id: str
+    documento_nombre: str
+    titulo_seccion: str
+    ruta_jerarquica: List[str] = []
+    nivel: int
+    dominio: str
+    score: float
 
 
 class QueryResponse(BaseModel):
     pregunta: str
     respuesta: str
+    trazabilidad: List[TrazabilidadSeccion] = []
     tiempo_segundos: float

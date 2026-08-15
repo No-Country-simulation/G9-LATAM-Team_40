@@ -71,16 +71,15 @@ def ejecutar_etapa_3_grafo():
 
 def ejecutar_etapa_4_rag(pregunta: str | None = None):
     logger.info("=== [ETAPA 4] Búsqueda y Generación RAG ===")
-    from indexacion.main import ejecutar_etapa_4
+    from indexacion.main import PipelineGraphRAG, imprimir_resultado
+
+    # El pipeline se instancia UNA SOLA VEZ, sin importar si es consulta puntual o modo interactivo.
+    pipeline = PipelineGraphRAG()
 
     if pregunta:
         logger.info("Ejecutando consulta puntual: '%s'", pregunta)
-        respuesta = ejecutar_etapa_4(pregunta)
-        print("\n" + "=" * 80)
-        print("RESPUESTA OBTENIDA:")
-        print("=" * 80)
-        print(respuesta)
-        print("=" * 80)
+        resultado = pipeline.responder_consulta(pregunta)
+        imprimir_resultado(pregunta, resultado)
     else:
         # Modo interactivo CLI si no se provee una pregunta
         print("\n" + "=" * 80)
@@ -94,13 +93,9 @@ def ejecutar_etapa_4_rag(pregunta: str | None = None):
                 if p.lower() in ["salir", "exit", "q"]:
                     print("\nSesión finalizada.")
                     break
-                
-                resp = ejecutar_etapa_4(p)
-                print("\n" + "-" * 80)
-                print("RESPUESTA:")
-                print("-" * 80)
-                print(resp)
-                print("-" * 80)
+
+                resultado = pipeline.responder_consulta(p)
+                imprimir_resultado(p, resultado)
             except KeyboardInterrupt:
                 print("\n\nInterrumpido por el usuario. Saliendo...")
                 break

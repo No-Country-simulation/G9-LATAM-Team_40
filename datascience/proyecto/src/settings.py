@@ -88,6 +88,10 @@ class Settings(BaseSettings):
     def PROMPT_EXTRACTION_PATH(self) -> Path:
         return self.PROMPTS_DIR / "extraction_prompt.txt"
 
+    @property
+    def PROMPT_RAG_SISTEMA_PATH(self) -> Path:
+        return self.PROMPTS_DIR / "rag_sistema_prompt.txt"
+
     # ==========================================================================
     # 4. PARÁMETROS POR ETAPAS
     # ==========================================================================
@@ -98,12 +102,24 @@ class Settings(BaseSettings):
 
     BATCH_SIZE_EMBEDDINGS: int = Field(default=32, validation_alias="BATCH_SIZE_EMBEDDINGS")
     CONCEPTOS_TOP_POR_SECCION: int = Field(default=5, validation_alias="CONCEPTOS_TOP_POR_SECCION")
-    CONFIANZA_MINIMA_RELACION: float = Field(default=0.70, validation_alias="CONFIANZA_MINIMA_RELACION")
-    SCORE_MINIMO_CONCEPTO: float = Field(default=0.35, validation_alias="SCORE_MINIMO_CONCEPTO")
+    CONFIANZA_MINIMA_RELACION: float = Field(default=0.75, validation_alias="CONFIANZA_MINIMA_RELACION")
+    SCORE_MINIMO_CONCEPTO: float = Field(default=0.65, validation_alias="SCORE_MINIMO_CONCEPTO")
     ROOT_ID: str = Field(default="NODE_ROOT_CORPUS", validation_alias="ROOT_ID")
 
     TOP_K_NODOS: int = Field(default=5, validation_alias="TOP_K_NODOS")
     TOP_K_SECCIONES_FINAL: int = Field(default=5, validation_alias="TOP_K_SECCIONES_FINAL")
+
+    #----ETAPA 4 BALANCEO DE NODOS Y RUTA JERÁRQUICA----
+
+    MIN_SECCIONES_NIVEL_1_3: int = Field(default=2, validation_alias="MIN_SECCIONES_NIVEL_1_3")
+    UMBRAL_NIVEL_4_6: float = Field(default=0.55, validation_alias="UMBRAL_NIVEL_4_6")
+    UMBRAL_SIMILITUD_NODO: float = Field(default=0.30, validation_alias="UMBRAL_SIMILITUD_NODO")
+    MAX_SECCIONES_POR_DOCUMENTO: int = Field(default=2, validation_alias="MAX_SECCIONES_POR_DOCUMENTO")
+    RESERVA_MINIMA_POR_DOMINIO: int = Field(default=1, validation_alias="RESERVA_MINIMA_POR_DOMINIO")
+    MAX_ITEMS_RUTA_JERARQUICA: int = Field(default=3, validation_alias="MAX_ITEMS_RUTA_JERARQUICA")
+    MAX_LONGITUD_ITEM_RUTA: int = Field(default=120, validation_alias="MAX_LONGITUD_ITEM_RUTA")
+
+    MAX_CARACTERES_CONTENIDO_SECCION: int = Field(default=6000, validation_alias="MAX_CARACTERES_CONTENIDO_SECCION")
 
     # ==========================================================================
     # 5. ARTEFACTOS Y SALIDAS JSON

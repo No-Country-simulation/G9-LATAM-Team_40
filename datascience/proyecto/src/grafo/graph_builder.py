@@ -2,24 +2,35 @@ from __future__ import annotations
 
 import json
 import logging
+import hashlib
 from datetime import datetime
 from pathlib import Path
-import networkx as nx
+from typing import Any
+
 from sentence_transformers import SentenceTransformer
 
 from settings import settings
-from .filtros import es_texto_valido, normalizar_key
+# Se asume que filtros provee estas utilidades; puedes ajustarlo a tu entorno.
+from .filtros import es_texto_valido, normalizar_key, limpiar_label
 
 logger = logging.getLogger("GraphRAGBuilder")
-
 
 class GraphRAGBuilder:
     def __init__(self, ruta_grafo: Path, ruta_embeddings: Path):
         self.ruta_grafo = ruta_grafo
         self.ruta_embeddings = ruta_embeddings
         self.modelo_embeddings = SentenceTransformer(settings.MODELO_EMBEDDINGS)
-        self.G = self._cargar_grafo_existente()
+        
+        # Estructuras de datos para el Grafo de Conocimiento Global
+        self.categorias: dict[str, dict] = {}
+        self.documentos: dict[str, dict] = {}
+        self.secciones: dict[str, dict] = {}
+        self.nodos: dict[str, dict] = {}        # Entidades y Conceptos
+        self.relaciones: dict[str, dict] = {}   # Relaciones extraídas y estructurales
+        self.rutas: list[dict] = []             # Rutas precalculadas (opcional)
+        
         self.embeddings_store = self._cargar_store_embeddings()
+        self._cargar_grafo_existente()
 
     def _cargar_store_embeddings(self) -> dict:
         if self.ruta_embeddings.exists():
@@ -32,285 +43,281 @@ class GraphRAGBuilder:
     def guardar_store_embeddings(self) -> None:
         self.ruta_embeddings.parent.mkdir(parents=True, exist_ok=True)
         self.ruta_embeddings.write_text(
-            json.dumps(self.embeddings_store, ensure_ascii=False),
+            json.dumps(self.embeddings_store, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
 
-    def _cargar_grafo_existente(self) -> nx.MultiDiGraph:
-        G = nx.MultiDiGraph()
-        if not self.ruta_grafo.exists():
-            G.add_node(settings.ROOT_ID, label="Corpus Normativo General ISO/Leyes", tipo="RAIZ", nivel=0)
-            return G
-
-        try:
-            data = json.loads(self.ruta_grafo.read_text(encoding="utf-8"))
-            for n in data.get("nodos", []):
-                node_id = n.pop("id")
-                G.add_node(node_id, **n)
-
-            for a in data.get("aristas", []):
-                origen, destino = a.pop("origen"), a.pop("destino")
-                key = a.pop("edge_key", None)
-                G.add_edge(origen, destino, key=key, **a)
-
-            if settings.ROOT_ID not in G:
-                G.add_node(settings.ROOT_ID, label="Corpus Normativo General ISO/Leyes", tipo="RAIZ", nivel=0)
-
-        except Exception as e:
-            logger.error("Error al cargar el grafo existente: %s. Creando nuevo.", e)
-            G.add_node(settings.ROOT_ID, label="Corpus Normativo General ISO/Leyes", tipo="RAIZ", nivel=0)
-
-        return G
+    def _cargar_grafo_existente(self) -> None:
+        """Carga el estado del grafo desde el JSON si ya existe, respetando la nueva estructura."""
+        if self.ruta_grafo.exists():
+            try:
+                data = json.loads(self.ruta_grafo.read_text(encoding="utf-8"))
+                grafo = data.get("grafo_conocimiento", {})
+                self.categorias = {c["id"]: c for c in grafo.get("categorias", [])}
+                self.documentos = {d["id"]: d for d in grafo.get("documentos", [])}
+                self.secciones = {s["id"]: s for s in grafo.get("secciones", [])}
+                self.nodos = {n["id"]: n for n in grafo.get("nodos", [])}
+                self.relaciones = {r["id"]: r for r in grafo.get("relaciones", [])}
+                self.rutas = grafo.get("rutas", [])
+            except Exception as e:
+                logger.error("Error al cargar el grafo existente: %s. Empezando de cero.", e)
 
     def guardar_grafo(self) -> None:
-        self.ruta_grafo.parent.mkdir(parents=True, exist_ok=True)
-        nodos_export = [{"id": n, **data} for n, data in self.G.nodes(data=True)]
-        aristas_export = [
-            {"edge_key": key, **data, "origen": u, "destino": v}
-            for u, v, key, data in self.G.edges(keys=True, data=True)
-        ]
-
+        """Exporta el grafo estructurado exactamente como se solicita."""
+        self._generar_relaciones_entre_documentos()
+        
         grafo_json = {
-            "metadata": {
-                "version": "GraphRAG-v4.2-optimizado",
-                "actualizado": datetime.now().isoformat(),
-                "total_nodos": self.G.number_of_nodes(),
-                "total_aristas": self.G.number_of_edges(),
-            },
-            "nodos": nodos_export,
-            "aristas": aristas_export,
+            "grafo_conocimiento": {
+                "categorias": list(self.categorias.values()),
+                "documentos": list(self.documentos.values()),
+                "secciones": list(self.secciones.values()),
+                "nodos": list(self.nodos.values()),
+                "relaciones": list(self.relaciones.values()),
+                "rutas": self.rutas
+            }
         }
+        
+        self.ruta_grafo.parent.mkdir(parents=True, exist_ok=True)
         self.ruta_grafo.write_text(
-            json.dumps(grafo_json, ensure_ascii=False, indent=2), encoding="utf-8"
+            json.dumps(grafo_json, ensure_ascii=False, indent=2), 
+            encoding="utf-8"
         )
 
-    def documento_ya_en_grafo(self, document_id: str) -> bool:
-        return self.G.has_node(f"SUBNODO_DOC_{document_id}")
+    def _generar_id_hash(self, base_string: str, prefijo: str = "REL") -> str:
+        """Genera un identificador determinístico basado en el contenido."""
+        hash_obj = hashlib.md5(base_string.encode("utf-8")).hexdigest()
+        return f"{prefijo}_{hash_obj[:12]}"
 
-    @staticmethod
-    def construir_mapa_entidades_seccion(entidades: list[dict]) -> dict[str, str]:
-        mapa = {}
-        for e in entidades:
-            canonical = e.get("canonical", "").strip()
-            texto = e.get("texto", "").strip()
-            if canonical and es_texto_valido(canonical):
-                mapa[normalizar_key(canonical)] = canonical
-                if texto:
-                    mapa[normalizar_key(texto)] = canonical
-        return mapa
+    def procesar_documento(self, doc: dict) -> None:
+        doc_original_id = doc.get("documento_id", "unknown")
+        doc_nombre = doc.get("documento_nombre", "Sin Nombre")
+        doc_id = f"DOC_{normalizar_key(doc_original_id)}"
+        
+        # 1. Procesar Documento
+        self.documentos[doc_id] = {
+            "id": doc_id,
+            "tipo": "DOCUMENTO",
+            "documento_id": doc_original_id,
+            "nombre": doc_nombre,
+            "metadata": doc.get("metadata", {}),
+            "clasificacion_llm": doc.get("clasificacion_llm", {})
+        }
 
-    @staticmethod
-    def obtener_identificador(doc: dict, tipo: str, idx: int) -> tuple[str, str]:
-        document_id = (
-            doc.get("documento_id")
-            or doc.get("metadata", {}).get("archivo")
-            or f"{tipo}_{idx}"
-        )
-        documento_nombre = doc.get("documento_nombre") or document_id
-        return str(document_id), str(documento_nombre)
+        # 2. Procesar Categorías y relacionar con el Documento
+        clasificacion_llm = doc.get("clasificacion_llm", {})
+        clasificaciones = clasificacion_llm.get("clasificaciones", [])
+        
+        for clasif in clasificaciones:
+            categoria_nombre = clasif.get("categoria", "General")
+            cat_id = f"CAT_{normalizar_key(categoria_nombre)}"
+            
+            if cat_id not in self.categorias:
+                self.categorias[cat_id] = {
+                    "id": cat_id,
+                    "tipo": "CATEGORIA",
+                    "nombre": categoria_nombre,
+                    "confianza": clasif.get("confianza", 1.0)
+                }
+            
+            # Relación: CATEGORIA -> CLASIFICA -> DOCUMENTO
+            rel_cat_doc_id = self._generar_id_hash(f"{cat_id}_CLASIFICA_{doc_id}")
+            self.relaciones[rel_cat_doc_id] = {
+                "id": rel_cat_doc_id,
+                "sujeto_id": cat_id,
+                "tipo": "CLASIFICA",
+                "objeto_id": doc_id
+            }
 
-    def recolectar_entidades_nuevas(self, doc: dict) -> dict[str, str]:
-        nuevas: dict[str, str] = {}
-        for sec in doc.get("secciones", []):
-            entidades = sec.get("entidades", [])
-            mapa_entidades_seccion = self.construir_mapa_entidades_seccion(entidades)
+        # 3. Procesar Secciones, Entidades, Conceptos y Relaciones
+        secciones = doc.get("secciones", [])
+        for idx, sec in enumerate(secciones):
+            sec_titulo = sec.get("titulo", f"Seccion {idx}")
+            sec_id = f"SEC_{normalizar_key(doc_original_id)}_{idx}"
+            ruta_jerarquica = sec.get("ruta_jerarquica", [])
+            
+            # Nodo de Sección
+            self.secciones[sec_id] = {
+                "id": sec_id,
+                "tipo": "SECCION",
+                "documento_id": doc_original_id,
+                "documento_nombre": doc_nombre,
+                "titulo": sec_titulo,
+                "nivel": sec.get("nivel", 1),
+                "ruta_jerarquica": ruta_jerarquica
+            }
 
-            for e in entidades:
-                canonical = e.get("canonical", "").strip()
-                if canonical and es_texto_valido(canonical):
-                    entity_id = f"ENT_{normalizar_key(canonical)}"
-                    if not self.G.has_node(entity_id) and entity_id not in nuevas:
-                        nuevas[entity_id] = canonical
+            # Relación estructural: DOCUMENTO -> CONTIENE -> SECCION
+            rel_doc_sec_id = self._generar_id_hash(f"{doc_id}_CONTIENE_{sec_id}")
+            self.relaciones[rel_doc_sec_id] = {
+                "id": rel_doc_sec_id,
+                "sujeto_id": doc_id,
+                "tipo": "CONTIENE",
+                "objeto_id": sec_id
+            }
 
+            # Procesar Entidades
+            for ent in sec.get("entidades", []):
+                canonical = ent.get("canonical") or ent.get("texto")
+                if not canonical or not es_texto_valido(canonical):
+                    continue
+                
+                ent_id = f"ENT_{normalizar_key(canonical)}"
+                self._registrar_nodo_semantico(
+                    nodo_id=ent_id,
+                    tipo="ENTIDAD",
+                    nombre=canonical,
+                    subtipo=ent.get("tipo", "DESCONOCIDO"),
+                    doc_id=doc_id,
+                    doc_original_id=doc_original_id,
+                    doc_nombre=doc_nombre,
+                    sec_id=sec_id,
+                    sec_titulo=sec_titulo,
+                    ruta_jerarquica=ruta_jerarquica,
+                    origen=ent.get("origen", "llm")
+                )
+
+            # Procesar Conceptos
+            for con in sec.get("conceptos", []):
+                concepto_texto = con.get("concepto")
+                if not concepto_texto or not es_texto_valido(concepto_texto):
+                    continue
+                
+                con_id = f"CON_{normalizar_key(concepto_texto)}"
+                self._registrar_nodo_semantico(
+                    nodo_id=con_id,
+                    tipo="CONCEPTO",
+                    nombre=concepto_texto,
+                    score=con.get("score", 0.0),
+                    doc_id=doc_id,
+                    doc_original_id=doc_original_id,
+                    doc_nombre=doc_nombre,
+                    sec_id=sec_id,
+                    sec_titulo=sec_titulo,
+                    ruta_jerarquica=ruta_jerarquica,
+                    origen="llm"
+                )
+
+            # Procesar Relaciones Semánticas (sujeto -> verbo -> objeto)
             for rel in sec.get("relaciones", []):
-                confianza = rel.get("confianza")
-                if confianza is not None and confianza < settings.CONFIANZA_MINIMA_RELACION:
-                    continue
+                sujeto_norm = normalizar_key(rel.get("sujeto", ""))
+                objeto_norm = normalizar_key(rel.get("objeto", ""))
+                tipo_relacion = rel.get("relacion", "RELACIONADO_CON")
+                
+                # Asumimos que los IDs de sujeto y objeto ya existen como ENT_ o CON_
+                # Para mayor robustez, se busca en los nodos, pero generamos el prefijo base ENT_ asumiendo entidades
+                sujeto_id = f"ENT_{sujeto_norm}" if f"ENT_{sujeto_norm}" in self.nodos else f"CON_{sujeto_norm}"
+                objeto_id = f"ENT_{objeto_norm}" if f"ENT_{objeto_norm}" in self.nodos else f"CON_{objeto_norm}"
+                
+                # Si por error de extracción el LLM inventó un término que no está en la lista de entidades,
+                # lo ignoramos o forzamos su creación (aquí forzamos creación rápida como concepto por seguridad)
+                if sujeto_id not in self.nodos: sujeto_id = f"CON_{sujeto_norm}"
+                if objeto_id not in self.nodos: objeto_id = f"CON_{objeto_norm}"
 
-                sujeto_txt = rel.get("sujeto", "").strip()
-                objeto_txt = rel.get("objeto", "").strip()
-                if not es_texto_valido(sujeto_txt) or not es_texto_valido(objeto_txt):
-                    continue
+                rel_sem_id = self._generar_id_hash(f"{sujeto_id}_{tipo_relacion}_{objeto_id}_{doc_id}_{sec_id}", "REL")
+                
+                self.relaciones[rel_sem_id] = {
+                    "id": rel_sem_id,
+                    "sujeto_id": sujeto_id,
+                    "tipo": tipo_relacion,
+                    "objeto_id": objeto_id,
+                    "trazabilidad": {
+                        "documento_id": doc_original_id,
+                        "documento_nombre": doc_nombre,
+                        "seccion_id": sec_id,
+                        "titulo_seccion": sec_titulo,
+                        "ruta_jerarquica": ruta_jerarquica,
+                        "contexto": rel.get("contexto", ""),
+                        "origen": rel.get("origen", "llm"),
+                        "confianza": rel.get("confianza", 1.0)
+                    }
+                }
 
-                sujeto_canonical = mapa_entidades_seccion.get(
-                    normalizar_key(sujeto_txt), sujeto_txt
-                )
-                objeto_canonical = mapa_entidades_seccion.get(
-                    normalizar_key(objeto_txt), objeto_txt
-                )
+    def _registrar_nodo_semantico(self, nodo_id: str, tipo: str, nombre: str, doc_id: str, 
+                                  doc_original_id: str, doc_nombre: str, sec_id: str, 
+                                  sec_titulo: str, ruta_jerarquica: list, origen: str, 
+                                  subtipo: str = None, score: float = None):
+        """Agrega un nodo global (Entidad/Concepto) y centraliza sus apariciones para trazabilidad."""
+        if nodo_id not in self.nodos:
+            self.nodos[nodo_id] = {
+                "id": nodo_id,
+                "tipo": tipo,
+                "nombre": nombre,
+                "apariciones": []
+            }
+            if subtipo: self.nodos[nodo_id]["subtipo"] = subtipo
+            if score: self.nodos[nodo_id]["score"] = score
 
-                for canonical in (sujeto_canonical, objeto_canonical):
-                    entity_id = f"ENT_{normalizar_key(canonical)}"
-                    if not self.G.has_node(entity_id) and entity_id not in nuevas:
-                        nuevas[entity_id] = canonical
+        aparicion = {
+            "documento_id": doc_original_id,
+            "documento_nombre": doc_nombre,
+            "seccion_id": sec_id,
+            "titulo_seccion": sec_titulo,
+            "ruta_jerarquica": ruta_jerarquica,
+            "origen": origen
+        }
+        
+        # Evitar duplicar la misma aparición si el concepto se extrae varias veces en la misma sección
+        if aparicion not in self.nodos[nodo_id]["apariciones"]:
+            self.nodos[nodo_id]["apariciones"].append(aparicion)
 
-        return nuevas
+    def _generar_relaciones_entre_documentos(self) -> None:
+        """Infere y crea relaciones entre documentos que comparten las mismas entidades."""
+        # Agrupar documentos por entidad
+        for nodo_id, nodo_data in self.nodos.items():
+            docs_asociados = list({ap["documento_id"] for ap in nodo_data.get("apariciones", [])})
+            
+            # Si una entidad aparece en 2 o más documentos distintos
+            if len(docs_asociados) > 1:
+                for i in range(len(docs_asociados)):
+                    for j in range(i + 1, len(docs_asociados)):
+                        doc_1 = f"DOC_{normalizar_key(docs_asociados[i])}"
+                        doc_2 = f"DOC_{normalizar_key(docs_asociados[j])}"
+                        
+                        rel_id = self._generar_id_hash(f"{doc_1}_COMPARTE_{doc_2}_{nodo_id}", "REL_DOC")
+                        if rel_id not in self.relaciones:
+                            self.relaciones[rel_id] = {
+                                "id": rel_id,
+                                "sujeto_id": doc_1,
+                                "tipo": "COMPARTE_ENTIDAD",
+                                "objeto_id": doc_2,
+                                "evidencia": {
+                                    "nodo_compartido": nodo_id
+                                }
+                            }
 
-    def procesar_documento(self, doc: dict, tipo: str, idx: int) -> None:
-        document_id, documento_nombre = self.obtener_identificador(doc, tipo, idx)
-        subnodo_doc_id = f"SUBNODO_DOC_{document_id}"
+    def recolectar_nodos_sin_embedding(self) -> dict[str, str]:
+        """Identifica qué Categorías, Entidades o Conceptos aún no tienen vector generado."""
+        pendientes = {}
+        # También incrustamos Categorías para búsquedas top-level
+        for cat_id, data in self.categorias.items():
+            if cat_id not in self.embeddings_store:
+                pendientes[cat_id] = data["nombre"]
+                
+        for nodo_id, data in self.nodos.items():
+            if nodo_id not in self.embeddings_store:
+                pendientes[nodo_id] = data["nombre"]
+                
+        return pendientes
 
-        self.G.add_node(
-            subnodo_doc_id,
-            label=documento_nombre,
-            tipo="SUBNODO_DOCUMENTO",
-            nivel=2,
-            document_id=document_id,
-            documento_nombre=documento_nombre,
-            tipo_documento=tipo,
-        )
-
-        for clasif in doc.get("clasificacion_llm", {}).get("clasificaciones", []):
-            cluster_id = clasif.get("cluster_id")
-            categoria_nombre = (
-                clasif.get("concepto") or clasif.get("categoria") or "Sin Nombre"
-            )
-            if cluster_id is None:
-                continue
-
-            node_cat_id = f"NODO_CAT_CLUSTER_{cluster_id}"
-            if not self.G.has_node(node_cat_id):
-                self.G.add_node(
-                    node_cat_id,
-                    label=categoria_nombre,
-                    tipo="NODO_CATEGORIA",
-                    nivel=1,
-                    cluster_id=cluster_id,
-                )
-                self.G.add_edge(settings.ROOT_ID, node_cat_id, relacion="CONTIENE_CATEGORIA")
-
-            self.G.add_edge(
-                node_cat_id,
-                subnodo_doc_id,
-                relacion="AGRUPA_DOCUMENTO",
-                confianza=clasif.get("confianza"),
-            )
-
-        for seccion_idx, sec in enumerate(doc.get("secciones", [])):
-            subnodo_sec_id = f"SUBNODO_SEC_{document_id}_{seccion_idx}"
-            entidades = sec.get("entidades", [])
-
-            self.G.add_node(
-                subnodo_sec_id,
-                label=sec.get("titulo", f"Sección {seccion_idx + 1}"),
-                tipo="SUBNODO_SECCION",
-                nivel=3,
-                document_id=document_id,
-                documento_nombre=documento_nombre,
-                seccion_idx=seccion_idx,
-                ruta_jerarquica=sec.get("ruta_jerarquica", []),
-                chunk_texto=sec.get("texto")
-                or ", ".join(
-                    e.get("canonical", "")
-                    for e in entidades
-                    if es_texto_valido(e.get("canonical", ""))
-                ),
-            )
-            self.G.add_edge(subnodo_sec_id, subnodo_doc_id, relacion="PERTENECE_A_DOCUMENTO")
-
-            for e in entidades:
-                canonical = e.get("canonical", "").strip()
-                if canonical and es_texto_valido(canonical):
-                    entity_id = f"ENT_{normalizar_key(canonical)}"
-                    if not self.G.has_node(entity_id):
-                        self.G.add_node(
-                            entity_id,
-                            label=canonical,
-                            tipo=f"NODO_ENTIDAD_{e.get('tipo', 'DESCONOCIDO')}",
-                            nivel=4,
-                            embedding_id=entity_id,
-                        )
-
-                    self.G.add_edge(
-                        subnodo_sec_id,
-                        entity_id,
-                        relacion="MENCIONA_ENTIDAD",
-                        document_id=document_id,
-                        documento_nombre=documento_nombre,
-                        seccion_idx=seccion_idx,
-                        origen_extraccion=e.get("origen"),
-                    )
-
-            top_conceptos = sorted(
-                sec.get("conceptos", []), key=lambda c: c.get("score", 0), reverse=True
-            )[:settings.CONCEPTOS_TOP_POR_SECCION]
-
-            for c in top_conceptos:
-                score = c.get("score", 0)
-                concepto_val = c.get("concepto", "").strip()
-                if (
-                    score >= settings.SCORE_MINIMO_CONCEPTO
-                    and concepto_val
-                    and es_texto_valido(concepto_val)
-                ):
-                    nodo_concepto_id = f"CONCEPTO_{normalizar_key(concepto_val)}"
-                    if not self.G.has_node(nodo_concepto_id):
-                        self.G.add_node(
-                            nodo_concepto_id,
-                            label=concepto_val,
-                            tipo="NODO_CONCEPTO",
-                            nivel=4,
-                            score_yake=score,
-                        )
-
-                    self.G.add_edge(
-                        subnodo_sec_id,
-                        nodo_concepto_id,
-                        relacion="DEFINE_CONCEPTO",
-                        document_id=document_id,
-                        documento_nombre=documento_nombre,
-                        seccion_idx=seccion_idx,
-                        score=score,
-                    )
-
-            mapa_entidades_seccion = self.construir_mapa_entidades_seccion(entidades)
-            for rel in sec.get("relaciones", []):
-                confianza = rel.get("confianza")
-                if confianza is not None and confianza < settings.CONFIANZA_MINIMA_RELACION:
-                    continue
-
-                sujeto_txt = rel.get("sujeto", "").strip()
-                objeto_txt = rel.get("objeto", "").strip()
-                if not es_texto_valido(sujeto_txt) or not es_texto_valido(objeto_txt):
-                    continue
-
-                entity_id_sujeto = f"ENT_{normalizar_key(mapa_entidades_seccion.get(normalizar_key(sujeto_txt), sujeto_txt))}"
-                entity_id_objeto = f"ENT_{normalizar_key(mapa_entidades_seccion.get(normalizar_key(objeto_txt), objeto_txt))}"
-
-                for eid, label in [
-                    (entity_id_sujeto, sujeto_txt),
-                    (entity_id_objeto, objeto_txt),
-                ]:
-                    if not self.G.has_node(eid):
-                        self.G.add_node(
-                            eid,
-                            label=label,
-                            tipo="NODO_ENTIDAD_SIN_RESOLVER",
-                            nivel=4,
-                            embedding_id=eid,
-                        )
-
-                self.G.add_edge(
-                    entity_id_sujeto,
-                    entity_id_objeto,
-                    relacion=rel.get("relacion", rel.get("verbo", "RELACIONADO_CON")),
-                    tipo_relacion=rel.get("tipo_relacion", "DESCONOCIDA"),
-                    document_id=document_id,
-                    documento_nombre=documento_nombre,
-                    seccion_idx=seccion_idx,
-                    contexto=rel.get("contexto", ""),
-                    confianza=confianza,
-                    origen_extraccion=rel.get("origen", "desconocido"),
-                )
-
-    def generar_y_guardar_embeddings(self, entidades_nuevas: dict[str, str]) -> None:
-        if not entidades_nuevas:
+    def generar_y_guardar_embeddings(self) -> None:
+        """Genera los vectores sólo para los nodos semánticos que falten."""
+        nodos_pendientes = self.recolectar_nodos_sin_embedding()
+        if not nodos_pendientes:
+            logger.info("No hay nodos nuevos para generar embeddings.")
             return
+            
+        textos = list(nodos_pendientes.values())
+        ids = list(nodos_pendientes.keys())
+        
+        logger.info(f"Generando {len(textos)} embeddings nuevos...")
         vectores = self.modelo_embeddings.encode(
-            list(entidades_nuevas.values()),
+            textos,
             normalize_embeddings=True,
             show_progress_bar=False,
         )
-        for eid, vector in zip(entidades_nuevas.keys(), vectores):
+        
+        for eid, vector in zip(ids, vectores):
             self.embeddings_store[eid] = vector.tolist()
-        logger.info("Generados %d embeddings nuevos.", len(entidades_nuevas))
+            
+        self.guardar_store_embeddings()
+        logger.info("Embeddings guardados exitosamente.")
