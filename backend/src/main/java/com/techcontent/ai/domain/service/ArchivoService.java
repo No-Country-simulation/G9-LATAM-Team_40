@@ -51,7 +51,6 @@ public class ArchivoService {
         String objectName = userId + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
 
         try {
-            // El tamaño (file.getSize()) ha sido agregado aquí como 4to argumento
             String url = ociStorageClient.upload(
                     filesBucket,
                     objectName,

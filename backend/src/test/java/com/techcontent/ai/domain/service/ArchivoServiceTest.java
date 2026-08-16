@@ -137,11 +137,11 @@ class ArchivoServiceTest {
         assertThat(response.totalPages()).isEqualTo(1);
         verify(archivoRepository).buscarPorUsuario(
                 eq(USER_ID), eq(""), eq(""), argThat(pageable ->
-                pageable.getPageNumber() == 0
-                        && pageable.getPageSize() == 20
-                        && pageable.getSort().getOrderFor("subidoEn") != null
-                        && pageable.getSort().getOrderFor("subidoEn").isDescending()
-        ));
+                        pageable.getPageNumber() == 0
+                                && pageable.getPageSize() == 20
+                                && pageable.getSort().getOrderFor("subidoEn") != null
+                                && pageable.getSort().getOrderFor("subidoEn").isDescending()
+                ));
     }
 
     @Test
@@ -237,7 +237,7 @@ class ArchivoServiceTest {
 
         verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, USER_ID);
         verify(ociStorageClient).delete(eq("test-bucket"), eq("documento.pdf"));
-        verify(archivoRepository).delete(archivo);
+        verify(archivoRepository).delete((Archivo) archivo); // Corregido tipado explícito
     }
 
     @Test
@@ -249,7 +249,7 @@ class ArchivoServiceTest {
                 .isInstanceOf(ArchivoNotFoundException.class);
 
         verifyNoInteractions(ociStorageClient);
-        verify(archivoRepository, never()).delete(any());
+        verify(archivoRepository, never()).delete(any(Archivo.class)); // Corregido tipado explícito
     }
 
     @Test
@@ -262,7 +262,7 @@ class ArchivoServiceTest {
 
         verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, OTRO_USER_ID);
         verifyNoInteractions(ociStorageClient);
-        verify(archivoRepository, never()).delete(any());
+        verify(archivoRepository, never()).delete(any(Archivo.class)); // Corregido tipado explícito
     }
 
     @Test
@@ -279,7 +279,7 @@ class ArchivoServiceTest {
 
         verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, USER_ID);
         verify(ociStorageClient).delete("test-bucket", "documento.pdf");
-        verify(archivoRepository, never()).delete(any());
+        verify(archivoRepository, never()).delete(any(Archivo.class)); // Corregido tipado explícito
     }
 
 }
