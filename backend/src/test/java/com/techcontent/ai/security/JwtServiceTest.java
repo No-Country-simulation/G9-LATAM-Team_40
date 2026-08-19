@@ -1,138 +1,199 @@
 package com.techcontent.ai.security;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.spec.ECGenParameterSpec;
 import java.util.Date;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JwtServiceTest {
 
-    private static final String TEST_SECRET = "clave-secreta-de-prueba-para-tests-1234567890";
+    private static final String SECRET = "test-secret-key-for-jwt-signing-minimum-256-bits-xxxxxxxxxxxxxxxxx";
+    private static final String USER_ID = "00000000-0000-0000-0000-000000000001";
+    private static final String EMAIL = "test@example.com";
 
     private JwtService jwtService;
-    private SecretKey secretKeyDePrueba;
+    private SecretKey secretKey;
 
     @BeforeEach
     void setUp() {
-   
-        jwtService = new JwtService(TEST_SECRET);
-        secretKeyDePrueba = Keys.hmacShaKeyFor(TEST_SECRET.getBytes(StandardCharsets.UTF_8));
+        jwtService = new JwtService(SECRET);
+        secretKey = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    private String generarTokenDePrueba(String userId, String email, Date expiracion) {
+    private String buildToken(long expirationMs) {
         return Jwts.builder()
-                .subject(userId)
-                .claim("email", email)
+                .subject(USER_ID)
+                .claim("email", EMAIL)
+                .claim("role", "authenticated")
                 .issuedAt(new Date())
-                .expiration(expiracion)
-                .signWith(secretKeyDePrueba)
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(secretKey)
                 .compact();
     }
 
+    // ───────── HS256 tests ─────────
+
     @Test
-    void isTokenValid_conTokenFirmadoCorrectamente_deberiaRetornarTrue() {
-        String token = generarTokenDePrueba(
-                "user-123",
-                "test@example.com",
-                new Date(System.currentTimeMillis() + 3_600_000)
-        );
-
-        boolean esValido = jwtService.isTokenValid(token);
-
-        assertTrue(esValido);
+    void validateToken_tokenValido_deberiaRetornarVALID() {
+        String token = buildToken(60_000);
+        assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.TokenValidationResult.VALID);
     }
 
     @Test
-    void isTokenValid_conTokenExpirado_deberiaRetornarFalse() {
-  
-        String tokenExpirado = generarTokenDePrueba(
-                "user-123",
-                "test@example.com",
-                new Date(System.currentTimeMillis() - 3_600_000)
-        );
-
-        boolean esValido = jwtService.isTokenValid(tokenExpirado);
-
-        assertFalse(esValido);
+    void validateToken_tokenExpirado_deberiaRetornarEXPIRED() {
+        String token = buildToken(-1000);
+        assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.TokenValidationResult.EXPIRED);
     }
 
     @Test
-    void isTokenValid_conTokenFirmadoConOtraClave_deberiaRetornarFalse() {
- 
-        SecretKey otraClave = Keys.hmacShaKeyFor("otra-clave-completamente-diferente-9999999".getBytes(StandardCharsets.UTF_8));
-        String tokenFalsificado = Jwts.builder()
-                .subject("user-123")
-                .claim("email", "hacker@example.com")
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 3_600_000))
-                .signWith(otraClave)
+    void validateToken_tokenConFirmaInvalida_deberiaRetornarINVALID() {
+        SecretKey wrongKey = Keys.hmacShaKeyFor(
+                "wrong-secret-key-completely-different-256-bits-xxxxxxxxxxxxxxxxxxxx".getBytes(StandardCharsets.UTF_8)
+        );
+        String tokenFirmadoMal = Jwts.builder()
+                .subject(USER_ID)
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(wrongKey)
                 .compact();
 
-        boolean esValido = jwtService.isTokenValid(tokenFalsificado);
-
-        assertFalse(esValido);
+        assertThat(jwtService.validateToken(tokenFirmadoMal)).isEqualTo(JwtService.TokenValidationResult.INVALID);
     }
 
     @Test
-    void isTokenValid_conTokenMalformado_deberiaRetornarFalse() {
-
-        boolean esValido = jwtService.isTokenValid("esto-no-es-un-token-jwt-valido");
-
-        assertFalse(esValido);
+    void validateToken_tokenMalformado_deberiaRetornarINVALID() {
+        assertThat(jwtService.validateToken("esto.no.es.un.jwt")).isEqualTo(JwtService.TokenValidationResult.INVALID);
     }
 
     @Test
-    void extractUserId_conTokenValido_deberiaDevolverElSubject() {
-        String token = generarTokenDePrueba(
-                "user-456",
-                "otro@example.com",
-                new Date(System.currentTimeMillis() + 3_600_000)
-        );
-
-        String userId = jwtService.extractUserId(token);
-
-        assertEquals("user-456", userId);
+    void validateToken_sinSecretoConfigurado_deberiaRetornarINVALID() {
+        JwtService sinSecreto = new JwtService("");
+        assertThat(sinSecreto.validateToken("cualquier-token")).isEqualTo(JwtService.TokenValidationResult.INVALID);
     }
 
     @Test
-    void extractEmail_conTokenValido_deberiaDevolverElEmail() {
-        String token = generarTokenDePrueba(
-                "user-789",
-                "correo@example.com",
-                new Date(System.currentTimeMillis() + 3_600_000)
-        );
-
-        String email = jwtService.extractEmail(token);
-
-        assertEquals("correo@example.com", email);
+    void isTokenValid_tokenValido_deberiaRetornarTrue() {
+        assertThat(jwtService.isTokenValid(buildToken(60_000))).isTrue();
     }
 
     @Test
-    void constructor_sinSecretoConfigurado_deberiaRechazarTodaValidacion() {
-
-        JwtService serviceSinSecreto = new JwtService("");
-
-        String cualquierToken = generarTokenDePrueba(
-                "user-123", "test@example.com", new Date(System.currentTimeMillis() + 3_600_000)
-        );
-
-        assertFalse(serviceSinSecreto.isTokenValid(cualquierToken));
+    void isTokenValid_tokenExpirado_deberiaRetornarFalse() {
+        assertThat(jwtService.isTokenValid(buildToken(-1000))).isFalse();
     }
 
     @Test
-    void extractClaims_sinSecretoConfigurado_deberiaLanzarIllegalStateException() {
-        JwtService serviceSinSecreto = new JwtService(null);
-
-        assertThrows(
-                IllegalStateException.class,
-                () -> serviceSinSecreto.extractClaims("cualquier-token")
-        );
+    void extractUserId_deberiaRetornarElSubjectDelToken() {
+        assertThat(jwtService.extractUserId(buildToken(60_000))).isEqualTo(USER_ID);
     }
-} 
+
+    @Test
+    void extractEmail_deberiaRetornarElEmailDelToken() {
+        assertThat(jwtService.extractEmail(buildToken(60_000))).isEqualTo(EMAIL);
+    }
+
+    @Test
+    void extractRole_deberiaRetornarElRolDelToken() {
+        assertThat(jwtService.extractRole(buildToken(60_000))).isEqualTo("authenticated");
+    }
+
+    @Test
+    void extractClaims_sinSecreto_deberiaLanzarIllegalState() {
+        JwtService sinSecreto = new JwtService("");
+        assertThatThrownBy(() -> sinSecreto.extractClaims("cualquier-token"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("JWT secret no configurado");
+    }
+
+    // ───────── ES256 tests ─────────
+
+    @Test
+    void validateToken_tokenES256_conJwksCargadas_deberiaRetornarVALID() throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(new ECGenParameterSpec("secp256r1"));
+        KeyPair keyPair = kpg.generateKeyPair();
+        String kid = "test-kid-es256";
+
+        String token = Jwts.builder()
+                .header().keyId(kid).and()
+                .subject(USER_ID)
+                .claim("email", EMAIL)
+                .claim("role", "authenticated")
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(keyPair.getPrivate())
+                .compact();
+
+        ReflectionTestUtils.setField(jwtService, "jwksKeys", Map.of(kid, keyPair.getPublic()));
+
+        assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.TokenValidationResult.VALID);
+    }
+
+    @Test
+    void validateToken_tokenES256_sinJwksCargadas_deberiaRetornarINVALID() throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(new ECGenParameterSpec("secp256r1"));
+        KeyPair keyPair = kpg.generateKeyPair();
+
+        String token = Jwts.builder()
+                .header().keyId("test-kid-es256").and()
+                .subject(USER_ID)
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(keyPair.getPrivate())
+                .compact();
+
+        // jwksKeys esta vacio — no se cargaron claves
+        assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.TokenValidationResult.INVALID);
+    }
+
+    @Test
+    void validateToken_tokenES256_kidDesconocido_usaClaveDisponible() throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(new ECGenParameterSpec("secp256r1"));
+        KeyPair keyPair = kpg.generateKeyPair();
+
+        String token = Jwts.builder()
+                .header().keyId("kid-desconocido").and()
+                .subject(USER_ID)
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(keyPair.getPrivate())
+                .compact();
+
+        // Cargamos la clave publica con diferente kid — fallback a primera disponible
+        ReflectionTestUtils.setField(jwtService, "jwksKeys",
+                Map.of("otra-kid", keyPair.getPublic()));
+
+        assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.TokenValidationResult.VALID);
+    }
+
+    @Test
+    void buildEcPublicKey_deberiaReconstruirClave() throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(new ECGenParameterSpec("secp256r1"));
+        KeyPair keyPair = kpg.generateKeyPair();
+        PublicKey original = keyPair.getPublic();
+
+        // Usamos el token ES256 para que JwtService valide con la clave reconstruida
+        String kid = "rebuild-kid";
+        String token = Jwts.builder()
+                .header().keyId(kid).and()
+                .subject(USER_ID)
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(keyPair.getPrivate())
+                .compact();
+
+        ReflectionTestUtils.setField(jwtService, "jwksKeys", Map.of(kid, original));
+
+        assertThat(jwtService.extractUserId(token)).isEqualTo(USER_ID);
+    }
+}

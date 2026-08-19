@@ -1,88 +1,135 @@
 package com.techcontent.ai.api.exception;
 
+import com.techcontent.ai.integration.ml.MlServiceException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class GlobalExceptionHandlerTest {
 
-    private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+    private MockMvc mockMvc;
 
-    @Test
-    void handleContenidoNotFound_deberiaRetornar404ConMensaje() {
+    @BeforeEach
+    void setUp() {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
 
-        UUID id = UUID.randomUUID();
-        ContenidoNotFoundException ex = new ContenidoNotFoundException(id);
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(new ThrowingController())
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setValidator(validator)
+                .build();
+    }
 
-        ResponseEntity<ErrorResponse> response = handler.handleContenidoNotFound(ex);
+    @RestController
+    @RequestMapping("/test-ex")
+    static class ThrowingController {
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("NOT_FOUND", response.getBody().error());
-        assertTrue(response.getBody().mensaje().contains(id.toString()));
+        record TestBody(@NotBlank String field) {}
+
+        @PostMapping("/validation")
+        public ResponseEntity<Void> validation(@Valid @RequestBody TestBody body) {
+            return ResponseEntity.ok().build();
+        }
+
+        @GetMapping("/contenido-not-found")
+        public ResponseEntity<Void> contenidoNotFound() {
+            throw new ContenidoNotFoundException(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        }
+
+        @GetMapping("/archivo-not-found")
+        public ResponseEntity<Void> archivoNotFound() {
+            throw new ArchivoNotFoundException(UUID.fromString("00000000-0000-0000-0000-000000000002"));
+        }
+
+        @GetMapping("/bad-request")
+        public ResponseEntity<Void> badRequest() {
+            throw new IllegalArgumentException("argumento invalido de prueba");
+        }
+
+        @GetMapping("/ml-error")
+        public ResponseEntity<Void> mlError() {
+            throw new MlServiceException("ML service unavailable");
+        }
+
+        @GetMapping("/invalid-credentials")
+        public ResponseEntity<Void> invalidCredentials() {
+            throw new InvalidCredentialsException("Credenciales incorrectas.");
+        }
+
+        @GetMapping("/server-error")
+        public ResponseEntity<Void> serverError() {
+            throw new RuntimeException("error inesperado en el servidor");
+        }
     }
 
     @Test
-    void handleArchivoNotFound_deberiaRetornar404ConMensaje() {
-        UUID id = UUID.randomUUID();
-        ArchivoNotFoundException ex = new ArchivoNotFoundException(id);
-
-        ResponseEntity<ErrorResponse> response = handler.handleArchivoNotFound(ex);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("NOT_FOUND", response.getBody().error());
+    void validationError_deberiaRetornar400ConValidationError() throws Exception {
+        mockMvc.perform(post("/test-ex/validation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"field\":\"\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.mensaje").exists());
     }
 
     @Test
-    void handleIllegalArgument_deberiaRetornar400ConMensajeOriginal() {
-        IllegalArgumentException ex = new IllegalArgumentException("El archivo no puede estar vacio");
-
-        ResponseEntity<ErrorResponse> response = handler.handleIllegalArgument(ex);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("BAD_REQUEST", response.getBody().error());
-        assertEquals("El archivo no puede estar vacio", response.getBody().mensaje());
+    void contenidoNotFound_deberiaRetornar404ConNotFound() throws Exception {
+        mockMvc.perform(get("/test-ex/contenido-not-found"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.mensaje").value(
+                        "Contenido no encontrado con id: 00000000-0000-0000-0000-000000000001"
+                ));
     }
 
     @Test
-    void handleGeneral_deberiaRetornar500SinExponerElMensajeInterno() {
-
-        Exception ex = new RuntimeException("NullPointerException en la linea 42, detalle sensible de stacktrace");
-
-        ResponseEntity<ErrorResponse> response = handler.handleGeneral(ex);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("INTERNAL_ERROR", response.getBody().error());
-        assertEquals("Error interno del servidor", response.getBody().mensaje());
+    void archivoNotFound_deberiaRetornar404ConNotFound() throws Exception {
+        mockMvc.perform(get("/test-ex/archivo-not-found"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("NOT_FOUND"));
     }
 
     @Test
-    void handleValidation_deberiaJuntarTodosLosErroresDeCampoEnUnMensaje() {
+    void badRequest_deberiaRetornar400ConBadRequest() throws Exception {
+        mockMvc.perform(get("/test-ex/bad-request"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.mensaje").value("argumento invalido de prueba"));
+    }
 
-        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
-        BindingResult bindingResult = mock(BindingResult.class);
+    @Test
+    void mlError_deberiaRetornar503ConServiceUnavailable() throws Exception {
+        mockMvc.perform(get("/test-ex/ml-error"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.error").value("SERVICE_UNAVAILABLE"));
+    }
 
-        FieldError error1 = new FieldError("contenidoRequest", "titulo", "El titulo es requerido");
-        FieldError error2 = new FieldError("contenidoRequest", "texto", "El texto debe tener al menos 20 caracteres");
+    @Test
+    void invalidCredentials_deberiaRetornar401ConUnauthorized() throws Exception {
+        mockMvc.perform(get("/test-ex/invalid-credentials"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.mensaje").value("Credenciales incorrectas."));
+    }
 
-        when(ex.getBindingResult()).thenReturn(bindingResult);
-        when(bindingResult.getFieldErrors()).thenReturn(List.of(error1, error2));
-
-        ResponseEntity<ErrorResponse> response = handler.handleValidation(ex);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("VALIDATION_ERROR", response.getBody().error());
-        
-        assertTrue(response.getBody().mensaje().contains("titulo: El titulo es requerido"));
-        assertTrue(response.getBody().mensaje().contains("texto: El texto debe tener al menos 20 caracteres"));
+    @Test
+    void serverError_deberiaRetornar500ConInternalError() throws Exception {
+        mockMvc.perform(get("/test-ex/server-error"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").value("INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.mensaje").value("Error interno del servidor"));
     }
 }

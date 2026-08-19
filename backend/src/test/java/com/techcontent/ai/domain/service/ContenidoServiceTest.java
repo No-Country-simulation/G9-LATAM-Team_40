@@ -5,10 +5,8 @@ import com.techcontent.ai.api.dto.request.ContenidoRequest;
 import com.techcontent.ai.api.dto.response.ContenidoResponse;
 import com.techcontent.ai.domain.model.Contenido;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
-import com.techcontent.ai.domain.service.ContenidoService;
 import com.techcontent.ai.integration.ml.MlClient;
 import com.techcontent.ai.dto.MlResponse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,9 +17,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,123 +28,98 @@ class ContenidoServiceTest {
     private ContenidoRepository repository;
 
     @Mock
-    private MlClient MlClient;
+    private MlClient mlClient;
 
     @InjectMocks
-    private ContenidoService contenidoService;
+    private ContenidoService service;
 
-    private UUID userId;
+    private static final UUID USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
-    @BeforeEach
-    void setUp() {
-        userId = UUID.randomUUID();
+    private Contenido contenidoGuardado(UUID id, String categoria, Double probabilidad, List<String> keywords) {
+        return Contenido.builder()
+                .id(id)
+                .userId(USER_ID)
+                .titulo("Titulo test")
+                .texto("Texto de prueba")
+                .categoria(categoria)
+                .probabilidad(probabilidad)
+                .palabrasClave(keywords)
+                .procesadoEn(LocalDateTime.now())
+                .build();
     }
 
     @Test
-    void clasificar_deberiaLlamarAlMlClientYGuardarElContenido() {
-        ContenidoRequest request = new ContenidoRequest("Titulo de prueba", "Texto suficientemente largo para pasar validacion");
+    void clasificar_deberiaLlamarAlMlYPersistirElContenido() {
+        ContenidoRequest request = new ContenidoRequest("Titulo", "Texto de prueba para clasificar");
+        MlResponse mlResponse = new MlResponse("Backend", 0.93, List.of("Java", "Spring"));
+        UUID savedId = UUID.randomUUID();
 
-        MlResponse mlResponseSimulado = new MlResponse(
-                "Backend",
-                0.92,
-                List.of("java", "spring")
-        );
+        when(mlClient.predict(request.texto())).thenReturn(mlResponse);
+        when(repository.save(any(Contenido.class))).thenReturn(contenidoGuardado(savedId, "Backend", 0.93, List.of("Java", "Spring")));
 
-        when(MlClient.predict(anyString())).thenReturn(mlResponseSimulado);
+        ContenidoResponse response = service.clasificar(request, USER_ID);
 
-        when(repository.save(any(Contenido.class))).thenAnswer(invocation -> {
-            Contenido c = invocation.getArgument(0);
-            c.setId(UUID.randomUUID());
-            return c;
-        });
+        assertThat(response.categoria()).isEqualTo("Backend");
+        assertThat(response.probabilidad()).isEqualTo(0.93);
+        assertThat(response.palabrasClave()).containsExactly("Java", "Spring");
 
-        ContenidoResponse response = contenidoService.clasificar(request, userId);
-
-        assertNotNull(response);
-        assertEquals("Backend", response.categoria());
-        assertEquals(0.92, response.probabilidad());
-        assertEquals(List.of("java", "spring"), response.palabrasClave());
-
-        verify(MlClient, times(1)).predict(request.texto());
+        verify(mlClient, times(1)).predict(request.texto());
         verify(repository, times(1)).save(any(Contenido.class));
     }
 
     @Test
-    void procesarLote_deberiaClasificarCadaItemDeLaLista() {
-       
-        ContenidoRequest item1 = new ContenidoRequest("Titulo 1", "Texto suficientemente largo numero uno aqui");
-        ContenidoRequest item2 = new ContenidoRequest("Titulo 2", "Texto suficientemente largo numero dos aqui");
-        ContenidoLoteRequest lote = new ContenidoLoteRequest(List.of(item1, item2));
+    void procesarLote_deberiaClasificarCadaItemDelLote() {
+        ContenidoRequest item1 = new ContenidoRequest("Titulo 1", "Texto numero uno para clasificar");
+        ContenidoRequest item2 = new ContenidoRequest("Titulo 2", "Texto numero dos para clasificar");
+        ContenidoLoteRequest loteRequest = new ContenidoLoteRequest(List.of(item1, item2));
 
-        MlResponse mlResponseSimulado = new MlResponse("Frontend", 0.80, List.of("react"));
-        when(MlClient.predict(anyString())).thenReturn(mlResponseSimulado);
-        when(repository.save(any(Contenido.class))).thenAnswer(invocation -> {
-            Contenido c = invocation.getArgument(0);
-            c.setId(UUID.randomUUID());
+        MlResponse mlResponse = new MlResponse("Frontend", 0.88, List.of("React", "TypeScript"));
+
+        when(mlClient.predict(any())).thenReturn(mlResponse);
+        when(repository.save(any(Contenido.class))).thenAnswer(inv -> {
+            Contenido c = inv.getArgument(0);
+            c = Contenido.builder()
+                    .id(UUID.randomUUID()).userId(USER_ID).titulo(c.getTitulo())
+                    .texto(c.getTexto()).categoria(c.getCategoria()).probabilidad(c.getProbabilidad())
+                    .palabrasClave(c.getPalabrasClave()).procesadoEn(c.getProcesadoEn())
+                    .build();
             return c;
         });
 
-       
-        List<ContenidoResponse> resultados = contenidoService.procesarLote(lote, userId);
+        List<ContenidoResponse> responses = service.procesarLote(loteRequest, USER_ID);
 
-        assertEquals(2, resultados.size());
-        verify(MlClient, times(2)).predict(anyString());
+        assertThat(responses).hasSize(2);
+        assertThat(responses).allMatch(r -> r.categoria().equals("Frontend"));
+        verify(mlClient, times(2)).predict(any());
         verify(repository, times(2)).save(any(Contenido.class));
     }
 
     @Test
-    void buscar_deberiaDelegarEnElRepositorioConLosParametrosCorrectos() {
-        
-        String query = "spring";
-        Contenido contenidoEncontrado = Contenido.builder()
-                .id(UUID.randomUUID())
-                .userId(userId)
-                .titulo("Encontrado")
-                .texto("Texto de ejemplo")
-                .categoria("Backend")
-                .probabilidad(0.75)
-                .palabrasClave(List.of("spring"))
-                .procesadoEn(LocalDateTime.now())
-                .build();
+    void buscar_deberiaRetornarResultadosDeLaQuery() {
+        UUID id = UUID.randomUUID();
+        when(repository.buscarPorKeyword("java", USER_ID)).thenReturn(
+                List.of(contenidoGuardado(id, "Backend", 0.90, List.of("java")))
+        );
 
-        when(repository.buscarPorKeyword(query, userId)).thenReturn(List.of(contenidoEncontrado));
+        List<ContenidoResponse> responses = service.buscar("java", USER_ID);
 
-        
-        List<ContenidoResponse> resultados = contenidoService.buscar(query, userId);
-
-        assertEquals(1, resultados.size());
-        assertEquals("Backend", resultados.get(0).categoria());
-        verify(repository, times(1)).buscarPorKeyword(query, userId);
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).palabrasClave()).contains("java");
+        verify(repository).buscarPorKeyword("java", USER_ID);
     }
 
     @Test
-    void buscar_siNoHayResultados_deberiaRetornarListaVacia() {
-        when(repository.buscarPorKeyword(anyString(), any(UUID.class))).thenReturn(List.of());
+    void listarPorUsuario_deberiaRetornarTodosLosContenidosDelUsuario() {
+        when(repository.findByUserId(USER_ID)).thenReturn(
+                List.of(
+                        contenidoGuardado(UUID.randomUUID(), "Backend", 0.91, List.of("Java")),
+                        contenidoGuardado(UUID.randomUUID(), "DevOps", 0.85, List.of("Docker"))
+                )
+        );
 
-        List<ContenidoResponse> resultados = contenidoService.buscar("inexistente", userId);
+        List<ContenidoResponse> responses = service.listarPorUsuario(USER_ID);
 
-        assertNotNull(resultados);
-        assertTrue(resultados.isEmpty());
-    }
-
-    @Test
-    void listarPorUsuario_deberiaDelegarEnElRepositorio() {
-        Contenido contenido = Contenido.builder()
-                .id(UUID.randomUUID())
-                .userId(userId)
-                .titulo("Mi contenido")
-                .texto("Texto")
-                .categoria("QA")
-                .probabilidad(0.5)
-                .palabrasClave(List.of())
-                .procesadoEn(LocalDateTime.now())
-                .build();
-
-        when(repository.findByUserId(userId)).thenReturn(List.of(contenido));
-
-        List<ContenidoResponse> resultados = contenidoService.listarPorUsuario(userId);
-
-        assertEquals(1, resultados.size());
-        verify(repository, times(1)).findByUserId(userId);
+        assertThat(responses).hasSize(2);
+        verify(repository).findByUserId(USER_ID);
     }
 }

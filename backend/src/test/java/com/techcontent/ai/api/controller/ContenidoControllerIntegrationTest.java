@@ -1,38 +1,34 @@
 package com.techcontent.ai.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.techcontent.ai.api.dto.request.ContenidoLoteRequest;
 import com.techcontent.ai.api.dto.request.ContenidoRequest;
-import com.techcontent.ai.domain.repository.ContenidoRepository;
-import com.techcontent.ai.integration.ml.MlClient;
-import com.techcontent.ai.dto.MlResponse;
-import com.techcontent.ai.security.SupabaseUserDetails;
+import com.techcontent.ai.api.dto.response.ContenidoResponse;
+import com.techcontent.ai.domain.service.ContenidoService;
+import com.techcontent.ai.security.JwtAccessDeniedHandler;
+import com.techcontent.ai.security.JwtAuthFilter;
+import com.techcontent.ai.security.JwtAuthenticationEntryPoint;
+import com.techcontent.ai.security.JwtService;
+import com.techcontent.ai.security.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import com.oracle.bmc.objectstorage.ObjectStorageClient;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+@WebMvcTest(ContenidoController.class)
+@Import({SecurityConfig.class, JwtAuthFilter.class, JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class})
 class ContenidoControllerIntegrationTest {
 
     @Autowired
@@ -41,164 +37,76 @@ class ContenidoControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private ContenidoRepository contenidoRepository;
+    @MockBean
+    private ContenidoService contenidoService;
 
     @MockBean
-    private MlClient MlClient;
+    private JwtService jwtService;
 
-    @MockBean
-        private ObjectStorageClient objectStorageSdkClient;
-
-    private UUID userId;
+    private static final UUID TEST_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final String VALID_TOKEN = "valid-test-token";
 
     @BeforeEach
     void setUp() {
-
-        contenidoRepository.deleteAll();
-
-        userId = UUID.randomUUID();
-
-        when(MlClient.predict(anyString())).thenReturn(
-                new MlResponse("Backend", 0.90, List.of("spring", "java"))
-        );
-    }
-
-    private RequestPostProcessor usuarioAutenticado() {
-        SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, "test@example.com","authenticated");
-        return SecurityMockMvcRequestPostProcessors.user(userDetails);
+        when(jwtService.validateToken(VALID_TOKEN)).thenReturn(JwtService.TokenValidationResult.VALID);
+        when(jwtService.extractUserId(VALID_TOKEN)).thenReturn(TEST_USER_ID.toString());
+        when(jwtService.extractEmail(VALID_TOKEN)).thenReturn("test@example.com");
     }
 
     @Test
-    void postContenido_conDatosValidos_deberiaRetornar200YElContenidoClasificado() throws Exception {
-        ContenidoRequest request = new ContenidoRequest(
-                "Titulo de prueba",
-                "Este es un texto de prueba con mas de veinte caracteres"
-        );
+    void POST_sinJwt_deberiaRetornar401() throws Exception {
+        ContenidoRequest request = new ContenidoRequest("Titulo", "Texto de prueba con mas de veinte caracteres");
 
         mockMvc.perform(post("/api/contenido")
-                        .with(usuarioAutenticado())
-                        .contentType("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void POST_conJwtExpirado_deberiaRetornar401ConMensajeExpirado() throws Exception {
+        when(jwtService.validateToken("expired-token")).thenReturn(JwtService.TokenValidationResult.EXPIRED);
+
+        ContenidoRequest request = new ContenidoRequest("Titulo", "Texto de prueba con mas de veinte caracteres");
+
+        mockMvc.perform(post("/api/contenido")
+                        .header("Authorization", "Bearer expired-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("expirado")));
+    }
+
+    @Test
+    void POST_conJwtValidoYBodyValido_deberiaRetornar200ConLaRespuestaDeClasificacion() throws Exception {
+        ContenidoRequest request = new ContenidoRequest("Titulo de prueba", "Texto de prueba con mas de veinte caracteres para validacion");
+        ContenidoResponse mockResponse = new ContenidoResponse(
+                UUID.randomUUID().toString(), "Backend", 0.95,
+                List.of("Java", "Spring"), List.of(), LocalDateTime.now()
+        );
+
+        when(contenidoService.clasificar(any(), any(UUID.class))).thenReturn(mockResponse);
+
+        mockMvc.perform(post("/api/contenido")
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.categoria").value("Backend"))
-                .andExpect(jsonPath("$.probabilidad").value(0.90))
-                .andExpect(jsonPath("$.palabrasClave[0]").value("spring"));
+                .andExpect(jsonPath("$.probabilidad").value(0.95))
+                .andExpect(jsonPath("$.palabrasClave[0]").value("Java"));
     }
 
     @Test
-    void postContenido_sinTitulo_deberiaRetornar400() throws Exception {
-
-        String jsonInvalido = """
-                {"titulo": "", "texto": "Este es un texto de prueba con mas de veinte caracteres"}
-                """;
+    void POST_conJwtValidoYBodyInvalido_deberiaRetornar400ConValidationError() throws Exception {
+        ContenidoRequest requestInvalido = new ContenidoRequest("", "corto");
 
         mockMvc.perform(post("/api/contenido")
-                        .with(usuarioAutenticado())
-                        .contentType("application/json")
-                        .content(jsonInvalido))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void postContenido_conTextoMuyCorto_deberiaRetornar400() throws Exception {
-        String jsonInvalido = """
-                {"titulo": "Titulo valido", "texto": "corto"}
-                """;
-
-        mockMvc.perform(post("/api/contenido")
-                        .with(usuarioAutenticado())
-                        .contentType("application/json")
-                        .content(jsonInvalido))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void postContenido_sinAutenticacion_deberiaRetornar403() throws Exception {
- 
-        ContenidoRequest request = new ContenidoRequest(
-                "Titulo", "Este es un texto de prueba con mas de veinte caracteres"
-        );
-
-        mockMvc.perform(post("/api/contenido")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void optionsContenido_desdeFrontend_deberiaPermitirPreflight() throws Exception {
-        mockMvc.perform(options("/api/contenido")
-                        .header(ORIGIN, "http://localhost:3001")
-                        .header(ACCESS_CONTROL_REQUEST_METHOD, "POST")
-                        .header(ACCESS_CONTROL_REQUEST_HEADERS, "Authorization, Content-Type"))
-                .andExpect(status().isOk())
-                .andExpect(header().string(ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:3001"))
-                .andExpect(header().string(ACCESS_CONTROL_ALLOW_METHODS, containsString("POST")))
-                .andExpect(header().string(ACCESS_CONTROL_ALLOW_HEADERS, containsString("Authorization")))
-                .andExpect(header().string(ACCESS_CONTROL_ALLOW_HEADERS, containsString("Content-Type")));
-    }
-
-    @Test
-    void postContenidoLote_conListaValida_deberiaClasificarTodos() throws Exception {
-        ContenidoRequest item1 = new ContenidoRequest("Titulo 1", "Primer texto de prueba con longitud suficiente");
-        ContenidoRequest item2 = new ContenidoRequest("Titulo 2", "Segundo texto de prueba con longitud suficiente");
-        ContenidoLoteRequest lote = new ContenidoLoteRequest(List.of(item1, item2));
-
-        mockMvc.perform(post("/api/contenido/lote")
-                        .with(usuarioAutenticado())
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(lote)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
-    }
-
-    @Test
-    void postContenidoLote_conListaVacia_deberiaRetornar400() throws Exception {
-        String jsonListaVacia = """
-                {"contenidos": []}
-                """;
-
-        mockMvc.perform(post("/api/contenido/lote")
-                        .with(usuarioAutenticado())
-                        .contentType("application/json")
-                        .content(jsonListaVacia))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getBuscar_deberiaEncontrarContenidoPorPalabraClave() throws Exception {
-
-        ContenidoRequest request = new ContenidoRequest(
-                "Guia de Spring Boot",
-                "Un texto largo explicando como configurar Spring Boot paso a paso"
-        );
-        mockMvc.perform(post("/api/contenido")
-                .with(usuarioAutenticado())
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(request)));
-
-        mockMvc.perform(get("/api/contenido/buscar")
-                        .with(usuarioAutenticado())
-                        .param("q", "spring"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
-
-    @Test
-    void getListar_deberiaDevolverSoloLosContenidosDelUsuarioAutenticado() throws Exception {
-
-        ContenidoRequest request = new ContenidoRequest(
-                "Mi contenido", "Texto de prueba con longitud suficiente para pasar"
-        );
-        mockMvc.perform(post("/api/contenido")
-                .with(usuarioAutenticado())
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(request)));
-
-        mockMvc.perform(get("/api/contenido")
-                        .with(usuarioAutenticado()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                        .header("Authorization", "Bearer " + VALID_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestInvalido)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
     }
 }

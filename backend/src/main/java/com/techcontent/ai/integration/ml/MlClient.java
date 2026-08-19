@@ -4,53 +4,39 @@ import com.techcontent.ai.dto.MlRequest;
 import com.techcontent.ai.dto.MlResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
 
-@Component
 @Slf4j
+@Component
 public class MlClient {
 
     private final RestClient restClient;
 
-    @Value("${ml.service.url}")
-    private String mlServiceUrl;
-
-    public MlClient(RestClient.Builder restClientBuilder) {
-    this.restClient = restClientBuilder.build();
+    public MlClient(RestClient.Builder builder,
+                    @Value("${ml.service.url}") String mlServiceUrl) {
+        this.restClient = builder
+                .baseUrl(mlServiceUrl)
+                .build();
     }
 
     public MlResponse predict(String texto) {
         try {
-            MlRequest request = new MlRequest(texto);
-
-            log.info("Invocando servicio ML: POST {}/predict", mlServiceUrl);
-            log.debug("Texto a clasificar: {}", texto);
-
-            MlResponse response = restClient
-                .post()
-                .uri(mlServiceUrl + "/predict")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .body(request)
-                .retrieve()
-                .body(MlResponse.class);
-
-            log.info("Respuesta recibida exitosamente del servicio ML");
-            return response;
-
-        } catch (RestClientException e) {
-            log.error("Error de conexión con el servicio ML en: {}", mlServiceUrl, e);
-            throw new RuntimeException("Fallo en la predicción del modelo ML. Servicio: " + mlServiceUrl, e);
-        } catch (Exception e) {
-            log.error("Error inesperado en MlClient.predict()", e);
-            throw new RuntimeException("Error inesperado en predicción del modelo ML", e);
+            return restClient.post()
+                    .uri("/predict")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new MlRequest(texto))
+                    .retrieve()
+                    .body(MlResponse.class);
+        } catch (HttpServerErrorException e) {
+            log.error("El servicio ML respondio con error {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new MlServiceException("El servicio de clasificacion respondio con un error. Intente mas tarde.");
+        } catch (ResourceAccessException e) {
+            log.error("No se pudo conectar con el servicio ML: {}", e.getMessage());
+            throw new MlServiceException("No se pudo conectar con el servicio de clasificacion.");
         }
-    }
-
-    public MlResponse predecir(String texto) {
-        return predict(texto);
     }
 }

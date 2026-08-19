@@ -24,14 +24,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                           HttpServletResponse response,
                           AuthenticationException authException) throws IOException, ServletException {
 
+        String jwtError = (String) request.getAttribute(JwtAuthFilter.JWT_ERROR_ATTRIBUTE);
+        String mensaje = "EXPIRED".equals(jwtError)
+                ? "Token JWT expirado"
+                : "Token JWT invalido o ausente";
+
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                "UNAUTHORIZED",
-                "No se proporciono un token valido de autenticacion"
-        );
-
+        ErrorResponse errorResponse = new ErrorResponse("UNAUTHORIZED", mensaje);
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

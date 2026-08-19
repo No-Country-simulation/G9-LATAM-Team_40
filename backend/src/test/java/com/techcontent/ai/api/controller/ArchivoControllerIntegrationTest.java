@@ -1,106 +1,63 @@
 package com.techcontent.ai.api.controller;
 
-import com.oracle.bmc.objectstorage.ObjectStorageClient;
-import com.techcontent.ai.domain.repository.ArchivoRepository;
-import com.techcontent.ai.integration.oci.OciStorageClient;
-import com.techcontent.ai.security.SupabaseUserDetails;
+import com.techcontent.ai.api.dto.response.ArchivoResponse;
+import com.techcontent.ai.api.dto.response.PaginaResponse;
+import com.techcontent.ai.api.exception.ArchivoNotFoundException;
+import com.techcontent.ai.domain.service.ArchivoService;
+import com.techcontent.ai.security.JwtAccessDeniedHandler;
+import com.techcontent.ai.security.JwtAuthFilter;
+import com.techcontent.ai.security.JwtAuthenticationEntryPoint;
+import com.techcontent.ai.security.JwtService;
+import com.techcontent.ai.security.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+@WebMvcTest(ArchivoController.class)
+@Import({SecurityConfig.class, JwtAuthFilter.class, JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class})
 class ArchivoControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ArchivoRepository archivoRepository;
+    @MockBean
+    private ArchivoService archivoService;
 
     @MockBean
-    private OciStorageClient ociStorageClient;
+    private JwtService jwtService;
 
-    @MockBean
-        private ObjectStorageClient objectStorageSdkClient;
-
-    private UUID userId;
+    private static final UUID TEST_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final String VALID_TOKEN = "valid-test-token";
 
     @BeforeEach
     void setUp() {
-        archivoRepository.deleteAll();
-        userId = UUID.randomUUID();
-
-        when(ociStorageClient.upload(anyString(),anyString(),any(),anyLong(),anyString())).thenReturn("https://storage.example.com/archivo-subido.pdf");
-    }
-
-    private RequestPostProcessor usuarioAutenticado() {
-        SupabaseUserDetails userDetails = new SupabaseUserDetails(userId, "test@example.com","authenticated");
-        return SecurityMockMvcRequestPostProcessors.user(userDetails);
+        when(jwtService.validateToken(VALID_TOKEN)).thenReturn(JwtService.TokenValidationResult.VALID);
+        when(jwtService.extractUserId(VALID_TOKEN)).thenReturn(TEST_USER_ID.toString());
+        when(jwtService.extractEmail(VALID_TOKEN)).thenReturn("test@example.com");
     }
 
     @Test
-    void postArchivo_conArchivoValido_deberiaSubirloYRetornar200() throws Exception {
+    void POST_sinJwt_deberiaRetornar401() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
-                "file",                
-                "documento.pdf",
-                "application/pdf",
-                "contenido de prueba".getBytes()
-        );
-
-        mockMvc.perform(multipart("/api/archivos")
-                        .file(file)
-                        .with(usuarioAutenticado()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("documento.pdf"))
-                .andExpect(jsonPath("$.url").value("https://storage.example.com/archivo-subido.pdf"))
-                .andExpect(jsonPath("$.tipo").value("application/pdf"));
-    }
-
-    @Test
-    void postArchivo_archivoVacio_deberiaRetornar400() throws Exception {
-        MockMultipartFile fileVacio = new MockMultipartFile(
-                "file", "vacio.pdf", "application/pdf", new byte[0]
-        );
-
-        mockMvc.perform(multipart("/api/archivos")
-                        .file(fileVacio)
-                        .with(usuarioAutenticado()))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void postArchivo_tipoNoPermitido_deberiaRetornar400() throws Exception {
-        MockMultipartFile fileInvalido = new MockMultipartFile(
-                "file", "imagen.png", "image/png", "contenido".getBytes()
-        );
-
-        mockMvc.perform(multipart("/api/archivos")
-                        .file(fileInvalido)
-                        .with(usuarioAutenticado()))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void postArchivo_sinAutenticacion_deberiaRetornar403() throws Exception {
-        MockMultipartFile file = new MockMultipartFile(
-                "file", "documento.pdf", "application/pdf", "contenido".getBytes()
+                "file", "test.pdf", "application/pdf", "contenido".getBytes()
         );
 
         mockMvc.perform(multipart("/api/archivos").file(file))
@@ -108,46 +65,152 @@ class ArchivoControllerIntegrationTest {
     }
 
     @Test
-    void getListar_deberiaDevolverSoloLosArchivosDelUsuarioAutenticado() throws Exception {
-
+    void POST_conJwtValidoYArchivoValido_deberiaRetornar200() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
-                "file", "mi-archivo.pdf", "application/pdf", "contenido".getBytes()
+                "file", "documento.pdf", "application/pdf", "contenido pdf".getBytes()
         );
+        ArchivoResponse mockResponse = new ArchivoResponse(
+                UUID.randomUUID().toString(), "documento.pdf",
+                "https://oci/test/documento.pdf", 1024L,
+                "application/pdf", LocalDateTime.now()
+        );
+
+        when(archivoService.subir(any(), any(UUID.class))).thenReturn(mockResponse);
+
         mockMvc.perform(multipart("/api/archivos")
-                .file(file)
-                .with(usuarioAutenticado()));
+                        .file(file)
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("documento.pdf"))
+                .andExpect(jsonPath("$.tipo").value("application/pdf"));
+    }
+
+    @Test
+    void GET_conJwtValido_deberiaRetornarListaDeArchivos() throws Exception {
+        ArchivoResponse archivo = new ArchivoResponse(
+                UUID.randomUUID().toString(), "doc.pdf",
+                "https://oci/test/doc.pdf", 2048L,
+                "application/pdf", LocalDateTime.now()
+        );
+        PaginaResponse<ArchivoResponse> pagina = new PaginaResponse<>(
+                List.of(archivo), 0, 20, 1, 1
+        );
+        when(archivoService.listar(any(UUID.class), eq(0), eq(20), eq(""), eq("")))
+                .thenReturn(pagina);
 
         mockMvc.perform(get("/api/archivos")
-                        .with(usuarioAutenticado()))
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].nombre").value("mi-archivo.pdf"));
+                .andExpect(jsonPath("$.items[0].nombre").value("doc.pdf"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1));
+
+        verify(archivoService).listar(TEST_USER_ID, 0, 20, "", "");
     }
 
     @Test
-    void getObtenerPorId_archivoExistente_deberiaDevolverlo() throws Exception {
-        MockMultipartFile file = new MockMultipartFile(
-                "file", "encontrame.pdf", "application/pdf", "contenido".getBytes()
+    void GET_conPaginacionPersonalizada_deberiaDelegarParametros() throws Exception {
+        PaginaResponse<ArchivoResponse> pagina = new PaginaResponse<>(
+                List.of(), 2, 5, 0, 0
         );
-        String responseJson = mockMvc.perform(multipart("/api/archivos")
-                        .file(file)
-                        .with(usuarioAutenticado()))
-                .andReturn().getResponse().getContentAsString();
+        when(archivoService.listar(any(UUID.class), eq(2), eq(5), eq(""), eq("")))
+                .thenReturn(pagina);
 
-        String id = com.jayway.jsonpath.JsonPath.read(responseJson, "$.id");
-
-        mockMvc.perform(get("/api/archivos/{id}", id)
-                        .with(usuarioAutenticado()))
+        mockMvc.perform(get("/api/archivos")
+                        .param("page", "2")
+                        .param("size", "5")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("encontrame.pdf"));
+                .andExpect(jsonPath("$.items").isEmpty())
+                .andExpect(jsonPath("$.page").value(2))
+                .andExpect(jsonPath("$.size").value(5));
+
+        verify(archivoService).listar(TEST_USER_ID, 2, 5, "", "");
     }
 
     @Test
-    void getObtenerPorId_archivoInexistente_deberiaRetornar404() throws Exception {
-        UUID idInexistente = UUID.randomUUID();
+    void GET_conBusquedaPorNombre_deberiaDelegarQuery() throws Exception {
+        PaginaResponse<ArchivoResponse> pagina = new PaginaResponse<>(
+                List.of(), 0, 20, 0, 0
+        );
+        when(archivoService.listar(any(UUID.class), eq(0), eq(20), eq("manual"), eq("")))
+                .thenReturn(pagina);
 
-        mockMvc.perform(get("/api/archivos/{id}", idInexistente)
-                        .with(usuarioAutenticado()))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/archivos")
+                        .param("q", "manual")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isEmpty());
+
+        verify(archivoService).listar(TEST_USER_ID, 0, 20, "manual", "");
+    }
+
+    @Test
+    void GET_conBusquedaYTipo_deberiaDelegarFiltros() throws Exception {
+        PaginaResponse<ArchivoResponse> pagina = new PaginaResponse<>(
+                List.of(), 0, 5, 0, 0
+        );
+        when(archivoService.listar(
+                any(UUID.class), eq(0), eq(5), eq("manual"), eq("pdf")))
+                .thenReturn(pagina);
+
+        mockMvc.perform(get("/api/archivos")
+                        .param("page", "0")
+                        .param("size", "5")
+                        .param("q", "manual")
+                        .param("tipo", "pdf")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isEmpty())
+                .andExpect(jsonPath("$.size").value(5));
+
+        verify(archivoService).listar(TEST_USER_ID, 0, 5, "manual", "pdf");
+    }
+
+    @Test
+    void GET_sinJwt_deberiaRetornar401() throws Exception {
+        mockMvc.perform(get("/api/archivos"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void DELETE_conJwtValido_deberiaRetornar204() throws Exception {
+        UUID archivoId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+
+        mockMvc.perform(delete("/api/archivos/{id}", archivoId)
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(archivoService).eliminar(archivoId, TEST_USER_ID);
+    }
+
+    @Test
+    void DELETE_sinJwt_deberiaRetornar401() throws Exception {
+        UUID archivoId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+
+        mockMvc.perform(delete("/api/archivos/{id}", archivoId))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(archivoService);
+    }
+
+    @Test
+    void DELETE_archivoNoEncontrado_deberiaRetornar404() throws Exception {
+        UUID archivoId = UUID.fromString("00000000-0000-0000-0000-000000000099");
+        doThrow(new ArchivoNotFoundException(archivoId))
+                .when(archivoService).eliminar(archivoId, TEST_USER_ID);
+
+        mockMvc.perform(delete("/api/archivos/{id}", archivoId)
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.mensaje").value(
+                        "Archivo no encontrado con id: " + archivoId
+                ));
+
+        verify(archivoService).eliminar(archivoId, TEST_USER_ID);
     }
 }

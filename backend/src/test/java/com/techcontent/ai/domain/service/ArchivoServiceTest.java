@@ -1,27 +1,33 @@
 package com.techcontent.ai.domain.service;
 
 import com.techcontent.ai.api.dto.response.ArchivoResponse;
+import com.techcontent.ai.api.dto.response.PaginaResponse;
 import com.techcontent.ai.api.exception.ArchivoNotFoundException;
 import com.techcontent.ai.domain.model.Archivo;
 import com.techcontent.ai.domain.repository.ArchivoRepository;
 import com.techcontent.ai.integration.oci.OciStorageClient;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,167 +40,246 @@ class ArchivoServiceTest {
     private OciStorageClient ociStorageClient;
 
     @InjectMocks
-    private ArchivoService archivoService;
+    private ArchivoService service;
 
-    private UUID userId;
+    private static final UUID USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final UUID OTRO_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000003");
+    private static final UUID ARCHIVO_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
 
-    @BeforeEach
+    @org.junit.jupiter.api.BeforeEach
     void setUp() {
-        userId = UUID.randomUUID();
-
-        // El campo filesBucket se inyecta con @Value en la clase real, algo
-        // que Spring hace solo cuando levanta el contexto completo. Como acá
-        // NO levantamos Spring (es un test unitario puro, más rápido),
-        // tenemos que setearlo a mano con ReflectionTestUtils.
-        ReflectionTestUtils.setField(archivoService, "filesBucket", "techcontent-files-test");
+        ReflectionTestUtils.setField(service, "filesBucket", "test-bucket");
     }
 
-    @Test
-    void subir_archivoValido_deberiaSubirYGuardar() throws IOException {
-        // ARRANGE
-        // MockMultipartFile es una clase de Spring hecha justamente para
-        // testing: simula un archivo subido por HTTP sin necesitar un
-        // request real.
-        MockMultipartFile file = new MockMultipartFile(
-                "file",                    // nombre del parametro
-                "documento.pdf",            // nombre original del archivo
-                "application/pdf",          // content type
-                "contenido de prueba".getBytes()
-        );
-
-        when(ociStorageClient.upload(anyString(),anyString(),any(),anyLong(),anyString() )).thenReturn("https://storage.example.com/documento.pdf");
-
-        when(archivoRepository.save(any(Archivo.class))).thenAnswer(invocation -> {
-            Archivo a = invocation.getArgument(0);
-            a.setId(UUID.randomUUID());
-            return a;
-        });
-
-        // ACT
-        ArchivoResponse response = archivoService.subir(file, userId);
-
-        // ASSERT
-        assertNotNull(response);
-        assertEquals("documento.pdf", response.nombre());
-        assertEquals("https://storage.example.com/documento.pdf", response.url());
-        assertEquals("application/pdf", response.tipo());
-
-        verify(ociStorageClient, times(1)).upload( eq("techcontent-files-test"),anyString(),any(),eq(file.getSize()),eq("application/pdf"));
-        verify(archivoRepository, times(1)).save(any(Archivo.class));
-    }
-
-    @Test
-    void subir_archivoVacio_deberiaLanzarIllegalArgumentException() {
-        // Caso borde: archivo sin contenido. La validacion tiene que
-        // rechazarlo ANTES de intentar subirlo a OCI.
-        MockMultipartFile fileVacio = new MockMultipartFile(
-                "file", "vacio.pdf", "application/pdf", new byte[0]
-        );
-
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> archivoService.subir(fileVacio, userId)
-        );
-
-        assertEquals("El archivo no puede estar vacio", ex.getMessage());
-
-        // Verificamos que, al fallar la validacion, NUNCA se haya intentado
-        // subir el archivo ni guardarlo. Esto es tan importante como el
-        // mensaje de error: confirma que el metodo corta la ejecucion a tiempo.
-        verifyNoInteractions(ociStorageClient);
-        verifyNoInteractions(archivoRepository);
-    }
-
-    @Test
-    void subir_tipoNoPermitido_deberiaLanzarIllegalArgumentException() {
-        MockMultipartFile fileInvalido = new MockMultipartFile(
-                "file", "imagen.png", "image/png", "contenido".getBytes()
-        );
-
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> archivoService.subir(fileInvalido, userId)
-        );
-
-        assertTrue(ex.getMessage().contains("Tipo de archivo no permitido"));
-        verifyNoInteractions(ociStorageClient);
-    }
-
-    @Test
-    void subir_archivoSuperaTamanoMaximo_deberiaLanzarIllegalArgumentException() {
-        // Simulamos un archivo de 11 MB (el limite real del Service es 10 MB).
-        // No hace falta generar 11 MB de datos reales: MockMultipartFile
-        // permite pasar contenido chico y el Service igual valida por el
-        // tamano que reporta file.getSize(), así que alcanza con un contenido
-        // cuyo length en bytes sea el que queremos simular.
-        byte[] contenidoGrande = new byte[11 * 1024 * 1024];
-        MockMultipartFile fileGrande = new MockMultipartFile(
-                "file", "grande.pdf", "application/pdf", contenidoGrande
-        );
-
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> archivoService.subir(fileGrande, userId)
-        );
-
-        assertTrue(ex.getMessage().contains("tamano maximo"));
-        verifyNoInteractions(ociStorageClient);
-    }
-
-    @Test
-    void listar_deberiaDevolverArchivosDelUsuario() {
-        Archivo archivo = Archivo.builder()
-                .id(UUID.randomUUID())
-                .userId(userId)
-                .nombre("mi-archivo.pdf")
-                .url("https://storage.example.com/mi-archivo.pdf")
+    private Archivo archivoGuardado() {
+        return Archivo.builder()
+                .id(ARCHIVO_ID)
+                .userId(USER_ID)
+                .nombre("documento.pdf")
+                .url("https://oci/test-bucket/documento.pdf")
                 .tamano(1024L)
                 .tipo("application/pdf")
                 .subidoEn(LocalDateTime.now())
                 .build();
-
-        when(archivoRepository.findByUserId(userId)).thenReturn(List.of(archivo));
-
-        List<ArchivoResponse> resultados = archivoService.listar(userId);
-
-        assertEquals(1, resultados.size());
-        assertEquals("mi-archivo.pdf", resultados.get(0).nombre());
-        verify(archivoRepository, times(1)).findByUserId(userId);
     }
 
     @Test
-    void obtenerPorId_archivoExiste_deberiaDevolverlo() {
-        UUID archivoId = UUID.randomUUID();
-        Archivo archivo = Archivo.builder()
-                .id(archivoId)
-                .userId(userId)
-                .nombre("encontrado.pdf")
-                .url("https://storage.example.com/encontrado.pdf")
-                .tamano(2048L)
-                .tipo("application/pdf")
-                .subidoEn(LocalDateTime.now())
-                .build();
+    void subir_archivoValido_deberiaSubirYPersistir() {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "documento.pdf", "application/pdf", "contenido pdf".getBytes()
+        );
 
-        when(archivoRepository.findByIdAndUserId(archivoId, userId)).thenReturn(Optional.of(archivo));
+        when(ociStorageClient.upload(anyString(), anyString(), any(), anyLong(), anyString()))
+                .thenReturn("https://oci/test-bucket/documento.pdf");
+        when(archivoRepository.save(any(Archivo.class))).thenReturn(archivoGuardado());
 
-        ArchivoResponse response = archivoService.obtenerPorId(archivoId, userId);
+        ArchivoResponse response = service.subir(file, USER_ID);
 
-        assertEquals("encontrado.pdf", response.nombre());
+        assertThat(response.nombre()).isEqualTo("documento.pdf");
+        assertThat(response.tipo()).isEqualTo("application/pdf");
+        verify(ociStorageClient).upload(eq("test-bucket"), anyString(), any(), anyLong(), eq("application/pdf"));
+        verify(archivoRepository).save(any(Archivo.class));
     }
 
     @Test
-    void obtenerPorId_archivoNoExiste_deberiaLanzarArchivoNotFoundException() {
-        // Caso importante: cuando el repo devuelve Optional.empty(), el
-        // Service tiene que transformarlo en una excepcion de negocio
-        // (ArchivoNotFoundException), no dejar pasar un null ni explotar
-        // con NoSuchElementException generico.
-        UUID archivoIdInexistente = UUID.randomUUID();
-        when(archivoRepository.findByIdAndUserId(archivoIdInexistente, userId))
+    void subir_tipoDeArchivoNoPermitido_deberiaLanzarIllegalArgument() {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "imagen.png", "image/png", "datos".getBytes()
+        );
+
+        assertThatThrownBy(() -> service.subir(file, USER_ID))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Tipo de archivo no permitido");
+
+        verifyNoInteractions(ociStorageClient, archivoRepository);
+    }
+
+    @Test
+    void subir_archivoVacio_deberiaLanzarIllegalArgument() {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "vacio.pdf", "application/pdf", new byte[0]
+        );
+
+        assertThatThrownBy(() -> service.subir(file, USER_ID))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("vacio");
+    }
+
+    @Test
+    void subir_archivoDemasiadoGrande_deberiaLanzarIllegalArgument() {
+        byte[] datosGrandes = new byte[11 * 1024 * 1024]; // 11 MB
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "grande.pdf", "application/pdf", datosGrandes
+        );
+
+        assertThatThrownBy(() -> service.subir(file, USER_ID))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("tamano maximo");
+    }
+
+    @Test
+    void listar_conPaginacion_deberiaRetornarPaginaDelUsuario() {
+        when(archivoRepository.buscarPorUsuario(
+                eq(USER_ID), eq(""), eq(""), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(
+                        List.of(archivoGuardado()),
+                        PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "subidoEn")),
+                        1
+                ));
+
+        PaginaResponse<ArchivoResponse> response = service.listar(USER_ID, 0, 20, null, null);
+
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().get(0).nombre()).isEqualTo("documento.pdf");
+        assertThat(response.page()).isZero();
+        assertThat(response.size()).isEqualTo(20);
+        assertThat(response.totalElements()).isEqualTo(1);
+        assertThat(response.totalPages()).isEqualTo(1);
+        verify(archivoRepository).buscarPorUsuario(
+                eq(USER_ID), eq(""), eq(""), argThat(pageable ->
+                        pageable.getPageNumber() == 0
+                                && pageable.getPageSize() == 20
+                                && pageable.getSort().getOrderFor("subidoEn") != null
+                                && pageable.getSort().getOrderFor("subidoEn").isDescending()
+                ));
+    }
+
+    @Test
+    void listar_conBusqueda_deberiaNormalizarYFiltrarPorNombre() {
+        when(archivoRepository.buscarPorUsuario(
+                eq(USER_ID), eq("DOC"), eq(""), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(archivoGuardado())));
+
+        PaginaResponse<ArchivoResponse> response = service.listar(USER_ID, 0, 20, "  DOC  ", "");
+
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().get(0).nombre()).isEqualTo("documento.pdf");
+        verify(archivoRepository).buscarPorUsuario(
+                eq(USER_ID), eq("DOC"), eq(""), any(Pageable.class));
+    }
+
+    @Test
+    void listar_conBusquedaYTipo_deberiaNormalizarYFiltrar() {
+        when(archivoRepository.buscarPorUsuario(
+                eq(USER_ID), eq("manual"), eq("application/pdf"), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(archivoGuardado())));
+
+        PaginaResponse<ArchivoResponse> response = service.listar(
+                USER_ID, 0, 20, "  manual  ", " PDF "
+        );
+
+        assertThat(response.items()).hasSize(1);
+        verify(archivoRepository).buscarPorUsuario(
+                eq(USER_ID), eq("manual"), eq("application/pdf"), any(Pageable.class));
+    }
+
+    @Test
+    void listar_conTipoNoPermitido_deberiaLanzarIllegalArgument() {
+        assertThatThrownBy(() -> service.listar(USER_ID, 0, 20, "", "xlsx"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("pdf, txt, md, docx");
+
+        verifyNoInteractions(archivoRepository);
+    }
+
+    @Test
+    void listar_conPaginaNegativa_deberiaLanzarIllegalArgument() {
+        assertThatThrownBy(() -> service.listar(USER_ID, -1, 20, "", ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("pagina");
+
+        verifyNoInteractions(archivoRepository);
+    }
+
+    @Test
+    void listar_conTamanoFueraDeRango_deberiaLanzarIllegalArgument() {
+        assertThatThrownBy(() -> service.listar(USER_ID, 0, 101, "", ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("entre 1 y 100");
+
+        verifyNoInteractions(archivoRepository);
+    }
+
+    @Test
+    void listar_conBusquedaDemasiadoLarga_deberiaLanzarIllegalArgument() {
+        assertThatThrownBy(() -> service.listar(USER_ID, 0, 20, "a".repeat(101), ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("100 caracteres");
+
+        verifyNoInteractions(archivoRepository);
+    }
+
+    @Test
+    void obtenerPorId_existente_deberiaRetornarElArchivo() {
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, USER_ID))
+                .thenReturn(Optional.of(archivoGuardado()));
+
+        ArchivoResponse response = service.obtenerPorId(ARCHIVO_ID, USER_ID);
+
+        assertThat(response.id()).isEqualTo(ARCHIVO_ID.toString());
+        verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, USER_ID);
+    }
+
+    @Test
+    void obtenerPorId_noExistente_deberiaLanzarArchivoNotFound() {
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, USER_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.obtenerPorId(ARCHIVO_ID, USER_ID))
+                .isInstanceOf(ArchivoNotFoundException.class);
+    }
+
+    @Test
+    void eliminar_existente_deberiaEliminarEnOciYPersistencia() {
+        Archivo archivo = archivoGuardado();
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, USER_ID))
+                .thenReturn(Optional.of(archivo));
+        service.eliminar(ARCHIVO_ID, USER_ID);
+
+        verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, USER_ID);
+        verify(ociStorageClient).delete(eq("test-bucket"), eq("documento.pdf"));
+        verify(archivoRepository).delete((Archivo) archivo); // Corregido tipado explícito
+    }
+
+    @Test
+    void eliminar_noExistente_deberiaLanzarArchivoNotFound() {
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, USER_ID))
                 .thenReturn(Optional.empty());
 
-        assertThrows(
-                ArchivoNotFoundException.class,
-                () -> archivoService.obtenerPorId(archivoIdInexistente, userId)
-        );
+        assertThatThrownBy(() -> service.eliminar(ARCHIVO_ID, USER_ID))
+                .isInstanceOf(ArchivoNotFoundException.class);
+
+        verifyNoInteractions(ociStorageClient);
+        verify(archivoRepository, never()).delete(any(Archivo.class)); // Corregido tipado explícito
     }
+
+    @Test
+    void eliminar_archivoDeOtroUsuario_deberiaTratarloComoNoEncontrado() {
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, OTRO_USER_ID))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.eliminar(ARCHIVO_ID, OTRO_USER_ID))
+                .isInstanceOf(ArchivoNotFoundException.class);
+
+        verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, OTRO_USER_ID);
+        verifyNoInteractions(ociStorageClient);
+        verify(archivoRepository, never()).delete(any(Archivo.class)); // Corregido tipado explícito
+    }
+
+    @Test
+    void eliminar_cuandoOciFalla_noDeberiaEliminarDePersistencia() {
+        Archivo archivo = archivoGuardado();
+        when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, USER_ID))
+                .thenReturn(Optional.of(archivo));
+        doThrow(new RuntimeException("Error en eliminación desde OCI"))
+                .when(ociStorageClient).delete("test-bucket", "documento.pdf");
+
+        assertThatThrownBy(() -> service.eliminar(ARCHIVO_ID, USER_ID))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Error en eliminación desde OCI");
+
+        verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, USER_ID);
+        verify(ociStorageClient).delete("test-bucket", "documento.pdf");
+        verify(archivoRepository, never()).delete(any(Archivo.class)); // Corregido tipado explícito
+    }
+
 }

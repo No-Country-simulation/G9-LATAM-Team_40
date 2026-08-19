@@ -51,7 +51,7 @@ class JwtAuthFilterTest {
         UUID userId = UUID.randomUUID();
         request.addHeader("Authorization", "Bearer token-valido");
 
-        when(jwtService.isTokenValid("token-valido")).thenReturn(true);
+        when(jwtService.validateToken("token-valido")).thenReturn(JwtService.TokenValidationResult.VALID);
         when(jwtService.extractUserId("token-valido"))
                 .thenReturn(userId.toString());
         when(jwtService.extractEmail("token-valido"))
@@ -82,7 +82,7 @@ class JwtAuthFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         request.addHeader("Authorization", "Bearer token-invalido");
-        when(jwtService.isTokenValid("token-invalido")).thenReturn(false);
+        when(jwtService.validateToken("token-invalido")).thenReturn(JwtService.TokenValidationResult.INVALID);
 
         filter.doFilter(request, response, filterChain);
 

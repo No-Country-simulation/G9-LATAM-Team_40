@@ -3,7 +3,6 @@ package com.techcontent.ai.integration.ml;
 import com.techcontent.ai.dto.MlResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
@@ -24,13 +23,8 @@ class MlClientDockerIntegrationTest {
 
        
         MlClient mlClient = new MlClient(
-             RestClient.builder().requestFactory(new SimpleClientHttpRequestFactory())
-        );
-
-        ReflectionTestUtils.setField(
-                mlClient,
-                "mlServiceUrl",
-                "http://localhost:5000"
+             RestClient.builder().requestFactory(new SimpleClientHttpRequestFactory()),
+             "http://localhost:5000"
         );
 
         MlResponse response = mlClient.predict(

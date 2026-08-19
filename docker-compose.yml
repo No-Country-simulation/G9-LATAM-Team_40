@@ -14,7 +14,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       ML_SERVICE_URL: http://ml-service:5000
-      SUPABASE_AUTH_URL: http://supabase-auth:9999
+      SUPABASE_AUTH_URL: ${SUPABASE_AUTH_URL:-https://bftvhnxtbahabwykqwni.supabase.co}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
       SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
@@ -29,8 +29,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      supabase-auth:
-        condition: service_started
       ml-service:
         condition: service_started
     networks:
