@@ -1,7 +1,5 @@
 package com.techcontent.ai.integration.ml;
 
-import com.techcontent.ai.dto.MlRequest;
-import com.techcontent.ai.dto.MlResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -23,14 +21,14 @@ public class MlClient {
                 .build();
     }
 
-    public MlResponse predict(String texto) {
+    public QueryResponse queryGraphRag(String textoConsulta) {
         try {
             return restClient.post()
-                    .uri("/predict")
+                    .uri("/api/v1/query")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(new MlRequest(texto))
+                    .body(new QueryRequest(textoConsulta))
                     .retrieve()
-                    .body(MlResponse.class);
+                    .body(QueryResponse.class);
         } catch (HttpServerErrorException e) {
             log.error("El servicio ML respondio con error {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new MlServiceException("El servicio de clasificacion respondio con un error. Intente mas tarde.");
