@@ -1,24 +1,17 @@
 ---
 title: "Ley 16744 - normas sobre accidentes y enfermedades laborales"
-source_file: "Ley 16744 - normas sobre accidentes y enfermedades laborales.pdf"
-source_path: "C:/Users/USUARIO/OneDrive/Documentos/knogment_naye/db/salida_markdown_limpio/LEYES/pdf/Ley 16744 - normas sobre accidentes y enfermedades laborales.pdf"
+source_path: "C:\Users\USUARIO\OneDrive\Documentos\nayeli_v2\db\archivos\LEYES\pdf\Ley 16744 - normas sobre accidentes y enfermedades laborales.pdf"
 category: "LEYES"
-processed_date: "2026-08-08 15:20:42"
+processed_date: "2026-08-17 02:36:23"
 ---
-
-# Ley 16744 - normas sobre accidentes y enfermedades laborales
-
-# **Ley 16744**
 
 ### ESTABLECE NORMAS SOBRE ACCIDENTES DEL TRABAJO Y ENFERMEDADES PROFESIONALES
 
-### MINISTERIO DEL TRABAJO Y PREVISIÓN SOCIAL; SUBSECRETARIA DE PREVISION SOCIAL
-
-Publicación: 01-FEB-1968 | Promulgación: 23-ENE-1968 Versión: Última Versión De : 01-ENE-2019 Ultima Modificación: 23-DIC-2017 Ley 21054 Url Corta: http://bcn.cl/299zk ESTABLECE NORMAS SOBRE ACCIDENTES DEL TRABAJO y ENFERMEDADES PROFESIONALES Por cuanto el H. Congreso Nacional ha dado su aprobación al siguiente
+MINISTERIO DEL TRABAJO Y PREVISIÓN SOCIAL; SUBSECRETARIA DE PREVISION SOCIAL ESTABLECE NORMAS SOBRE ACCIDENTES DEL TRABAJO y ENFERMEDADES PROFESIONALES Por cuanto el H. Congreso Nacional ha dado su aprobación al siguiente
 
 ### PROYECTO DE LEY:
 
-TITULO I (1-4)
+## TITULO I (1-4)
 
 OBLIGATORIEDAD, PERSONAS PROTEGIDAS Y AFILIACION.
 
@@ -28,115 +21,79 @@ Obligatoriedad
 
 contra Riesgos de Accidentes del Trabajo y Enfermedades Profesionales, en la forma y condiciones establecidas en la presente ley.
 
-§ 2. Personas protegidas Artículo 2° Estarán sujetas, obligatoriamente, a este seguro, las siguientes personas:
+## § 2. Personas protegidas
 
-- a) Todos los trabajadores por cuenta ajena,
+## Artículo 2° Estarán sujetas, obligatoriamente, a
 
-cualesquiera que sean las labores que ejecuten, sean ellas manuales o intelectuales, o cualquiera que sea la naturaleza de la empresa, institución, servicio o persona para quien trabajen; incluso los servidores domésticos y los aprendices;
+este seguro, las siguientes personas:
 
-- b) Los funcionarios públicos de la Administración           NOTA
+a) Todos los trabajadores por cuenta ajena, cualesquiera que sean las labores que ejecuten, sean ellas manuales o intelectuales, o cualquiera que sea la naturaleza de la empresa, institución, servicio o persona para quien trabajen; incluso los servidores domésticos y los aprendices;
 
-Civil del Estado, municipales y de instituciones administrativamente descentralizadas del Estado.
+b) Los funcionarios públicos de la Administración           NOTA Civil del Estado, municipales y de instituciones administrativamente descentralizadas del Estado.
 
 ### INCISO SEGUNDO DEROGADO.
 
-- c) Los estudiantes que deban ejecutar trabajos que          LEY 18269
+c) Los estudiantes que deban ejecutar trabajos que          LEY 18269 signifiquen una fuente de ingreso para el respectivo            Art. único N° 1 plantel;                                                        D.O. 28.12.1983 d) Los trabajadores independientes y los trabajadores familiares.
 
-signifiquen una fuente de ingreso para el respectivo            Art. único N° 1 plantel;                                                        D.O. 28.12.1983
-
-- d) Los trabajadores independientes y los
-
-trabajadores familiares.
-
-El Presidente de la República establecerá, dentro           NOTA 1 Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 1 de 38 del plazo de un año, a contar desde la vigencia de la presente ley, el financiamiento y condiciones en que deberán incorporarse al régimen de seguro de esta ley las personas indicadas en las letras b) y c) de este No obstante, el Presidente de la República queda            NOTA 2 facultado para decidir la oportunidad, financiamiento y         NOTA 3 condiciones en que deberán incorporarse al régimen de seguro que establece esta ley las personas indicadas en la letra d).
+El Presidente de la República establecerá, dentro           NOTA 1 del plazo de un año, a contar desde la vigencia de la presente ley, el financiamiento y condiciones en que deberán incorporarse al régimen de seguro de esta ley las personas indicadas en las letras b) y c) de este No obstante, el Presidente de la República queda            NOTA 2 facultado para decidir la oportunidad, financiamiento y         NOTA 3 condiciones en que deberán incorporarse al régimen de seguro que establece esta ley las personas indicadas en la letra d).
 
 La LEY 19345, publicada el 07.11.1994, dispuso la aplicación de la presente ley a los trabajadores del sector público que indica.
 
-## `NOTA 1:`
+## `NOTA 1:` El DTO 102, Trabajo, publicado el 25.08.1969, reglamentó la incorporación al seguro de las personas indicadas en las letras b) y c) del presente artículo.
 
-El DTO 102, Trabajo, publicado el 25.08.1969,
+## `NOTA 2:` El artículo único del DL 1.548, publicada el 09.09.1976, declaró que el sentido de la facultad delegada por el inciso final del presente art. 2°, es permitir que el Presidente de la República incorpore a ese régimen de Seguro a los trabajadores independientes y a los trabajadores familiares, en forma conjunta o separada, o por grupos determinados dentro de ellos, pudiendo fijar, en cada caso, la oportunidad, el financiamiento y las condiciones de su incorporación.
 
-reglamentó la incorporación al seguro de las personas indicadas en las letras b) y c) del presente artículo.
+## `NOTA 3:` Las siguientes disposiciones han incorporado al seguro social contra riesgos de accidentes del trabajo y enfermedades profesionales a las siguientes personas:
 
-## `NOTA 2:`
+DTO 448, Trabajo, publicado el 07.12.1976, incorpora a campesinos asignatarios de tierras.
 
-El artículo único del DL 1.548, publicada el
-
-09.09.1976, declaró que el sentido de la facultad
-
-delegada por el inciso final del presente art. 2°,
-
-es permitir que el Presidente de la República incorpore a ese régimen de Seguro a los trabajadores independientes y a los trabajadores familiares, en forma conjunta o separada, o por grupos determinados dentro de ellos, pudiendo fijar, en cada caso, la oportunidad, el financiamiento y las condiciones de su incorporación.
-
-## `NOTA 3:`
-
-Las siguientes disposiciones han incorporado al seguro social contra riesgos de accidentes del trabajo y enfermedades profesionales a las siguientes personas:
-
-DTO 448, Trabajo, publicado el 07.12.1976,
-
-incorpora a campesinos asignatarios de tierras.
-
-DTO 244, Trabajo, publicado el 11.10.1977,
-
-incorpora a los suplementeros acogidos al régimen previsional del seguro social.
+DTO 244, Trabajo, publicado el 11.10.1977, incorpora a los suplementeros acogidos al régimen previsional del seguro social.
 
 El Art. 8° del DFL 50, Trabajo, publicado el
 
-17.05. 1979, incorporó a los profesionales hípicos
+## 17.05. 1979, incorporó a los profesionales hípicos
 
 independientes.
 
 DTO 68, Trabajo, publicado el 03.10.1983, incorpora a los conductores propietarios de taxis.
 
-DFL 19, Trabajo, publicada el 13.07.1984, incorpora a los pirquineros independientes.
+## DFL 19, Trabajo, publicada el 13.07.1984, incorpora
 
-El Art. 1° del DFL 2, Trabajo, publicada el
+a los pirquineros independientes.
 
-08.04.1986, dispuso la inclusión, en los mismos términos
-
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 2 de 38 en que se produjo la de los mismos grupos afectos al Antiguo Sistema Previsional, a los campesinos asignatarios de tierras en dominio individual, a los suplementeros, a los profesionales hípicos independientes, a los conductores propietarios de automóviles de alquiler, a los pirquineros y, en general, a todos los trabajadores independientes pertenecientes a aquellos grupos que por el hecho de estar afiliados a una Administradora de Fondos de Pensiones y no haber estado afectos al régimen de alguna Institución del Antiguo Sistema Previsional han quedado marginados de tal protección.
+El Art. 1° del DFL 2, Trabajo, publicada el 08.04.1986, dispuso la inclusión, en los mismos términos en que se produjo la de los mismos grupos afectos al Antiguo Sistema Previsional, a los campesinos asignatarios de tierras en dominio individual, a los suplementeros, a los profesionales hípicos independientes, a los conductores propietarios de automóviles de alquiler, a los pirquineros y, en general, a todos los trabajadores independientes pertenecientes a aquellos grupos que por el hecho de estar afiliados a una Administradora de Fondos de Pensiones y no haber estado afectos al régimen de alguna Institución del Antiguo Sistema Previsional han quedado marginados de tal protección.
 
 EL Art. 2° del referido DFL 2 de 1986, incorporó a los pequeños mineros artesanales.
 
-El Art. 1° del DFL 54, Trabajo, publicado el
+El Art. 1° del DFL 54, Trabajo, publicado el 05.08.1987, incluyó a los conductores propietarios de vehículos motorizados de movilización colectiva, de transporte escolar y de carga, que se encuentren afectos al Nuevo Sistema de Pensiones del D.L. N° 3.500, de 1980.
 
-05.08.1987, incluyó a los conductores propietarios de
+El Art. 1° del DFL 90, Trabajo, publicado el 01.12.1987, incorporó a los comerciantes autorizados para desarrollar su actividad en la vía pública o plazas, sea que se encuentren afectos al Antiguo Sistema Previsional o al Nuevo Sistema de Pensiones del DL No. 3.500, de 1980.
 
-vehículos motorizados de movilización colectiva, de transporte escolar y de carga, que se encuentren afectos al Nuevo Sistema de Pensiones del D.L. N°
+El Art. 1° del DFL 101, Trabajo, publicado el 23.10.1989, incorporó a los a los pescadores artesanales que se desempeñen en calidad de trabajadores independientes en labores propias de dicha actividad, sea que se encuentren afectos al Antiguo Sistema Previsional o al Nuevo Sistema de Pensiones del D.L. N° 3.500, de 1980.
 
-3.500, de 1980.
+## Artículo 3° Estarán protegidos también, todos los           LEY 20067
 
-El Art. 1° del DFL 90, Trabajo, publicado el
-
-01.12.1987, incorporó a los comerciantes autorizados
-
-para desarrollar su actividad en la vía pública o plazas, sea que se encuentren afectos al Antiguo Sistema Previsional o al Nuevo Sistema de Pensiones del DL No. 3.500, de 1980.
-
-El Art. 1° del DFL 101, Trabajo, publicado el
-
-23.10.1989, incorporó a los a los pescadores
-
-artesanales que se desempeñen en calidad de trabajadores independientes en labores propias de dicha actividad, sea que se encuentren afectos al Antiguo Sistema Previsional o al Nuevo Sistema de Pensiones del D.L. N° 3.500, de 1980.
-
-## Artículo 3° Estarán protegidos también, todos los           LEY 20067 estudiantes por los accidentes que sufran a causa o             D.O. 25.11.2005 con ocasión de sus estudios o en la realización de su           NOTA 1 práctica profesional. Para estos efectos se entenderá por estudiantes a los alumnos de cualquiera de los niveles o cursos de los establecimientos educacionales reconocidos oficialmente de acuerdo a lo establecido en la ley Nº 18.962, Orgánica Constitucional de Enseñanza.
+estudiantes por los accidentes que sufran a causa o             D.O. 25.11.2005 con ocasión de sus estudios o en la realización de su           NOTA 1 práctica profesional. Para estos efectos se entenderá por estudiantes a los alumnos de cualquiera de los niveles o cursos de los establecimientos educacionales reconocidos oficialmente de acuerdo a lo establecido en la ley Nº 18.962, Orgánica Constitucional de Enseñanza.
 
 El Presidente de la República queda facultado para          NOTA decidir la oportunidad, financiamiento y condiciones de la incorporación de tales estudiantes a este seguro escolar, la naturaleza y contenido de las prestaciones que se les otorgará y los organismos, instituciones o servicios que administrarán dicho seguro.
 
-El DTO 313, Trabajo, publicado el 12.05.1973,
+El DTO 313, Trabajo, publicado el 12.05.1973, reglamentó el seguro establecido por el presente El Art. 2º de la LEY 20067, publicada el 25.11.2005, establece que la presente modificación entrará en vigencia a partir del 1 del mes siguiente al de su publicación.
 
-reglamentó el seguro establecido por el presente El Art. 2º de la LEY 20067, publicada el 25.11.2005,
+## Párrafo 3°
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 3 de 38 establece que la presente modificación entrará en vigencia a partir del 1 del mes siguiente al de su publicación.
-
-## Párrafo 3° Afiliación.
+Afiliación.
 
 ## Artículo 4.- Para los efectos de este seguro, todos los
 
 empleadores se entenderán afiliados al Instituto de Seguridad Laboral respecto de la totalidad de sus trabajadores, salvo que se adhieran a alguna mutualidad de empleadores.                                                    Ley 21054 Lo dispuesto en el inciso anterior también se              Art. ÚNICO N° 1 aplicará a los trabajadores independientes afectos al           D.O. 23.12.2017 seguro de esta ley.
 
-TITULO II Contingencias cubiertas Artículo 5° Para los efectos de esta ley se                 NOTA entiende por accidente del trabajo toda lesión que              NOTA 1 una persona sufra a causa o con ocasión del trabajo,
+## TITULO II
 
-y que le produzca incapacidad o muerte.
+Contingencias cubiertas
+
+## Artículo 5° Para los efectos de esta ley se                 NOTA
+
+entiende por accidente del trabajo toda lesión que              NOTA 1 una persona sufra a causa o con ocasión del trabajo, y que le produzca incapacidad o muerte.
 
 Son también accidentes del trabajo los ocurridos en el trayecto directo, de ida o regreso, entre la habitación y el lugar del trabajo, y aquéllos que               NOTA 2 ocurran en el trayecto directo entre dos lugares de trabajo, aunque correspondan a distintos empleadores.
 
@@ -146,29 +103,15 @@ Se considerarán también accidentes del trabajo los sufridos por dirigentes de 
 
 Exceptúanse los accidentes debidos a fuerza mayor extraña que no tenga relación alguna con el trabajo y los producidos intencionalmente por la víctima. La prueba de las excepciones corresponderá al organismo administrador.
 
-El Art. 14 de la LEY 19303, publicada el
+El Art. 14 de la LEY 19303, publicada el 13.04.1994, incorporó como accidentes del trabajo los daños físicos o síquicos que sufran los trabajadores de las empresas, entidades o establecimientos que sean objeto de robo, asalto u otra forma de violencia delictual, a causa o con ocasión del trabajo.
 
-13.04.1994, incorporó como accidentes del trabajo los
+El Art. 33 de la LEY 19518, publicada el 14.10.1997, con vigencia a contar del 1° del mes subsiguiente al de su publicación; así como el Art.
 
-daños físicos o síquicos que sufran los trabajadores de las empresas, entidades o establecimientos que sean objeto de robo, asalto u otra forma de violencia delictual, a causa o con ocasión del trabajo.
-
-El Art. 33 de la LEY 19518, publicada el
-
-14.10.1997, con vigencia a contar del 1° del mes
-
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 4 de 38 subsiguiente al de su publicación; así como el Art.
-
-181 del Código del Trabajo, contenido en el DFL 1,
-
-publicado el 16.01.2003, incorporan como accidente del trabajo a aquel sufrido con ocasión de actividades de capacitación.
+181 del Código del Trabajo, contenido en el DFL 1, publicado el 16.01.2003, incorporan como accidente del trabajo a aquel sufrido con ocasión de actividades de capacitación.
 
 NOTA 2:
 
-El Art. 2º de la LEY 20101, publicada el
-
-28.04.2006, dispuso que la modificación introducida
-
-en el presente artículo regirá a contar del 1º del mes subsiguiente al de su publicación.
+El Art. 2º de la LEY 20101, publicada el 28.04.2006, dispuso que la modificación introducida en el presente artículo regirá a contar del 1º del mes subsiguiente al de su publicación.
 
 ## Artículo 6°.- Los Consejos de los organismos
 
@@ -186,11 +129,13 @@ El Reglamento enumerará las enfermedades que deberán considerarse como profesi
 
 Con todo, los afiliados podrán acreditar ante el respectivo organismo administrador el carácter profesional de alguna enfermedad que no estuviere enumerada en la lista a que se refiere el inciso anterior y que hubiesen contraido como consecuencia directa de la profesión o del trabajo realizado. La resolución que al respecto dicte el organismo administrador será consultada ante la Superintendencia de Seguridad Social, la que deberá decidir dentro del plazo de tres meses con informe del Servicio Nacional de Salud.
 
-TITULO III Administración
+## TITULO III
+
+Administración
 
 ## Artículo 8.- La administración del seguro estará a
 
-cargo del Instituto de Seguridad Laboral o de las mutualidades de empleadores, según corresponda, en adelante denominados los organismos administradores                      Ley 21054 Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 5 de 38 Art. ÚNICO N° 2 D.O. 23.12.2017
+cargo del Instituto de Seguridad Laboral o de las mutualidades de empleadores, según corresponda, en adelante denominados los organismos administradores                      Ley 21054 Art. ÚNICO N° 2 D.O. 23.12.2017
 
 ## Artículo 9°.- Derogado.                                    Ley 21054
 
@@ -200,9 +145,7 @@ Art. ÚNICO N° 3 D.O. 23.12.2017
 
 administrará este seguro, incluida la realización de actividades de prevención de riesgos de accidentes del trabajo y enfermedades profesionales, respecto de las entidades empleadoras afiliadas a él, de sus trabajadores y de los trabajadores independientes que corresponda.             Ley 21054 El Instituto de Seguridad Laboral podrá contratar el       Art. ÚNICO N° 4 otorgamiento de las prestaciones médicas con los servicios      D.O. 23.12.2017 de salud, las mutualidades de empleadores o con otros establecimientos de salud públicos o privados.
 
-Para los servicios de salud señalados en el artículo 16 del decreto con fuerza de ley N° 1, de 2005, del Ministerio de Salud, que fija el texto refundido, coordinado y sistematizado del decreto ley N° 2.763, de 1979, y de las leyes N° 18.933 y N° 18.469, y para los establecimientos de salud experimental creados por los decretos con fuerza de ley Nos 29, 30 y 31, de 2000, todos del Ministerio de Salud,
-
-será obligatorio convenir el otorgamiento y proporcionar tales prestaciones cuando se lo solicite el Instituto de Seguridad Laboral, sujeto al pago de tarifas establecidas según los aranceles vigentes.
+Para los servicios de salud señalados en el artículo 16 del decreto con fuerza de ley N° 1, de 2005, del Ministerio de Salud, que fija el texto refundido, coordinado y sistematizado del decreto ley N° 2.763, de 1979, y de las leyes N° 18.933 y N° 18.469, y para los establecimientos de salud experimental creados por los decretos con fuerza de ley Nos 29, 30 y 31, de 2000, todos del Ministerio de Salud, será obligatorio convenir el otorgamiento y proporcionar tales prestaciones cuando se lo solicite el Instituto de Seguridad Laboral, sujeto al pago de tarifas establecidas según los aranceles vigentes.
 
 Los convenios de atención celebrados por el Instituto de Seguridad Laboral con los organismos públicos y privados se someterán a las normas de contratación general del Estado y a las modalidades, condiciones y aranceles que señale un reglamento emanado del Ministerio del Trabajo y Previsión Social, suscrito por los ministros de Salud y de Hacienda.
 
@@ -210,37 +153,21 @@ Los convenios de atención celebrados por el Instituto de Seguridad Laboral con 
 
 también, por las Mutualidades de Empleadores, que no persigan fines de lucro, respecto de los trabajadores dependientes de los miembros adheridos a ellas.
 
-## Artículo 12° El Presidente de la República podrá autorizar la existencia de estas Instituciones,
+## Artículo 12° El Presidente de la República podrá
 
-otorgándoles la correspondiente personalidad jurídica,
+autorizar la existencia de estas Instituciones, otorgándoles la correspondiente personalidad jurídica, cuando cumplan con las siguientes condiciones:
 
-cuando cumplan con las siguientes condiciones:
+a) Que sus miembros ocupen, en conjunto, 20.000 trabajadores, a lo menos, en faenas permanentes;
 
-- a) Que sus miembros ocupen, en conjunto, 20.000
+b) Que dispongan de servicios médicos adecuados, propios o en común con otra mutualidad, los que deben incluir servicios especializados, incluso en rehabilitación;
 
-trabajadores, a lo menos, en faenas permanentes;
+c) Que realicen actividades permanentes de prevención de accidentes del trabajo y enfermedades profesionales;
 
-- b) Que dispongan de servicios médicos adecuados,
-
-propios o en común con otra mutualidad, los que deben incluir servicios especializados, incluso en rehabilitación;
-
-- c) Que realicen actividades permanentes de
-
-prevención de accidentes del trabajo y enfermedades profesionales;
-
-- d) Que no sean administradas directa ni
-
-indirectamente por instituciones con fines de lucro, y Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 6 de 38
-
-- e) Que sus miembros sean solidariamente responsables
-
-de las obligaciones contraídas por ellas.
+d) Que no sean administradas directa ni indirectamente por instituciones con fines de lucro, y e) Que sus miembros sean solidariamente responsables de las obligaciones contraídas por ellas.
 
 El Servicio Nacional de Salud controlará que dentro del plazo que fije el Presidente de la República en el decreto que les conceda personalidad jurídica, cumplan con las exigencias previstas en las letras b) y c) del inciso anterior.
 
-En caso de disolución anticipada de una Mutualidad,
-
-sus miembros deberán constituir los capitales representativos correspondientes a las pensiones de responsabilidad de dicha Mutualidad, en el o los organismos administradores que deban hacerse cargo en el futuro, del pago de tales pensiones.
+En caso de disolución anticipada de una Mutualidad, sus miembros deberán constituir los capitales representativos correspondientes a las pensiones de responsabilidad de dicha Mutualidad, en el o los organismos administradores que deban hacerse cargo en el futuro, del pago de tales pensiones.
 
 En lo demás, se procederá en la forma como dispongan sus estatutos y el Estatuto Orgánico de las Mutualidades que deberá dictar el Presidente de la República en conformidad al artículo siguiente.
 
@@ -262,75 +189,41 @@ República para que, dentro del plazo de un año, contado desde la publicación 
 
 Dicho Estatuto deberá prever que el Directorio de estas instituciones esté integrado, paritariamente, por representantes de los empleadores y de los trabajadores y la forma como se habrá de elegir al presidente de la institución, el cual lo será, también, del Directorio.
 
-## Artículo 14° Los organismos administradores no              LEY 18269 podrán destinar a gastos de administración una suma             Art. único N° 2 superior al 10% de los ingresos que les correspondan            D.O. 28.12.1983 Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 7 de 38 para este seguro. Sin perjuicio de dicho porcentaje máximo, a las Mutualidades no podrá fijárseles menos del cinco por ciento de sus ingresos para tales gastos en los decretos en que se aprueban las estimaciones presupuestarias de esta ley.
+## Artículo 14° Los organismos administradores no              LEY 18269
 
-TITULO IV Artículo 15° El Seguro de Accidentes del Trabajo y          NOTA Enfermedades Profesionales se financiará con los siguientes recursos:
+podrán destinar a gastos de administración una suma             Art. único N° 2 superior al 10% de los ingresos que les correspondan            D.O. 28.12.1983 para este seguro. Sin perjuicio de dicho porcentaje máximo, a las Mutualidades no podrá fijárseles menos del cinco por ciento de sus ingresos para tales gastos en los decretos en que se aprueban las estimaciones presupuestarias de esta ley.
 
-- a) Con una cotización básica general del 0,90% de           LEY 18768
+## TITULO IV
 
-las remuneraciones imponibles, de cargo del empleador;          Art. 96 a)
+## Artículo 15° El Seguro de Accidentes del Trabajo y          NOTA
 
-- b) Con una cotización adicional diferenciada en             D.O. 29.12.1988
+Enfermedades Profesionales se financiará con los siguientes recursos:
 
-función de la actividad y riesgo de la empresa o                NOTA 1 entidad empleadora, la que será determinada por el Presidente de la República y no podrá exceder de un             NOTA 2 3,4% de las remuneraciones imponibles, que también será de cargo del empleador, y que se fijará sin                NOTA 3 perjuicio de lo dispuesto en el artículo 16°;                   NOTA 4
-
-- c) Con el producto de las multas que cada organismo         DL 3501, TRABAJO
-
-administrador aplique en conformidad a la presente ley;         Art. 25
-
-- d) Con las utilidades o rentas que produzca la              D.O. 18.11.1980
-
-inversión de los fondos de reserva, y
-
-- e) Con las cantidades que les corresponda por el
-
-ejercicio del derecho de repetir de acuerdo con los artículos 56° y 69°.
+a) Con una cotización básica general del 0,90% de           LEY 18768 las remuneraciones imponibles, de cargo del empleador;          Art. 96 a) b) Con una cotización adicional diferenciada en             D.O. 29.12.1988 función de la actividad y riesgo de la empresa o                NOTA 1 entidad empleadora, la que será determinada por el Presidente de la República y no podrá exceder de un             NOTA 2 3,4% de las remuneraciones imponibles, que también será de cargo del empleador, y que se fijará sin                NOTA 3 perjuicio de lo dispuesto en el artículo 16°;                   NOTA 4 c) Con el producto de las multas que cada organismo         DL 3501, TRABAJO administrador aplique en conformidad a la presente ley;         Art. 25 d) Con las utilidades o rentas que produzca la              D.O. 18.11.1980 inversión de los fondos de reserva, y e) Con las cantidades que les corresponda por el ejercicio del derecho de repetir de acuerdo con los artículos 56° y 69°.
 
 El Decreto 67, Trabajo, publicado el 07.03.2000, con vigencia a contar de 1° de julio de 2001, establece el Reglamento para la aplicación del presente artículo.
 
-29.12.1988, dispuso que la modificación introducida a este
-
-## artículo entrará en vigencia a contar del primer día del mes siguiente al de su publicación.
+29.12.1988, dispuso que la modificación introducida a este artículo entrará en vigencia a contar del primer día del mes siguiente al de su publicación.
 
 NOTA 2:
 
-El Artículo sexto transitorio de la LEY 19578,
+El Artículo sexto transitorio de la LEY 19578, publicada el 29.07.1998, en su texto modificado por el artículo único de la LEY 19969, publicada el 31.08.2004, estableció, a contar del 1º de septiembre de 1998 y hasta el 31 de agosto del año 2008, una cotización extraordinaria del 0,05% de las remuneraciones imponibles, de cargo del empleador, en favor del seguro social contra riesgos de accidentes del trabajo y enfermedades profesionales de la presente ley.
 
-publicada el 29.07.1998, en su texto modificado por el artículo único de la LEY 19969, publicada el 31.08.2004,
+## `NOTA 3` El artículo 1° de la LEY 20288, publicada el 03.09.2008, extiende hasta el año 2011 la cotización extraordinaria del 0,05% de las remuneraciones imponibles, de cargo del empleador, en favor del seguro social contra riesgos de accidentes del trabajo y enfermedades profesionales, al reemplazar en el artículo sexto transitorio de la LEY 19578, modificatorio de la presente norma, la expresión "2008" por "2011".
 
-estableció, a contar del 1º de septiembre de 1998 y hasta el 31 de agosto del año 2008, una cotización extraordinaria del 0,05% de las remuneraciones imponibles,
+## `NOTA 4` El N° 2 del artículo único de la Ley 20532, publicada el 30.08.2011, extiende hasta el año 2014 la cotización extraordinaria del 0,05% de las remuneraciones imponibles, de cargo del empleador, en favor del seguro social contra riesgos de accidentes del trabajo y enfermedades profesionales, al reemplazar en el artículo sexto transitorio de la LEY 19578, modificatorio de la presente norma, la frase "hasta el 31 de agosto del año 2011", por "hasta el 31 de marzo del año 2014".
 
-de cargo del empleador, en favor del seguro social contra riesgos de accidentes del trabajo y enfermedades profesionales de la presente ley.
+## Artículo 16° Las empresas o entidades que implanten
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 8 de 38
-
-## `NOTA 3`
-
-El artículo 1° de la LEY 20288, publicada el
-
-03.09.2008, extiende hasta el año 2011 la cotización
-
-extraordinaria del 0,05% de las remuneraciones imponibles,
-
-de cargo del empleador, en favor del seguro social contra riesgos de accidentes del trabajo y enfermedades profesionales, al reemplazar en el artículo sexto transitorio de la LEY 19578, modificatorio de la presente norma, la expresión "2008" por "2011".
-
-## `NOTA 4`
-
-El N° 2 del artículo único de la Ley 20532,
-
-publicada el 30.08.2011, extiende hasta el año 2014 la cotización extraordinaria del 0,05% de las remuneraciones imponibles, de cargo del empleador, en favor del seguro social contra riesgos de accidentes del trabajo y enfermedades profesionales, al reemplazar en el artículo sexto transitorio de la LEY 19578, modificatorio de la presente norma, la frase "hasta el 31 de agosto del año 2011", por "hasta el 31 de marzo del año 2014".
-
-## Artículo 16° Las empresas o entidades que implanten o hayan implantado medidas de prevención que rebajen apreciablemente los riesgos de accidentes del trabajo o de enfermedades profesionales, podrán solicitar que se les reduzca la tasa de cotización adicional o que se les exima de ella si alcanzan un nivel óptimo de seguridad.
+o hayan implantado medidas de prevención que rebajen apreciablemente los riesgos de accidentes del trabajo o de enfermedades profesionales, podrán solicitar que se les reduzca la tasa de cotización adicional o que se les exima de ella si alcanzan un nivel óptimo de seguridad.
 
 Las empresas o entidades que no ofrezcan condiciones satisfactorias de seguridad y/o higiene, o que no implanten las medidas de seguridad que el organismo competente les ordene, deberán cancelar la cotización adicional con recargo de hasta el 100%, sin perjuicio de las demás sanciones que les correspondan.
 
-Las exenciones, rebajas o recargos de la cotización         LEY 18811 adicional se determinarán por las mutualidades de               Art. 2° empleadores respecto de sus empresas adherentes y por           D.O. 14.07.1989 los Servicios de Salud respecto de las demás empresas,
-
-en relación con la magnitud de los riesgos efectivos y las condiciones de seguridad existentes en la respectiva empresa, sin perjuicio de los demás requisitos que establece este artículo y el reglamento.
+Las exenciones, rebajas o recargos de la cotización         LEY 18811 adicional se determinarán por las mutualidades de               Art. 2° empleadores respecto de sus empresas adherentes y por           D.O. 14.07.1989 los Servicios de Salud respecto de las demás empresas, en relación con la magnitud de los riesgos efectivos y las condiciones de seguridad existentes en la respectiva empresa, sin perjuicio de los demás requisitos que establece este artículo y el reglamento.
 
 Las empresas podrán reclamar de lo resuelto por la respectiva Mutualidad de Empleadores ante la Superintendencia de Seguridad Social, en conformidad al inciso tercero del artículo 77 de esta ley, la que           LEY 19454 para resolver, si lo estima pertinente, podrá solicitar         Art. 8° N° 1 informe al Servicio de Salud correspondiente.                   D.O. 08.05.1996 El reglamento establecerá los requisitos y                  NOTA proporciones de las rebajas y recargos, así como también la forma, proporciones y plazos en que se concederán o aplicarán.
 
-El DTO 67, Trabajo, publicado el 07.03.2000, con Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 9 de 38 vigencia a contar de 1° de julio de 2001, estableció el reglamento para la aplicación de este artículo.
+El DTO 67, Trabajo, publicado el 07.03.2000, con vigencia a contar de 1° de julio de 2001, estableció el reglamento para la aplicación de este artículo.
 
 ## Artículo 17°.- Las cotizaciones se calcularán sobre
 
@@ -342,17 +235,9 @@ Durante el período en que los trabajadores se reincorporen al trabajo en virtud
 
 obligación de cotizar de parte de los empleadores afectos a alguna Mutualidad, deberán observarse las siguientes reglas:
 
-- a) La Mutualidad deberá hacer la liquidación de las
+a) La Mutualidad deberá hacer la liquidación de las cotizaciones adeudadas;
 
-cotizaciones adeudadas;
-
-- b) El infractor deberá pagar un interés penal de un 3%
-
-mensual sobre el monto de lo adeudado, y
-
-- c) En la misma liquidación se impondrá, también, una
-
-multa cuyo monto será equivalente al 50% de las imposiciones adeudadas, y en ningún caso, inferior a medio sueldo vital mensual, escala A) del departamento de Santiago.
+b) El infractor deberá pagar un interés penal de un 3% mensual sobre el monto de lo adeudado, y c) En la misma liquidación se impondrá, también, una multa cuyo monto será equivalente al 50% de las imposiciones adeudadas, y en ningún caso, inferior a medio sueldo vital mensual, escala A) del departamento de Santiago.
 
 Esta multa se recargará en un 50% si la infracción se produce con posterioridad a haberse verificado un accidente o enfermedad por algún trabajador.
 
@@ -362,23 +247,13 @@ La liquidación aprobada por el presidente de la respectiva Mutualidad tendrá m
 
 el de reparto. Pero deberá formarse una reserva de eventualidades no inferior al 2% ni superior al 5% del ingreso anual.
 
-## Artículo 20° Respecto de las Mutualidades, el               NOTA estatuto orgánico de ellas deberá establecer que estas          NOTA 1 instituciones formen, además de la reserva de eventualidades a que se refiere el artículo anterior,
+## Artículo 20° Respecto de las Mutualidades, el               NOTA
 
-una reserva adicional para atender el pago de las pensiones y de sus futuros reajustes.
+estatuto orgánico de ellas deberá establecer que estas          NOTA 1 instituciones formen, además de la reserva de eventualidades a que se refiere el artículo anterior, una reserva adicional para atender el pago de las pensiones y de sus futuros reajustes.
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 10 de 38 Véanse los Arts. 22 y 23 del DFL 285, Trabajo,
+Véanse los Arts. 22 y 23 del DFL 285, Trabajo, publicado el 26.02.1969, que reglamenta el Estatuto Orgánico de las Mutualidades de Empleadores.
 
-publicado el 26.02.1969, que reglamenta el Estatuto Orgánico de las Mutualidades de Empleadores.
-
-## `NOTA 1:`
-
-El Art. 21 de la LEY 19578, publicada el
-
-29.07.1998, dispuso que las Mutualidades de Empleadores
-
-deberán formar y mantener un Fondo de Contingencia y,
-
-además, deberán ajustarse a las normas de composición de activos representativos de la reserva de pensiones prevista en el presente artículo, según las reglas que indica y las instrucciones que al efecto imparta la Superintendencia de Seguridad Social, ello con la finalidad de financiar los mejoramientos extraordinarios de pensiones que se conceden en la referida ley y los beneficios pecuniarios extraordinarios que se establezcan a futuro, conforme a su Art. 20.
+## `NOTA 1:` El Art. 21 de la LEY 19578, publicada el 29.07.1998, dispuso que las Mutualidades de Empleadores deberán formar y mantener un Fondo de Contingencia y, además, deberán ajustarse a las normas de composición de activos representativos de la reserva de pensiones prevista en el presente artículo, según las reglas que indica y las instrucciones que al efecto imparta la Superintendencia de Seguridad Social, ello con la finalidad de financiar los mejoramientos extraordinarios de pensiones que se conceden en la referida ley y los beneficios pecuniarios extraordinarios que se establezcan a futuro, conforme a su Art. 20.
 
 ## Artículo 21.- El Instituto de Seguridad Laboral deberá
 
@@ -386,47 +261,41 @@ aportar al Ministerio de Salud un porcentaje de sus ingresos con el objeto de fi
 
 ## Artículo 22°.- DEROGADO.
 
-29.12.1988, dispuso que la derogación del presente
-
-## artículo entrará en vigencia a contar del primer día del mes siguiente al de su publicación.
+29.12.1988, dispuso que la derogación del presente artículo entrará en vigencia a contar del primer día del mes siguiente al de su publicación.
 
 ## Artículo 23.- Todas las sumas de dinero que le
 
-corresponda percibir al Ministerio de Salud por aplicación de lo dispuesto en esta ley se contabilizarán por separado,
-
-para destinarlas exclusivamente a los objetivos que esta ley
+corresponda percibir al Ministerio de Salud por aplicación de lo dispuesto en esta ley se contabilizarán por separado, para destinarlas exclusivamente a los objetivos que esta ley
 
 ## Artículo 24°.- Créase un fondo especial destinado a
 
-la rehabilitación de alcohólicos que será administrado por el Servicio Nacional de Salud y que se formará hasta con el 10% de los excedentes a que se refiere el inciso Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 11 de 38 tercero del artículo 21° y con el 10% de las multas de cualquiera naturaleza que se apliquen en conformidad a la presente ley.
+la rehabilitación de alcohólicos que será administrado por el Servicio Nacional de Salud y que se formará hasta con el 10% de los excedentes a que se refiere el inciso tercero del artículo 21° y con el 10% de las multas de cualquiera naturaleza que se apliquen en conformidad a la presente ley.
 
 El Servicio Nacional de Salud destinará estos recursos preferentemente a la construcción, habilitación y funcionamiento de clínicas para el uso de las instituciones con personalidad jurídica que existan o se constituyan exclusivamente con la finalidad señalada, a las que podrá también otorgar subvenciones de acuerdo con sus necesidades.
 
 Un reglamento que el Presidente de la República dictará, dentro del plazo de 180 días desde la fecha de la promulgación de la ley, determinará la forma de administrar y distribuir estos recursos.
 
-## Artículo 24° bis.- Las Mutualidades de Empleadores          LEY 18754 estarán exentas de la obligación de efectuar aportes            Art. 7° N° 2 para el financiamiento del seguro de las personas a que         D.O. 28.10.1988 se refieren el inciso final del artículo 2° y el                NOTA artículo 3° de esta ley.
+## Artículo 24° bis.- Las Mutualidades de Empleadores          LEY 18754
 
-El artículo 8° de la LEY 18754, publicada el
+estarán exentas de la obligación de efectuar aportes            Art. 7° N° 2 para el financiamiento del seguro de las personas a que         D.O. 28.10.1988 se refieren el inciso final del artículo 2° y el                NOTA artículo 3° de esta ley.
 
-28.10.1988, dispuso que las modificaciones introducidas
+El artículo 8° de la LEY 18754, publicada el 28.10.1988, dispuso que las modificaciones introducidas a la presente norma entrarán en vigencia el día primero del mes subsiguiente al de su publicación.
 
-a la presente norma entrarán en vigencia el día primero del mes subsiguiente al de su publicación.
+## TITULO V
 
-TITULO V Prestaciones Definiciones
+Prestaciones Definiciones
 
 ## Artículo 25°.- Para los efectos de esta ley se
 
-entenderá por "entidad empleadora" a toda empresa,
+entenderá por "entidad empleadora" a toda empresa, institución, servicio o persona que proporcione trabajo: y por "trabajador" a toda persona que preste servicios por cuenta propia o como dependiente para alguna entidad empleadora.                                                     Ley 21054 Art. ÚNICO N° 7 D.O. 23.12.2017
 
-institución, servicio o persona que proporcione trabajo: y por "trabajador" a toda persona que preste servicios por cuenta propia o como dependiente para alguna entidad empleadora.                                                     Ley 21054 Art. ÚNICO N° 7 D.O. 23.12.2017 Artículo 26° Para los efectos del cálculo de las pensiones e indemnizaciones, se entiende por sueldo             LEY 19454 base mensual el promedio de las remuneraciones o                Art. 8° N° 2 rentas, sujetas a cotización, excluidos los subsidios,          D.O. 08.05.1996 percibidas por el afiliado en los últimos seis meses,
+## Artículo 26° Para los efectos del cálculo de las
 
-inmediatamente anteriores al accidente o al diagnóstico médico, en caso de enfermedad profesional.
+pensiones e indemnizaciones, se entiende por sueldo             LEY 19454 base mensual el promedio de las remuneraciones o                Art. 8° N° 2 rentas, sujetas a cotización, excluidos los subsidios,          D.O. 08.05.1996 percibidas por el afiliado en los últimos seis meses, inmediatamente anteriores al accidente o al diagnóstico médico, en caso de enfermedad profesional.
 
 En caso que la totalidad de los referidos seis meses no estén cubiertos por cotizaciones, el sueldo base será igual al promedio de las remuneraciones o rentas por las cuales se han efectuado cotizaciones.
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 12 de 38 El trabajador podrá acreditar, en todo caso, que ha percibido una remuneración superior a aquélla por la cual se le hicieron las cotizaciones, debiendo entonces calcularse el sueldo base sobre la renta efectivamente percibida, sin perjuicio de que la respectiva institución previsional persiga el pago de las cotizaciones adeudadas, con sus intereses y multas, por la diferencia entre la remuneración real y la declarada para los efectos previsionales. Al empleador, también se le aplicará la sanción máxima establecida en el
-
-## artículo 80°.
+El trabajador podrá acreditar, en todo caso, que ha percibido una remuneración superior a aquélla por la cual se le hicieron las cotizaciones, debiendo entonces calcularse el sueldo base sobre la renta efectivamente percibida, sin perjuicio de que la respectiva institución previsional persiga el pago de las cotizaciones adeudadas, con sus intereses y multas, por la diferencia entre la remuneración real y la declarada para los efectos previsionales. Al empleador, también se le aplicará la sanción máxima establecida en el artículo 80°.
 
 Si el accidente o enfermedad ocurre antes que hubiere correspondido enterar la primera cotización, se tendrá por sueldo base el indicado como sueldo o renta en el acto de la afiliación o el que tuvo derecho a percibir a la fecha en que la afiliación debió efectuarse.
 
@@ -444,47 +313,41 @@ prestaciones pecuniarias, los accidentes del trabajo y enfermedades profesionale
 
 3.- Que producen invalidez total;
 
-4.- Que producen gran invalidez, y
-
-5.- Que producen la muerte.
+4.- Que producen gran invalidez, y 5.- Que producen la muerte.
 
 ## Artículo 28°.- Las prestaciones que establecen los
 
 artículos siguientes se deben otorgar, tanto en caso de accidente del trabajo como de enfermedad profesional.
 
-## Párrafo 2° Prestaciones médicas
+## Párrafo 2°
+
+Prestaciones médicas
 
 ## Artículo 29°.- La víctima de un accidente del trabajo
 
 o enfermedad profesional tendrá derecho a las siguientes prestaciones, que se otorgarán gratuitamente hasta su curación completa o mientras subsistan los síntomas de las secuelas causadas por la enfermedad o accidente:
 
-- a) Atención médica, quirúrgica y dental en
+a) Atención médica, quirúrgica y dental en establecimientos externos o a domicilio;
 
-establecimientos externos o a domicilio;
+b) Hospitalización si fuere necesario, a juicio del facultativo tratante;
 
-- b) Hospitalización si fuere necesario, a juicio del
+c) Medicamentos y productos farmacéuticos;
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 13 de 38 facultativo tratante;
+d) Prótesis y aparatos ortópedicos y su reparación;
 
-- c) Medicamentos y productos farmacéuticos;
-
-- d) Prótesis y aparatos ortópedicos y su reparación;
-
-- e) Rehabilitación física y reeducación profesional, y
-
-- f) Los gastos de traslado y cualquier otro que sea
-
-necesario para el otorgamiento de estas prestaciones.
+e) Rehabilitación física y reeducación profesional, y f) Los gastos de traslado y cualquier otro que sea necesario para el otorgamiento de estas prestaciones.
 
 También tendrán derecho a estas prestaciones médicas los asegurados que se encuentren en la situación a que se refiere el inciso final del artículo 5° de la presente ley.
 
-## `3. Prestaciones por incapacidad temporal` Artículo 30° La incapacidad temporal da derecho al          LEY 18768 accidentado o enfermo a un subsidio al cual le serán            Art. 96 c) aplicables las normas contenidas en los artículos 3°,           D.O. 29.12.1988 7°, 8°, 10, 11, 17, 19 y 22 del decreto con fuerza de           NOTA ley N° 44, de 1978, del Ministerio del Trabajo y                LEY 19454 Previsión Social, Subsecretaría de Previsión Social,            Art. 8° Nº 3 en el inciso segundo del artículo 21 de la ley N° 18.469        D.O. 08.09.1996 y en el artículo 17 del decreto ley N° 3.500 de 1980.
+## `3. Prestaciones por incapacidad temporal`
+
+## Artículo 30° La incapacidad temporal da derecho al          LEY 18768
+
+accidentado o enfermo a un subsidio al cual le serán            Art. 96 c) aplicables las normas contenidas en los artículos 3°,           D.O. 29.12.1988 7°, 8°, 10, 11, 17, 19 y 22 del decreto con fuerza de           NOTA ley N° 44, de 1978, del Ministerio del Trabajo y                LEY 19454 Previsión Social, Subsecretaría de Previsión Social,            Art. 8° Nº 3 en el inciso segundo del artículo 21 de la ley N° 18.469        D.O. 08.09.1996 y en el artículo 17 del decreto ley N° 3.500 de 1980.
 
 En todo caso, el monto del subsidio se reajustará en un porcentaje equivalente al alza que experimenten los correspondientes sueldos y salarios en virtud de leyes generales, o por aplicación de convenios colectivos de trabajo.
 
-29.12.1988, dispuso que la modificación introducida
-
-a este artículo entrará en vigencia a contar del primer día del mes siguiente al de su publicación.
+29.12.1988, dispuso que la modificación introducida a este artículo entrará en vigencia a contar del primer día del mes siguiente al de su publicación.
 
 ## Artículo 31°.- El subsidio se pagará durante toda la
 
@@ -492,9 +355,7 @@ duración del tratamiento, desde el día que ocurrió el accidente o se comprob�
 
 La duración máxima del período del subsidio será de 52 semanas, el cual se podrá prorrogar por 52 semanas más cuando sea necesario para un mejor tratamiento de la víctima o para atender a su rehabilitación.
 
-Si al cabo de las 52 semanas o de las 104, en su caso,
-
-no se hubiere logrado la curación, y/o rehabilitación de la víctima, se presumirá que presenta un estado de invalidez.
+Si al cabo de las 52 semanas o de las 104, en su caso, no se hubiere logrado la curación, y/o rehabilitación de la víctima, se presumirá que presenta un estado de invalidez.
 
 ## Artículo 32°.- El subsidio se pagará incluso por los
 
@@ -502,15 +363,15 @@ días feriados y no estará afecto a descuentos por concepto de impuestos o coti
 
 El beneficiario de subsidio, durante todo el tiempo que dure su otorgamiento, se considerará como activo en la respectiva institución de previsión social para todos los efectos legales.
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 14 de 38
-
 ## Artículo 33°.- Si el accidentado o enfermo se negare a
 
 seguir el tratamiento o dificultare o impidiere deliberadamente su curación, se podrá suspender el pago del subsidio a pedido del médico tratante y con el visto bueno del jefe técnico correspondiente.
 
 El afectado podrá reclamar en contra de esta resolución ante el Jefe del Area respectiva del Servicio Nacional de Salud, de cuya resolución, a su vez, podrá apelar ante la Comisión Médica de Reclamos de Accidentes del Trabajo y Enfermedades Profesionales.
 
-## Párrafo 4° Prestaciones por invalidez
+## Párrafo 4°
+
+Prestaciones por invalidez
 
 ## Artículo 34°.- Se considerará inválido parcial a
 
@@ -522,25 +383,21 @@ a un 15% e inferior a un 40%, la victima tendrá derecho a una indemnización gl
 
 En ningún caso esta indemnización global podrá ser inferior a medio sueldo vital mensual del departamento de Santiago.
 
-## Artículo 36° La indemnización global establecida            LEY 17671 en el artículo anterior se pagará de una sola vez o en          Art. 8º mensualidades iguales y vencidas, cuyo monto equivaldrá         D.O. 14.06.1972 a 30 veces el subsidio diario que se determine en conformidad al artículo 30° de esta ley, a opción del interesado. En el evento de que hubiera optado por el pago en cuotas podrá no obstante solicitar en cualquier momento el pago total del saldo insoluto de una sola vez.
+## Artículo 36° La indemnización global establecida            LEY 17671
+
+en el artículo anterior se pagará de una sola vez o en          Art. 8º mensualidades iguales y vencidas, cuyo monto equivaldrá         D.O. 14.06.1972 a 30 veces el subsidio diario que se determine en conformidad al artículo 30° de esta ley, a opción del interesado. En el evento de que hubiera optado por el pago en cuotas podrá no obstante solicitar en cualquier momento el pago total del saldo insoluto de una sola vez.
 
 ## Artículo 37°.- El asegurado que sufriere un accidente
 
 que, sin incapacitarlo para el trabajo, le produjere una mutilación importante o una deformación notoria, será considerado inválido parcial en conformidad a lo dispuesto en los artículos precedentes. En tal caso, tendrá derecho a la indemnización establecida en el artículo 35°, que será fijada, por el organismo administrador, de acuerdo al grado de mutilación o deformación. La mutilación importante o deformación notoria, si es en la cara, cabeza u órganos genitales dará derecho al máximo de la indemnización establecida en dicho artículo.
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 15 de 38
-
 ## Artículo 38°.- Si la disminución de la capacidad de
 
-ganancia es igual o superior a un 40% e inferior a un 70%,
-
-el accidentado o enfermo tendrá derecho a una pensión mensual, cuyo monto será equivalente al 35% del sueldo base.
+ganancia es igual o superior a un 40% e inferior a un 70%, el accidentado o enfermo tendrá derecho a una pensión mensual, cuyo monto será equivalente al 35% del sueldo base.
 
 ## Artículo 39°.- Se considerará inválido total a quien
 
-haya sufrido una disminución de su capacidad de ganancia,
-
-presumiblemente permanentemente igual o superior a un 70%.
+haya sufrido una disminución de su capacidad de ganancia, presumiblemente permanentemente igual o superior a un 70%.
 
 El inválido total tendrá derecho a una pensión mensual, equivalente al 70% de su sueldo base.
 
@@ -554,9 +411,7 @@ En caso de gran invalidez la víctima tendrá derecho a un suplemento de pensió
 
 aumentarán en un 5% por cada uno de los hijos que le causen asignación familiar al pensionado, en exceso sobre dos, sin perjuicio de las asignaciones familiares que correspondan.
 
-En ningún caso, esas pensiones podrán exceder del 50%,
-
-100% ó 140% del sueldo base, según sean por invalidez parcial, total, o gran invalidez, respectivamente.
+En ningún caso, esas pensiones podrán exceder del 50%, 100% ó 140% del sueldo base, según sean por invalidez parcial, total, o gran invalidez, respectivamente.
 
 La cuantía de la pensión será disminuida o aumentada cada vez que se extinga o nazca el derecho a los suplementos a que se refiere el inciso primero de este artículo.
 
@@ -566,19 +421,17 @@ suspender el pago de las pensiones a quienes se nieguen a someterse a los exáme
 
 El interesado podrá reclamar de la suspensión ante la Comisión Médica de Reclamos de Accidentes del Trabajo y Enfermedades Profesionales.
 
-## Párrafo 5° Prestaciones por supervivencia.
+## Párrafo 5°
+
+Prestaciones por supervivencia.
 
 ## Artículo 43°.- Si el accidente o enfermedad produjere
 
-la muerte del afiliado, o si fallece el inválido pensionado, el cónyuge, sus hijos legítimos, naturales,
-
-ilegítimos o adoptivos, la madre de sus hijos naturales,
-
-así como también los ascendientes o descendientes que le causaban asignación familiar, tendrán derecho a pensiones de supervivencia en conformidad con las reglas de los artículos siguientes.
+la muerte del afiliado, o si fallece el inválido pensionado, el cónyuge, sus hijos legítimos, naturales, ilegítimos o adoptivos, la madre de sus hijos naturales, así como también los ascendientes o descendientes que le causaban asignación familiar, tendrán derecho a pensiones de supervivencia en conformidad con las reglas de los artículos siguientes.
 
 ## Artículo 44°.- La cónyuge superviviente mayor de 45
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 16 de 38 años de edad, o inválida de cualquiera edad, tendrá derecho a una pensión vitalicia equivalente al 50% de la pensión básica que habría correspondido a la víctima si se hubiere invalidado totalmente, o de la pensión básica que percibía en el momento de la muerte.
+años de edad, o inválida de cualquiera edad, tendrá derecho a una pensión vitalicia equivalente al 50% de la pensión básica que habría correspondido a la víctima si se hubiere invalidado totalmente, o de la pensión básica que percibía en el momento de la muerte.
 
 Igual pensión corresponderá a la viuda menor de 45 años de edad, por el período de un año, el que se prorrogará por todo el tiempo durante el cual mantenga a su cuidado hijos legítimos que le causen asignación familiar.
 
@@ -606,7 +459,7 @@ menores de 18 años o mayores de esa edad, pero menores de 24 años, que sigan e
 
 ## Artículo 48°.- A falta de las personas designadas en
 
-las disposiciones precedentes, cada uno de los ascendientes y demás descendientes del causante que le causaban asignación familiar tendrán derecho a una pensión del Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 17 de 38 mismo monto señalado en el artículo anterior.
+las disposiciones precedentes, cada uno de los ascendientes y demás descendientes del causante que le causaban asignación familiar tendrán derecho a una pensión del mismo monto señalado en el artículo anterior.
 
 Estos descendientes tendrán derecho a la pensión mencionada en el inciso anterior hasta el último día del año en que cumplieran 18 años de edad.
 
@@ -624,9 +477,15 @@ Las reducciones que resulten de la aplicación del máximo señalado en el incis
 
 6. Cuota mortuoria
 
-### ARTICULO 51°.- DEROGADO                                     DFL 90, TRABAJO
+## ARTICULO 51°.- DEROGADO                                     DFL 90, TRABAJO
 
-Art. 12 D.O. 11.01.1979 Párrafo 7° Normas Generales
+## Art. 12
+
+D.O. 11.01.1979
+
+## Párrafo 7°
+
+Normas Generales
 
 ## Artículo 52°.- Las prestaciones de subsidios, pensión
 
@@ -636,15 +495,13 @@ y cuota mortuoria, que establece la presente ley, son incompatibles con las que 
 
 o enfermedad profesional que cumpla la edad para tener derecho a pensión dentro del correspondiente régimen previsional, entrará en el goce de esta última de acuerdo con las normas generales pertinentes, dejando de percibir la pensión de que disfrutaba.
 
-En ningún caso la nueva pensión podrá ser inferior al monto de la que disfrutaba, ni al 80% del sueldo base que sirvió para calcular la pensión anterior, amplificado en la forma que señalan los artículos 26° y 41° y su pago se hará con cargo a los recursos que la respectiva Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 18 de 38 institución de previsión social debe destinar al pago de pensiones de vejez.
+En ningún caso la nueva pensión podrá ser inferior al monto de la que disfrutaba, ni al 80% del sueldo base que sirvió para calcular la pensión anterior, amplificado en la forma que señalan los artículos 26° y 41° y su pago se hará con cargo a los recursos que la respectiva institución de previsión social debe destinar al pago de pensiones de vejez.
 
 Los pensionados por invalidez parcial que registren con posterioridad a la declaración de invalidez, 60 o más cotizaciones mensuales, como activos en su correspondiente régimen previsional tendrán derecho a que la nueva pensión a que se refieren los incisos anteriores, no sea inferior al 100% del sueldo base mencionado en el inciso precedente.
 
 ## Artículo 54°.- Los pensionados por accidentes o
 
-enfermedades profesionales deberán efectuar en el organismo previsional en que se encuentren afiliados las mismas cotizaciones que los otros pensionados, gozando, también,
-
-de los mismos beneficios por lo que respecta a atención médica, asignaciones familiares y demás que sean procedentes.
+enfermedades profesionales deberán efectuar en el organismo previsional en que se encuentren afiliados las mismas cotizaciones que los otros pensionados, gozando, también, de los mismos beneficios por lo que respecta a atención médica, asignaciones familiares y demás que sean procedentes.
 
 ## Artículo 55°.- Los organismos administradores
 
@@ -658,15 +515,21 @@ Los organismos administradores otorgarán al accidentado o enfermo las prestacio
 
 En los casos de siniestro en que se establezca el incumplimiento de la obligación de solicitar la afiliación por parte de un empleador, éste estará obligado a reembolsar al organismo administrador el total del costo de las prestaciones médicas y de subsidio que se hubieren otorgado y deban otorgarse a sus trabajadores, sin perjuicio del pago de las cotizaciones adeudadas y demás sanciones legales que procedan.
 
-## Artículo 57° El reglamento determinará la forma en          LEY 18269 que habrán de concurrir al pago de las pensiones o              Art. único Nº 4 indemnizaciones causadas por enfermedad profesional los         D.O. 28.12.1983 distintos organismos administradores en que, desde la fecha de vigencia de esta ley, haya estado afiliado el enfermo.
+## Artículo 57° El reglamento determinará la forma en          LEY 18269
+
+que habrán de concurrir al pago de las pensiones o              Art. único Nº 4 indemnizaciones causadas por enfermedad profesional los         D.O. 28.12.1983 distintos organismos administradores en que, desde la fecha de vigencia de esta ley, haya estado afiliado el enfermo.
 
 En todo caso, las concurrencias se calcularán en relación con el tiempo de imposiciones existentes en cada organismo administrador y en proporción al monto de la pensión o indemnización fijada de acuerdo con las normas de este seguro.
 
-El organismo administrador a que se encuentre Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 19 de 38 afiliado el enfermo al momento de declararse su derecho a pensión o indemnización deberá pagar la totalidad del beneficio y cobrará posteriormente, a los de anterior afiliación, las concurrencias que correspondan.
+El organismo administrador a que se encuentre afiliado el enfermo al momento de declararse su derecho a pensión o indemnización deberá pagar la totalidad del beneficio y cobrará posteriormente, a los de anterior afiliación, las concurrencias que correspondan.
 
-TITULO VI Evaluación, reevaluación y revisión de incapacidades Artículo 58° La declaración, evaluación,                    LEY 18269 reevaluación y revisión de las incapacidades                    Art. único Nº 5 permanentes serán de exclusiva competencia de los               D.O. 28.12.1983 Servicios de Salud. Sin embargo, respecto de los afiliados a las Mutualidades, la declaración,
+## TITULO VI
 
-evaluación, reevaluación y revisión de las incapacidades permanentes derivadas de accidentes del trabajo corresponderá a estas instituciones.
+Evaluación, reevaluación y revisión de incapacidades
+
+## Artículo 58° La declaración, evaluación,                    LEY 18269
+
+reevaluación y revisión de las incapacidades                    Art. único Nº 5 permanentes serán de exclusiva competencia de los               D.O. 28.12.1983 Servicios de Salud. Sin embargo, respecto de los afiliados a las Mutualidades, la declaración, evaluación, reevaluación y revisión de las incapacidades permanentes derivadas de accidentes del trabajo corresponderá a estas instituciones.
 
 Las resoluciones de las Mutualidades que se dicten sobre las materias a que se refiere este artículo se ajustarán, en lo pertinente, a las mismas normas legales y reglamentarias aplicables a los otros administradores del seguro de esta ley.
 
@@ -674,25 +537,19 @@ Las resoluciones de las Mutualidades que se dicten sobre las materias a que se r
 
 permanente del accidentado o enfermo se harán en función de su incapacidad para procurarse por medio de un trabajo proporcionado a sus actuales fuerzas, capacidad y formación, una remuneración equivalente al salario o renta que gana una persona sana en condiciones análogas y en la misma localidad.
 
-## Artículo 60° Para los efectos de determinar las incapacidades permanentes, el reglamento las clasificará y graduará, asignando a cada cual un porcentaje de incapacidad oscilante entre un máximo y un mínimo.
+## Artículo 60° Para los efectos de determinar las
 
-El porcentaje exacto, en cada caso particular, será         LEY 18269 determinado por el médico especialista del Servicio de          Art. único Nº 6 Salud respectivo o de las Mutualidades en los casos de          D.O. 28.12.1983 incapacidades permanentes de sus afiliados derivadas de accidentes del trabajo, dentro de la escala preestablecida por el reglamento. El facultativo,
+incapacidades permanentes, el reglamento las clasificará y graduará, asignando a cada cual un porcentaje de incapacidad oscilante entre un máximo y un mínimo.
 
-al determinar el porcentaje exacto, deberá tener,
+El porcentaje exacto, en cada caso particular, será         LEY 18269 determinado por el médico especialista del Servicio de          Art. único Nº 6 Salud respectivo o de las Mutualidades en los casos de          D.O. 28.12.1983 incapacidades permanentes de sus afiliados derivadas de accidentes del trabajo, dentro de la escala preestablecida por el reglamento. El facultativo, al determinar el porcentaje exacto, deberá tener, especialmente, en cuenta, entre otros factores, la edad, el sexo y la profesión habitual del afiliado.
 
-especialmente, en cuenta, entre otros factores, la edad, el sexo y la profesión habitual del afiliado.
-
-En los casos en que se verifique una incapacidad no graduada ni clasificada previamente, corresponderá hacer la valoración concreta al médico especialista del Servicio de Salud respectivo o de las Mutualidades,
-
-en su caso, sujetándose para ello, al concepto dado en el artículo anterior y teniendo en cuenta los factores mencionados en el inciso precedente.
+En los casos en que se verifique una incapacidad no graduada ni clasificada previamente, corresponderá hacer la valoración concreta al médico especialista del Servicio de Salud respectivo o de las Mutualidades, en su caso, sujetándose para ello, al concepto dado en el artículo anterior y teniendo en cuenta los factores mencionados en el inciso precedente.
 
 ## Artículo 61°.- Si el inválido profesional sufre un
 
-nuevo accidente o enfermedad, también de origen Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 20 de 38 profesional, procederá a hacer una reevaluación de la incapacidad en función del nuevo estado que presente.
+nuevo accidente o enfermedad, también de origen profesional, procederá a hacer una reevaluación de la incapacidad en función del nuevo estado que presente.
 
-Si la nueva incapacidad ocurre mientras el trabajador se encuentra afiliado a un organismo administrador distinto del que estaba cuando se produjo la primera incapacidad, será el último organismo el que deberá pagar, en su totalidad,
-
-la prestación correspondiente al nuevo estado que finalmente presente el inválido. Pero si el anterior organismo estaba pagando una pensión, deberá concurrir asl pago de la nueva prestación con una suma equivalente al monto de dicha pensión.
+Si la nueva incapacidad ocurre mientras el trabajador se encuentra afiliado a un organismo administrador distinto del que estaba cuando se produjo la primera incapacidad, será el último organismo el que deberá pagar, en su totalidad, la prestación correspondiente al nuevo estado que finalmente presente el inválido. Pero si el anterior organismo estaba pagando una pensión, deberá concurrir asl pago de la nueva prestación con una suma equivalente al monto de dicha pensión.
 
 ## Artículo 62°.- Procederá, también, hacer una
 
@@ -702,17 +559,13 @@ Las prestaciones que corresponda pagar, en virtud de esta reevaluación, serán 
 
 ## Artículo 63°.- Las declaraciones de incapacidad serán
 
-revisables por agravación, mejoría o error en el diagnóstico y, según el resultado de estas revisiones, se concederá o terminará el derecho al pago de las pensiones,
-
-o se aumentará o disminuirá su monto.
+revisables por agravación, mejoría o error en el diagnóstico y, según el resultado de estas revisiones, se concederá o terminará el derecho al pago de las pensiones, o se aumentará o disminuirá su monto.
 
 La revisión podrá realizarse, también, a petición del interesado, en la forma que determine el reglamento.
 
 ## Artículo 64°.- En todo caso, durante los primeros ocho
 
-años contados desde la fecha de concesión de la pensión,
-
-el inválido deberá someterse a examen cada dos años.
+años contados desde la fecha de concesión de la pensión, el inválido deberá someterse a examen cada dos años.
 
 Pasado aquel plazo el organismo administrador podrá exigir nuevos exámenes en los casos y con la frecuencia que determine el reglamento.
 
@@ -720,43 +573,31 @@ El reglamento determinará los casos en que podrá prescindirse del examen a que
 
 Al practicarse la nueva evaluación se habrán de tener también en cuenta las nueva posibilidades que haya tenido el inválido para actualizar su capacidad residual de trabajo.
 
-TITULO VII Prevención de riesgos profesionales
+## TITULO VII
+
+Prevención de riesgos profesionales
 
 ## Artículo 65°.- Corresponderá al Servicio Nacional           NOTA
 
-de Salud la competencia general en materia de supervigilancia y fiscalización de la prevención,
-
-higiene y seguridad de todos los sitios de trabajo,
-
-cualesquiera que sean las actividades que en ellos se Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 21 de 38 ## `realicen.` La competencia a que se refiere el inciso anterior la tendrá el Servicio Nacional de Salud incluso respecto de aquellas empresas del Estado que, por aplicación de sus leyes orgánicas que las rigen, se encuentren actualmente exentas de este control.
+de Salud la competencia general en materia de supervigilancia y fiscalización de la prevención, higiene y seguridad de todos los sitios de trabajo, cualesquiera que sean las actividades que en ellos se ## `realicen.` La competencia a que se refiere el inciso anterior la tendrá el Servicio Nacional de Salud incluso respecto de aquellas empresas del Estado que, por aplicación de sus leyes orgánicas que las rigen, se encuentren actualmente exentas de este control.
 
 Corresponderá, también, al Servicio Nacional de Salud la fiscalización de las instalaciones médicas de los demás organismos administradores, de la forma y condiciones cómo tales organismos otorguen las prestaciones médicas, y de la calidad de las actividades de prevención que realicen.
 
-El DTO 40, Trabajo, publicado el 07.03.1969, fijó el reglamento de prevención de riesgos profesionales,
+El DTO 40, Trabajo, publicado el 07.03.1969, fijó el reglamento de prevención de riesgos profesionales, de que trata este título.
 
-de que trata este título.
+## Artículo 66° En toda industria o faena en que
 
-## Artículo 66° En toda industria o faena en que trabajen más de 25 personas deberán funcionar uno o más Comités Paritarios de Higiene y Seguridad, que tendrán las siguientes funciones:
+trabajen más de 25 personas deberán funcionar uno o más Comités Paritarios de Higiene y Seguridad, que tendrán las siguientes funciones:
 
-1.- Asesorar e instruir a los trabajadores para la
+1.- Asesorar e instruir a los trabajadores para la correcta utilización de los instrumentos de protección;
 
-correcta utilización de los instrumentos de protección;
+2.- Vigilar el cumplimiento, tanto por parte de las empresas como de los trabajadores, de las medidas de prevención, higiene y seguridad.
 
-2.- Vigilar el cumplimiento, tanto por parte de las
+3.- Investigar las causas de los accidentes del trabajo y enfermedades profesionales, que se produzcan en la empresa y de cualquiera otra afección que                 LEY 20308 afecte en forma reiterada o general a los                       Art. 4º trabajadores y sea presumible que tenga su origen en            D.O. 27.12.2008 la utilización de productos fitosanitarios, químicos o nocivos para la salud;
 
-empresas como de los trabajadores, de las medidas de prevención, higiene y seguridad.
+4.- Indicar la adopción de todas las medidas de higiene y seguridad, que sirvan para la prevención de los riesgos profesionales;
 
-3.- Investigar las causas de los accidentes del
-
-trabajo y enfermedades profesionales, que se produzcan en la empresa y de cualquiera otra afección que                 LEY 20308 afecte en forma reiterada o general a los                       Art. 4º trabajadores y sea presumible que tenga su origen en            D.O. 27.12.2008 la utilización de productos fitosanitarios, químicos o nocivos para la salud;
-
-4.- Indicar la adopción de todas las medidas de
-
-higiene y seguridad, que sirvan para la prevención de los riesgos profesionales;
-
-5.- Cumplir las demás funciones o misiones que le
-
-encomiende el organismo administrador respectivo.
+5.- Cumplir las demás funciones o misiones que le encomiende el organismo administrador respectivo.
 
 El representante o los representantes de los trabajadores serán designados por los propios trabajadores.
 
@@ -766,53 +607,39 @@ En aquellas empresas mineras, industriales o comerciales que ocupen a más de 10
 
 Las empresas estarán obligadas a adoptar y poner en práctica las medidas de prevención que les indique el Departamento de Prevención y/o el Comité Paritario;
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 22 de 38 pero podrán apelar de tales resoluciones ante el respectivo organismo administrador, dentro del plazo de 30 días, desde que le sea notificada la resolución del Departamento de Prevención o del Comité Paritario de Higiene y Seguridad.
+pero podrán apelar de tales resoluciones ante el respectivo organismo administrador, dentro del plazo de 30 días, desde que le sea notificada la resolución del Departamento de Prevención o del Comité Paritario de Higiene y Seguridad.
 
-El incumplimiento de las medidas acordadas por el Departamento de Prevención o por el Comité Paritario,
+El incumplimiento de las medidas acordadas por el Departamento de Prevención o por el Comité Paritario, cuando hayan sido ratificadas por el respectivo organismo administrador, será sancionado en la forma que preceptúa el artículo 68°.                                  Ley 20773
 
-cuando hayan sido ratificadas por el respectivo organismo administrador, será sancionado en la forma que preceptúa el artículo 68°.                                  Ley 20773 Art. 2 N° 1 D.O. 17.09.2014 El DTO 54, Trabajo, publicado el 11.03.1969,
+## Art. 2 N° 1
 
-aprobó el Reglamento para la constitución y funcionamiento de los Comités Paritarios.
+D.O. 17.09.2014 El DTO 54, Trabajo, publicado el 11.03.1969, aprobó el Reglamento para la constitución y funcionamiento de los Comités Paritarios.
 
-## Artículo 66° Bis.- Los empleadores que contraten            LEY 20123 o subcontraten con otros la realización de una obra,            Art. 7º a) faena o servicios propios de su giro, deberán vigilar           D.O. 16.10.2006 el cumplimiento por parte de dichos contratistas o              NOTA subcontratistas de la normativa relativa a higiene y            NOTA 1 seguridad, debiendo para ello implementar un sistema de gestión de la seguridad y salud en el trabajo para todos los trabajadores involucrados, cualquiera que sea su dependencia, cuando en su conjunto agrupen a más de 50 trabajadores.
+## Artículo 66° Bis.- Los empleadores que contraten            LEY 20123
 
-Para la implementación de este sistema de gestión,
+o subcontraten con otros la realización de una obra,            Art. 7º a) faena o servicios propios de su giro, deberán vigilar           D.O. 16.10.2006 el cumplimiento por parte de dichos contratistas o              NOTA subcontratistas de la normativa relativa a higiene y            NOTA 1 seguridad, debiendo para ello implementar un sistema de gestión de la seguridad y salud en el trabajo para todos los trabajadores involucrados, cualquiera que sea su dependencia, cuando en su conjunto agrupen a más de 50 trabajadores.
 
-la empresa principal deberá confeccionar un reglamento especial para empresas contratistas y subcontratistas,
+Para la implementación de este sistema de gestión, la empresa principal deberá confeccionar un reglamento especial para empresas contratistas y subcontratistas, en el que se establezca como mínimo las acciones de coordinación entre los distintos empleadores de las actividades preventivas, a fin de garantizar a todos los trabajadores condiciones de higiene y seguridad adecuadas. Asimismo, se contemplarán en dicho reglamento los mecanismos para verificar su cumplimiento por parte de la empresa mandante y las sanciones aplicables.
 
-en el que se establezca como mínimo las acciones de coordinación entre los distintos empleadores de las actividades preventivas, a fin de garantizar a todos los trabajadores condiciones de higiene y seguridad adecuadas. Asimismo, se contemplarán en dicho reglamento los mecanismos para verificar su cumplimiento por parte de la empresa mandante y las sanciones aplicables.
+Asimismo, corresponderá al mandante, velar por la constitución y funcionamiento de un Comité Paritario de Higiene y Seguridad y un Departamento de Prevención de Riesgos para tales faenas, aplicándose a su respecto para calcular el número de trabajadores exigidos por los incisos primero y cuarto, del artículo 66, respectivamente, la totalidad de los trabajadores que prestan servicios en un mismo lugar de trabajo, cualquiera sea su dependencia. Los requisitos para la constitución y funcionamiento de los mismos serán determinados por el reglamento que dictará el Ministerio del Trabajo y Previsión Social.
 
-Asimismo, corresponderá al mandante, velar por la constitución y funcionamiento de un Comité Paritario de Higiene y Seguridad y un Departamento de Prevención de Riesgos para tales faenas, aplicándose a su respecto para calcular el número de trabajadores exigidos por los incisos primero y cuarto, del artículo 66,
+El Art. segundo transitorio de la LEY 20123, publicada el 16.10.2006, estableció que la modificación introducida al presente artículo regirá a contar de 90 días después de su publicación.
 
-respectivamente, la totalidad de los trabajadores que prestan servicios en un mismo lugar de trabajo,
+El DTO 76, Trabajo, publicado el 18.01.2007, fijó el Reglamento para la aplicación del presente
 
-cualquiera sea su dependencia. Los requisitos para la constitución y funcionamiento de los mismos serán determinados por el reglamento que dictará el Ministerio del Trabajo y Previsión Social.
+## Artículo 66 ter.- Las empresas de muellaje estarán
 
-El Art. segundo transitorio de la LEY 20123,
-
-publicada el 16.10.2006, estableció que la Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 23 de 38 modificación introducida al presente artículo regirá a contar de 90 días después de su publicación.
-
-El DTO 76, Trabajo, publicado el 18.01.2007,
-
-fijó el Reglamento para la aplicación del presente Artículo 66 ter.- Las empresas de muellaje estarán obligadas a constituir un Comité Paritario de Higiene y Seguridad en cada puerto, terminal o frente de atraque en que presten regularmente servicios, siempre que, sumados los trabajadores permanentes y eventuales de la misma, trabajen habitualmente más de 25 personas, conforme al promedio mensual del año calendario anterior.                            Ley 20773 Los trabajadores integrantes del Comité Paritario          Art. 2 N° 2 indicado en el inciso anterior deberán ser elegidos entre       D.O. 17.09.2014 los trabajadores portuarios permanentes y eventuales de la respectiva entidad empleadora, en la forma que señale el Sin perjuicio de lo señalado en el inciso primero,
-
-cuando en un mismo puerto presten servicios dos o más entidades empleadoras de las señaladas en el artículo 136 del Código del Trabajo, cada una de ellas deberá otorgar las facilidades necesarias para la integración,
-
-constitución y funcionamiento de un Comité Paritario de Higiene y Seguridad, cuyas decisiones en las materias de su competencia serán obligatorias para todas estas entidades empleadoras y sus trabajadores.
+obligadas a constituir un Comité Paritario de Higiene y Seguridad en cada puerto, terminal o frente de atraque en que presten regularmente servicios, siempre que, sumados los trabajadores permanentes y eventuales de la misma, trabajen habitualmente más de 25 personas, conforme al promedio mensual del año calendario anterior.                            Ley 20773 Los trabajadores integrantes del Comité Paritario          Art. 2 N° 2 indicado en el inciso anterior deberán ser elegidos entre       D.O. 17.09.2014 los trabajadores portuarios permanentes y eventuales de la respectiva entidad empleadora, en la forma que señale el Sin perjuicio de lo señalado en el inciso primero, cuando en un mismo puerto presten servicios dos o más entidades empleadoras de las señaladas en el artículo 136 del Código del Trabajo, cada una de ellas deberá otorgar las facilidades necesarias para la integración, constitución y funcionamiento de un Comité Paritario de Higiene y Seguridad, cuyas decisiones en las materias de su competencia serán obligatorias para todas estas entidades empleadoras y sus trabajadores.
 
 Al Comité Paritario de Higiene y Seguridad corresponderá la coordinación de los Comités Paritarios de empresa y el ejercicio de aquellas atribuciones que establece el artículo 66, en los casos y bajo las modalidades que defina el reglamento.
 
-Los representantes de los trabajadores ante el Comité Paritario de Higiene y Seguridad serán elegidos por éstos,
-
-en la forma que determine el reglamento. Corresponderá igualmente al reglamento establecer un mecanismo por el cual las distintas entidades empleadoras obligadas designen a sus representantes ante el Comité Paritario de Higiene y Seguridad.
+Los representantes de los trabajadores ante el Comité Paritario de Higiene y Seguridad serán elegidos por éstos, en la forma que determine el reglamento. Corresponderá igualmente al reglamento establecer un mecanismo por el cual las distintas entidades empleadoras obligadas designen a sus representantes ante el Comité Paritario de Higiene y Seguridad.
 
 El Comité a que hace referencia este artículo se denominará para todos los efectos legales Comité Paritario de Higiene y Seguridad de Faena Portuaria.
 
 ## Artículo 67°.- Las empresas o entidades estarán
 
-obligadas a mantener al día los reglamentos internos de higiene y seguridad en el trabajo y los trabajadores a cumplir con las exigencias que dichos reglamentos les impongan. Los reglamentos deberán consultar la aplicación de multas a los trabajadores que no utilicen los elementos de protección personal que se les haya proporcionado o que no cumplan las obligaciones que les impongan las normas,
-
-reglamentaciones o instrucciones sobre higiene y seguridad Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 24 de 38 en el trabajo. La aplicación de tales multas se regirá por lo dispuesto en el Párrafo I del Título III del Libro I del Código del Trabajo.
+obligadas a mantener al día los reglamentos internos de higiene y seguridad en el trabajo y los trabajadores a cumplir con las exigencias que dichos reglamentos les impongan. Los reglamentos deberán consultar la aplicación de multas a los trabajadores que no utilicen los elementos de protección personal que se les haya proporcionado o que no cumplan las obligaciones que les impongan las normas, reglamentaciones o instrucciones sobre higiene y seguridad en el trabajo. La aplicación de tales multas se regirá por lo dispuesto en el Párrafo I del Título III del Libro I del Código del Trabajo.
 
 ## Artículo 68°.- Las empresas o entidades deberán
 
@@ -830,13 +657,7 @@ El Servicio Nacional de Salud queda facultado para clausurar las fábricas, tall
 
 deba a culpa o dolo de la entidad empleadora o de un tercero, sin perjuicio de las acciones criminales que procedan, deberán observarse las siguientes reglas:
 
-- a) El organismo administrador tendrá derecho a repetir
-
-en contra del responsable del accidente, por las prestaciones que haya otorgado o deba otorgar, y
-
-- b) La víctima y las demás personas a quienes el
-
-accidente o enfermedad cause daño podrán reclamar al empleador o terceros responsables del accidente, también las otras indemnizaciones a que tengan derecho, con arreglo a las prescripciones del derecho común, incluso el daño moral.
+a) El organismo administrador tendrá derecho a repetir en contra del responsable del accidente, por las prestaciones que haya otorgado o deba otorgar, y b) La víctima y las demás personas a quienes el accidente o enfermedad cause daño podrán reclamar al empleador o terceros responsables del accidente, también las otras indemnizaciones a que tengan derecho, con arreglo a las prescripciones del derecho común, incluso el daño moral.
 
 ## Artículo 70°.- Si el accidente o enfermedad ocurre
 
@@ -848,13 +669,11 @@ Corresponderá al Comité Paritario de Higiene y Seguridad decidir si medió neg
 
 enfermedad profesional deberán ser trasladados, por la empresa donde presten sus servicios, a otras faenas donde no estén expuestos al agente causante de la enfermedad.
 
-Los trabajadores que sean citados para exámenes de control por los servicios médicos de los organismos Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 25 de 38 administradores, deberán ser autorizados por su empleador para su asistencia, y el tiempo que en ello utilicen será considerado como trabajado para todos los efectos legales.
+Los trabajadores que sean citados para exámenes de control por los servicios médicos de los organismos administradores, deberán ser autorizados por su empleador para su asistencia, y el tiempo que en ello utilicen será considerado como trabajado para todos los efectos legales.
 
-Las empresas que exploten faenas en que trabajadores suyos puedan estar expuestos al riesgo de neumoconiosis,
+Las empresas que exploten faenas en que trabajadores suyos puedan estar expuestos al riesgo de neumoconiosis, deberán realizar un control radiográfico semestral de tales trabajadores.
 
-deberán realizar un control radiográfico semestral de tales trabajadores.
-
-TITULO VIII
+## TITULO VIII
 
 ## Disposiciones finales
 
@@ -866,21 +685,11 @@ condiciones que señala el inciso siguiente del presente artículo, tendrán der
 
 Tales empresas deberán ocupar habitualmente dos mil o más trabajadores, deben tener un capital y reservas superior a siete mil sueldos vitales anuales, escala A) del departamento de Santiago y cumplir, además, los siguientes requisitos:
 
-- a) Poseer servicios médicos adecuados, con personal
+a) Poseer servicios médicos adecuados, con personal especializado en rehabilitación;
 
-especializado en rehabilitación;
+b) Realizar actividades permanentes y efectivas de prevención de accidentes y enfermedades profesionales;
 
-- b) Realizar actividades permanentes y efectivas de
-
-prevención de accidentes y enfermedades profesionales;
-
-- c) Constituir garantías suficientes del fiel
-
-cumplimiento de las obligaciones que asumen, ante los organismos previsionales, que hubieren delegado la administración, y
-
-- d) Contar con el o los Comités Paritarios de Seguridad
-
-a que se refiere el artículo 66°.
+c) Constituir garantías suficientes del fiel cumplimiento de las obligaciones que asumen, ante los organismos previsionales, que hubieren delegado la administración, y d) Contar con el o los Comités Paritarios de Seguridad a que se refiere el artículo 66°.
 
 Los organismos administradores deberán exigir a las empresas que se acojan a este sistema, un determinado aporte cuya cuantía la fijarán de acuerdo con las normas que establezca el reglamento.
 
@@ -892,15 +701,17 @@ también convenir con organismos intermedios o de base que éstos realicen, por 
 
 ## Artículo 74°.- Los servicios de las entidades con
 
-administración delegada serán supervigilados por el Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 26 de 38 Servicio Nacional de Salud y por la Superintendencia de Seguridad Social, cada cual dentro de sus respectivas competencias.
+administración delegada serán supervigilados por el Servicio Nacional de Salud y por la Superintendencia de Seguridad Social, cada cual dentro de sus respectivas competencias.
 
 ## Artículo 75°.- Las delegaciones de que trata el
 
-## artículo 72° deberán ser autorizadas por la Superintendencia de Seguridad Social, previo informe del Servicio Nacional de Salud.
+artículo 72° deberán ser autorizadas por la Superintendencia de Seguridad Social, previo informe del Servicio Nacional de Salud.
 
-## `2. Procedimiento y recursos` Artículo 76° La entidad empleadora deberá denunciar al organismo administrador respectivo,
+## `2. Procedimiento y recursos`
 
-inmediatamente de producido, todo accidente o enfermedad que pueda ocasionar incapacidad para el trabajo o la muerte de la víctima. El accidentado o enfermo, o sus derecho-habientes, o el médico que trató o diagnosticó la lesión o enfermedad, como igualmente el Comité Paritario de Seguridad, tendrán también, la obligación de denunciar el hecho en dicho organismo administrador, en el caso de que la entidad empleadora no hubiere realizado la denuncia.
+## Artículo 76° La entidad empleadora deberá
+
+denunciar al organismo administrador respectivo, inmediatamente de producido, todo accidente o enfermedad que pueda ocasionar incapacidad para el trabajo o la muerte de la víctima. El accidentado o enfermo, o sus derecho-habientes, o el médico que trató o diagnosticó la lesión o enfermedad, como igualmente el Comité Paritario de Seguridad, tendrán también, la obligación de denunciar el hecho en dicho organismo administrador, en el caso de que la entidad empleadora no hubiere realizado la denuncia.
 
 Las denuncias mencionadas en el inciso anterior deberán contener todos los datos que hayan sido indicados por el Servicio Nacional de Salud.
 
@@ -912,49 +723,31 @@ En estos mismos casos el empleador deberá suspender de forma inmediata las faen
 
 Las infracciones a lo dispuesto en los incisos cuarto y quinto, serán sancionadas con multa a beneficio fiscal de cincuenta a ciento cincuenta unidades tributarias mensuales, las que serán aplicadas por los servicios fiscalizadores a que se refiere el inciso cuarto.
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 27 de 38 El Art. segundo transitorio de la LEY 20123,
-
-publicada el 16.10.2006, estableció que la modificación introducida al presente artículo regirá a contar de 90 días después de su publicación.
+El Art. segundo transitorio de la LEY 20123, publicada el 16.10.2006, estableció que la modificación introducida al presente artículo regirá a contar de 90 días después de su publicación.
 
 ## Artículo 77° Los afiliados o sus derecho-habientes,
 
 así como también los organismos administradores podrán reclamar dentro del plazo de 90 días hábiles             LEY 18269 ante la Comisión Médica de Reclamos de Accidentes del           Art. único Nº 7 Trabajo y Enfermedades Profesionales, de las decisiones         D.O. 28.12.1983 de los Servicios de Salud o de las Mutualidades en su caso recaidas en cuestiones de hecho que se refieran a materias de orden médico.
 
-Las resoluciones de la Comisión serán apelables,
+Las resoluciones de la Comisión serán apelables, en todo caso, ante la Superintendencia de Seguridad Social dentro del plazo de 30 días hábiles, la que resolverá con competencia exclusiva y sin ulterior recurso.
 
-en todo caso, ante la Superintendencia de Seguridad Social dentro del plazo de 30 días hábiles, la que resolverá con competencia exclusiva y sin ulterior recurso.
-
-Sin perjuicio de lo dispuesto en los incisos precedentes, en contra de las demás resoluciones de los organismos administradores podrá reclamarse,
-
-dentro del plazo de 90 días hábiles, directamente a la Superintendencia de Seguridad Social.
+Sin perjuicio de lo dispuesto en los incisos precedentes, en contra de las demás resoluciones de los organismos administradores podrá reclamarse, dentro del plazo de 90 días hábiles, directamente a la Superintendencia de Seguridad Social.
 
 Los plazos mencionados en este artículo se                  LEY 19394 contarán desde la notificación de la resolución, la             Art. único Nº 1 que se efectuará mediante carta certificada o por               D.O. 21.06.1995 los otros medios que establezcan los respectivos                LEY 18899 reglamentos. Si se hubiere notificado por carta                 Art. 62 certificada, el plazo se contará desde el tercer                D.O. 30.12.1989 día de recibida la misma en el Servicio de Correos.
 
-## Artículo 77 bis.- El trabajador afectado por el             LEY 19394 rechazo de una licencia o de un reposo médico por parte         Art. único Nº 2 de los organismos de los Servicios de Salud, de las             D.O. 21.06.1995 Instituciones de Salud Previsional o de las Mutualidades de Empleadores, basado en que la afección invocada tiene o no tiene origen profesional, según el caso, deberá concurrir ante el organismo de régimen previsional a que esté afiliado, que no sea el que rechazó la licencia o el reposo médico, el cual estará obligado a cursarla de inmediato y a otorgar las prestaciones médicas o pecuniarias que correspondan, sin perjuicio de los reclamos posteriores y reembolsos, si procedieren, que establece este artículo.
+## Artículo 77 bis.- El trabajador afectado por el             LEY 19394
 
-En la situación prevista en el inciso anterior,
+rechazo de una licencia o de un reposo médico por parte         Art. único Nº 2 de los organismos de los Servicios de Salud, de las             D.O. 21.06.1995 Instituciones de Salud Previsional o de las Mutualidades de Empleadores, basado en que la afección invocada tiene o no tiene origen profesional, según el caso, deberá concurrir ante el organismo de régimen previsional a que esté afiliado, que no sea el que rechazó la licencia o el reposo médico, el cual estará obligado a cursarla de inmediato y a otorgar las prestaciones médicas o pecuniarias que correspondan, sin perjuicio de los reclamos posteriores y reembolsos, si procedieren, que establece este artículo.
 
-cualquier persona o entidad interesada podrá reclamar directamente en la Superintendencia de Seguridad Social por el rechazo de la licencia o del reposo médico,
+En la situación prevista en el inciso anterior, cualquier persona o entidad interesada podrá reclamar directamente en la Superintendencia de Seguridad Social por el rechazo de la licencia o del reposo médico, debiendo ésta resolver, con competencia exclusiva y sin ulterior recurso, sobre el carácter de la afección que dio origen a ella, en el plazo de treinta días contado desde la recepción de los antecedentes que se requieran o desde la fecha en que el trabajador afectado se hubiere sometido a los exámenes que disponga dicho Organismo, si éstos fueren posteriores.
 
-debiendo ésta resolver, con competencia exclusiva y sin ulterior recurso, sobre el carácter de la afección que dio origen a ella, en el plazo de treinta días contado desde la recepción de los antecedentes que se requieran o desde la fecha en que el trabajador afectado se hubiere sometido a los exámenes que disponga dicho Organismo, si éstos fueren posteriores.
+Si la Superintendencia de Seguridad Social resuelve que las prestaciones debieron otorgarse con cargo a un régimen previsional diferente de aquel conforme al cual se proporcionaron, el Servicio de Salud, el Instituto de Normalización Previsional, la Mutualidad de Empleadores, la Caja de Compensación de Asignación Familiar o la Institución de Salud Previsional, según corresponda, deberán reembolsar el valor de aquéllas al organismo administrador de la entidad que las solventó, debiendo este último efectuar el requerimiento respectivo. En dicho reembolso se deberá incluir la parte que debió financiar el trabajador en conformidad al régimen de salud previsional a que esté afiliado.
 
-Si la Superintendencia de Seguridad Social resuelve Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 28 de 38 que las prestaciones debieron otorgarse con cargo a un régimen previsional diferente de aquel conforme al cual se proporcionaron, el Servicio de Salud, el Instituto de Normalización Previsional, la Mutualidad de Empleadores,
-
-la Caja de Compensación de Asignación Familiar o la Institución de Salud Previsional, según corresponda,
-
-deberán reembolsar el valor de aquéllas al organismo administrador de la entidad que las solventó, debiendo este último efectuar el requerimiento respectivo. En dicho reembolso se deberá incluir la parte que debió financiar el trabajador en conformidad al régimen de salud previsional a que esté afiliado.
-
-El valor de las prestaciones que, conforme al inciso precedente, corresponda reembolsar, se expresará en unidades de fomento, según el valor de éstas en el momento de su otorgamiento, con más el interés corriente para operaciones reajustables a que se refiere la ley N°
-
-18.010, desde dicho momento hasta la fecha del
-
-requerimiento del respectivo reembolso, debiendo pagarse dentro del plazo de diez días, contados desde el requerimiento, conforme al valor que dicha unidad tenga en el momento del pago efectivo. Si dicho pago se efectúa con posterioridad al vencimiento del plazo señalado, las sumas adeudadas devengarán el 10% de interés anual, que se aplicará diariamente a contar del señalado requerimiento de pago.
+El valor de las prestaciones que, conforme al inciso precedente, corresponda reembolsar, se expresará en unidades de fomento, según el valor de éstas en el momento de su otorgamiento, con más el interés corriente para operaciones reajustables a que se refiere la ley N° 18.010, desde dicho momento hasta la fecha del requerimiento del respectivo reembolso, debiendo pagarse dentro del plazo de diez días, contados desde el requerimiento, conforme al valor que dicha unidad tenga en el momento del pago efectivo. Si dicho pago se efectúa con posterioridad al vencimiento del plazo señalado, las sumas adeudadas devengarán el 10% de interés anual, que se aplicará diariamente a contar del señalado requerimiento de pago.
 
 En el evento de que las prestaciones hubieren sido otorgadas conforme a los regímenes de salud dispuestos para las enfermedades comunes, y la Superintendencia de Seguridad Social resolviere que la afección es de origen profesional, el Fondo Nacional de Salud, el Servicio de Salud o la Institución de Salud Previsional que las proporcionó deberá devolver al trabajador la parte del reembolso correspondiente al valor de las prestaciones que éste hubiere solventado, conforme al régimen de salud previsional a que esté afiliado, con los reajustes e intereses respectivos. El plazo para su pago será de diez días, contados desde que se efectuó el reembolso.
 
-Si, por el contrario, la afección es calificada como común y las prestaciones hubieren sido otorgadas como si su origen fuere profesional, el Servicio de Salud o la Institución de Salud Previsional que efectuó el reembolso deberá cobrar a su afiliado la parte del valor de las prestaciones que a éste le corresponde solventar,
-
-según el régimen de salud de que se trate, para lo cual sólo se considerará el valor de aquéllas.
+Si, por el contrario, la afección es calificada como común y las prestaciones hubieren sido otorgadas como si su origen fuere profesional, el Servicio de Salud o la Institución de Salud Previsional que efectuó el reembolso deberá cobrar a su afiliado la parte del valor de las prestaciones que a éste le corresponde solventar, según el régimen de salud de que se trate, para lo cual sólo se considerará el valor de aquéllas.
 
 Para los efectos de los reembolsos dispuestos en los incisos precedentes, se considerará como valor de las prestaciones médicas el equivalente al que la entidad que las otorgó cobra por ellas al proporcionarlas a particulares.
 
@@ -962,23 +755,17 @@ Para los efectos de los reembolsos dispuestos en los incisos precedentes, se con
 
 Accidentes del Trabajo y Enfermedades Profesionales estará compuesta por:
 
-- a) Dos médicos en representación del Servicio Nacional
+a) Dos médicos en representación del Servicio Nacional de Salud, uno de los cuales la presidirá;
 
-de Salud, uno de los cuales la presidirá;
+b) Un médico en representación de las organizaciones más representativas de los trabajadores;
 
-- b) Un médico en representación de las organizaciones
-
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 29 de 38 más representativas de los trabajadores;
-
-- c) Un médico en representación de las organizaciones
-
-más representativas de las entidades empleadoras, y
-
-- d) Un abogado.
+c) Un médico en representación de las organizaciones más representativas de las entidades empleadoras, y d) Un abogado.
 
 Los miembros de esta Comisión serán designados por el Presidente de la República, en la forma que determine el El mismo Reglamento establecerá la organización y funcionamiento de la Comisión, la que en todo caso, estará sometida a la fiscalización de la Superintendencia de Seguridad Social.
 
-## Párrafo 3° (Arts. 79-80 Prescripción y sanciones.                                   NOTA
+## Párrafo 3° (Arts. 79-80
+
+Prescripción y sanciones.                                   NOTA
 
 ## Artículo 79°.- Las acciones para reclamar las
 
@@ -986,29 +773,25 @@ prestaciones por accidentes del trabajo o enfermedades profesionales prescribir�
 
 Esta prescripción no correrá contra los menores de 16 años.
 
-El artículo 34 de la LEY 18591, publicada el
-
-03.01.1987, dispone que el derecho a impetrar subsidio
-
-por incapacidad temporal de la ley N° 16744,
-
-prescribirá en seis meses desde el término de la respectiva licencia. Esta disposición rige a contar del 1° de enero de 1987, de conformidad con el Art.
+El artículo 34 de la LEY 18591, publicada el 03.01.1987, dispone que el derecho a impetrar subsidio por incapacidad temporal de la ley N° 16744, prescribirá en seis meses desde el término de la respectiva licencia. Esta disposición rige a contar del 1° de enero de 1987, de conformidad con el Art.
 
 110 de la citada ley 19591.
 
 ## Artículo 80°.- Las infracciones a cualquiera de las
 
-## disposiciones de esta ley, salvo que tengan señalada una sanción especial, serán penadas con una multa de uno a veinticuatro sueldos vitales mensuales, escala A) del departamento de Santiago. Estas multas serán aplicadas por los organismos administradores.
+disposiciones de esta ley, salvo que tengan señalada una sanción especial, serán penadas con una multa de uno a veinticuatro sueldos vitales mensuales, escala A) del departamento de Santiago. Estas multas serán aplicadas por los organismos administradores.
 
 La reincidencia será sancionada con el doble de la multa primeramente impuesta.
 
-## Párrafo 4° Disposiciones varias
+## Párrafo 4°
+
+## Disposiciones varias
 
 ## Artículo 81°.- Fusiónanse la actual Caja de
 
 Accidentes del Trabajo con el Servicio de Seguro Social, que será su continuador legal y al cual se transferirá el activo y pasivo de esa Caja.
 
-El Fondo de Garantía, que actualmente administra la Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 30 de 38 Caja, se transferirá, también, al Servicio de Seguro Social e ingresará al respectivo Fondo de Accidentes del Trabajo y Enfermedades Profesionales.
+El Fondo de Garantía, que actualmente administra la Caja, se transferirá, también, al Servicio de Seguro Social e ingresará al respectivo Fondo de Accidentes del Trabajo y Enfermedades Profesionales.
 
 Los bienes muebles e inmuebles que la Caja de Accidentes del Trabajo tiene destinados a los servicios hospitalarios o médicos en general y a la prevención de riesgos profesionales, serán transferidos por el Servicio de Seguro Social al Servicio Nacional de Salud.
 
@@ -1022,43 +805,33 @@ El personal que trabaja en las Secciones de Accidentes del Trabajo y Administrat
 
 El personal de la Planta se Servicios Menores de la Caja de Accidentes del Trabajo, actualmente imponente del Servicio de Seguro Social, pasará a ser imponente de la Caja Nacional de Empleados Públicos y Periodistas.
 
-## Artículo 83° El Servicio de Minas del Estado                LEY 16840 continuará ejerciendo en las faenas extractivas de la           Art. 200 minería las atribuciones que en materia de seguridad le         D.O. 24.05.1968 fueron conferidas por la letra i) del artículo 2° del decreto con fuerza de ley 152, de 1960, y por el Reglamento de Policía Minera aprobado por decreto 185,
+## Artículo 83° El Servicio de Minas del Estado                LEY 16840
 
-de 1946, del Ministerio de Economía y Comercio y sus modificaciones posteriores.
+continuará ejerciendo en las faenas extractivas de la           Art. 200 minería las atribuciones que en materia de seguridad le         D.O. 24.05.1968 fueron conferidas por la letra i) del artículo 2° del decreto con fuerza de ley 152, de 1960, y por el Reglamento de Policía Minera aprobado por decreto 185, de 1946, del Ministerio de Economía y Comercio y sus modificaciones posteriores.
 
-El Servicio Nacional de Salud y el Servicio de              NOTA Minas del Estado estarán facultados para otorgarse delegaciones recíprocas, para obtener un mayor Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 31 de 38 ## `aprovechamiento del personal técnico.` El Presidente de la República determinará la forma          NOTA como se coordinarán ambos Servicios y establecerá una Comisión Mixta de Nivel Nacional integrada por representantes del Ministerio del Trabajo y Previsión Social, Servicio Nacional de Salud y Servicio de Minas del Estado que aprobará las normas sobre seguridad en las faenas mineras y resolverá los problemas de coordinación que puedan suscitarse entre ambos Servicios.
+El Servicio Nacional de Salud y el Servicio de              NOTA Minas del Estado estarán facultados para otorgarse delegaciones recíprocas, para obtener un mayor ## `aprovechamiento del personal técnico.` El Presidente de la República determinará la forma          NOTA como se coordinarán ambos Servicios y establecerá una Comisión Mixta de Nivel Nacional integrada por representantes del Ministerio del Trabajo y Previsión Social, Servicio Nacional de Salud y Servicio de Minas del Estado que aprobará las normas sobre seguridad en las faenas mineras y resolverá los problemas de coordinación que puedan suscitarse entre ambos Servicios.
 
 Facúltase al Presidente de la República para modificar las plantas del Servicio Nacional de Salud o del Servicio de Seguro Social con el objeto de incorporar en ellas a los personales a que se refieren este artículo y los anteriores.
 
-El Art. 200 de la LEY 16840, publicada el
-
-24.05.1968, reemplazó el inciso primero del presente
-
-## artículo por el que se indica. Sin embargo, su texto contempla además otros dos incisos que han sido incorporados en el presente texto actualizado,
-
-manteniéndose el anterior inciso segundo como actual inciso cuarto.
+El Art. 200 de la LEY 16840, publicada el 24.05.1968, reemplazó el inciso primero del presente artículo por el que se indica. Sin embargo, su texto contempla además otros dos incisos que han sido incorporados en el presente texto actualizado, manteniéndose el anterior inciso segundo como actual inciso cuarto.
 
 ## Artículo 84°.- Los hospitales de la actual Caja de
 
-Accidentes del Trabajo ubicados en Santiago, Valparaíso,
+Accidentes del Trabajo ubicados en Santiago, Valparaíso, Coquimbo, Concepción, Temuco, Osorno y Valdivia y la Clínica Traumatológica de Antofagasta, se mantendrán como Centros de Traumatología y Ortopedia una vez fusionados estos dos servicios.
 
-Coquimbo, Concepción, Temuco, Osorno y Valdivia y la Clínica Traumatológica de Antofagasta, se mantendrán como Centros de Traumatología y Ortopedia una vez fusionados estos dos servicios.
-
-Para los efectos de futuros concursos de antecedentes para optar a cargos médicos, de dentistas, farmacéuticos,
-
-administrativos o de cualquier otro, en el Servicio Nacional de Salud o en el Servicio de Seguro Social, los años de antigüedad y la categorí a de los cargos desempeñados en la Caja de Accidentes del Trabajo serán computados con el mismo valor en puntaje que actualmente se asignan a tales antecedentes en el Servicio Nacional de Salud y en el Servicio de Seguro Social.
+Para los efectos de futuros concursos de antecedentes para optar a cargos médicos, de dentistas, farmacéuticos, administrativos o de cualquier otro, en el Servicio Nacional de Salud o en el Servicio de Seguro Social, los años de antigüedad y la categorí a de los cargos desempeñados en la Caja de Accidentes del Trabajo serán computados con el mismo valor en puntaje que actualmente se asignan a tales antecedentes en el Servicio Nacional de Salud y en el Servicio de Seguro Social.
 
 Los antecedentes de los profesionales afectos a la ley N° 15.076 que tengan acreditados ante la Caja de Accidentes del Trabajo, y que, por aplicación de la presente ley deban ingresar al Servicio Nacional de Salud, valdrán ante este último organismo en idéntica forma que si lo hubieren acreditado ante él.
 
 Los profesionales funcionarios se mantendrán en sus cargos de planta que tengan a la fecha de publicación de la presente ley, rigiéndose en lo futuro por las disposiciones del Estatuto Médico-Funcionario.
 
-## Artículo 85° Reemplázase el artículo transitorio            LEY 17365 N° 3° de la ley 8.198, por el siguiente:                        Art. 24 "Artículo 3° transitorio Los aparatos y equipos de              D.O. 06.10.1970 protección destinados a prevenir los accidentes del Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 32 de 38 trabajo y enfermedades profesionales y los instrumentos científicos destinados a la investigación y medición de los riesgos profesionales que el Servicio Nacional de Salud indique, así como también los instrumentos quirúrgicos, aparatos de rayos X y demás instrumentales que sean indicados por dicho Servicio, serán incluidos en las listas de importación permitida del Banco Central de Chile y de la Corporación del Cobre y estarán liberados de depósitos, de derechos de internación, de cualquier otro gravamen que se cobre por las Aduanas y de los otros impuestos a las importaciones, a menos que ellos se fabriquen en el país en condiciones favorables de calidad y precio".
+## Artículo 85° Reemplázase el artículo transitorio            LEY 17365
+
+N° 3° de la ley 8.198, por el siguiente:                        Art. 24 "Artículo 3° transitorio Los aparatos y equipos de              D.O. 06.10.1970 protección destinados a prevenir los accidentes del trabajo y enfermedades profesionales y los instrumentos científicos destinados a la investigación y medición de los riesgos profesionales que el Servicio Nacional de Salud indique, así como también los instrumentos quirúrgicos, aparatos de rayos X y demás instrumentales que sean indicados por dicho Servicio, serán incluidos en las listas de importación permitida del Banco Central de Chile y de la Corporación del Cobre y estarán liberados de depósitos, de derechos de internación, de cualquier otro gravamen que se cobre por las Aduanas y de los otros impuestos a las importaciones, a menos que ellos se fabriquen en el país en condiciones favorables de calidad y precio".
 
 ## Artículo 86°.- Sustitúyese en el inciso primero del
 
-## artículo 62° de la ley N° 16.395, la frase "uno por mil",
-
-por "dos por mil".
+artículo 62° de la ley N° 16.395, la frase "uno por mil", por "dos por mil".
 
 ## Artículo 87°.- La Superintendencia de Seguridad Social
 
@@ -1080,37 +853,27 @@ del Código del Trabajo, la ley N° 15.477 y toda otra norma legal o reglamentar
 
 dentro del plazo de tres meses contado desde su publicación en el Diario Oficial.
 
-TITULO IX
+## TITULO IX
 
 ## Artículo 92°.- Reemplázase el inciso segundo del
 
-## artículo 32° de la ley N° 6.037, por los siguientes:
+artículo 32° de la ley N° 6.037, por los siguientes:
 
 "La pensión de montepío se difiere el día del fallecimiento.
 
-En caso de pérdida o naufragio de una nave, de muerte por sumersión o por otro accidente marítimo o aéreo, si no ha sido posible recuperar los restos del imponente,
-
-podrá acreditarse el fallecimiento, para todos los efectos de esta ley, con un certificado expedido por la Dirección del Litoral y de Marina Mercante o la Dirección de Aeronáutica, según proceda, que establezca la efectividad del hecho, la circunstancia de que el causante formaba parte Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 33 de 38 de la tripulación o del pasaje y que determine la imposibilidad de recuperar sus restos, y que permita establecer que el fallecimiento se ha producido a consecuencia de dicha pérdida, naufragio o accidente".
+En caso de pérdida o naufragio de una nave, de muerte por sumersión o por otro accidente marítimo o aéreo, si no ha sido posible recuperar los restos del imponente, podrá acreditarse el fallecimiento, para todos los efectos de esta ley, con un certificado expedido por la Dirección del Litoral y de Marina Mercante o la Dirección de Aeronáutica, según proceda, que establezca la efectividad del hecho, la circunstancia de que el causante formaba parte de la tripulación o del pasaje y que determine la imposibilidad de recuperar sus restos, y que permita establecer que el fallecimiento se ha producido a consecuencia de dicha pérdida, naufragio o accidente".
 
 ## Artículo 93°.- Agrégase el siguiente inciso a
 
 continuación del inciso primero del artículo 33° de la ley N° 6.037:
 
-"El padre y la madre del imponente, por los cuales éste haya estado percibiendo asignación familiar, concurrirán en el montepío, conjuntamente con la cónyuge y los hijos,
-
-con una cuota total equivalente a la que corresponda a un hijo legítimo."
+"El padre y la madre del imponente, por los cuales éste haya estado percibiendo asignación familiar, concurrirán en el montepío, conjuntamente con la cónyuge y los hijos, con una cuota total equivalente a la que corresponda a un hijo legítimo."
 
 ## Artículo 94°.- Introdúcense las siguientes
 
 modificaciones al artículo 30° de la ley N° 10.662:
 
-- a) Intercálase a continuación de la palabra
-
-"sumersión", suprimiendo la coma (,) la siguiente frase seguida de una coma (,): "u otro accidente marítimo o aéreo,", y
-
-- b) Intercálase después de la palabra "Mercante" la
-
-siguiente frase: "o la Dirección de Aeronáutica, según proceda".
+a) Intercálase a continuación de la palabra "sumersión", suprimiendo la coma (,) la siguiente frase seguida de una coma (,): "u otro accidente marítimo o aéreo,", y b) Intercálase después de la palabra "Mercante" la siguiente frase: "o la Dirección de Aeronáutica, según proceda".
 
 ## Artículo 95°.- Aclárase que, a contar desde la fecha
 
@@ -1118,7 +881,7 @@ de vigencia de la ley N° 15.575, el fallecimiento de cualquiera de los benefici
 
 ## Artículo 96°.- Agrégase el siguiente inciso al
 
-## artículo 40° de la ley N° 15.386:
+artículo 40° de la ley N° 15.386:
 
 "Gozarán también del beneficio de desahucio establecido por el presente artículo los beneficiarios de montepío del imponente fallecido sin haberse acogido al beneficio de jubilación. El desahucio se distribuirá en este caso en el orden y proporción que establecen los artículos 30° y 33° de la ley N° 6.037.".
 
@@ -1128,7 +891,7 @@ la ley N° 15.386 ordenada por el artículo precedente regirá a contar desde el
 
 ## Artículo 98°.- Los beneficiarios de montepío de los
 
-imponentes de la Caja de Previsión de la Marina Mercante Nacional y de la Sección Tripulantes de Naves y Obreros Marítimos de la misma desaparecidos en el naufragio de la nave Santa Fe tendrán derecho a optar a la adjudicación de viviendas que pueda tener disponible la institución, sin sujeción al sistema de puntaje establecido en el Reglamento General de Préstamos Hipotecarios para las instituciones de previsión regidas por el DFL N° 2, de 1959, siempre que el causante no hubiese obtenido de la institución un beneficio Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 34 de 38 similar, o un préstamo hipotecario destinado a la adquisición, construcción o terminación de viviendas.
+imponentes de la Caja de Previsión de la Marina Mercante Nacional y de la Sección Tripulantes de Naves y Obreros Marítimos de la misma desaparecidos en el naufragio de la nave Santa Fe tendrán derecho a optar a la adjudicación de viviendas que pueda tener disponible la institución, sin sujeción al sistema de puntaje establecido en el Reglamento General de Préstamos Hipotecarios para las instituciones de previsión regidas por el DFL N° 2, de 1959, siempre que el causante no hubiese obtenido de la institución un beneficio similar, o un préstamo hipotecario destinado a la adquisición, construcción o terminación de viviendas.
 
 La adjudicación se hará a los beneficiarios en igual proporción a la que les corresponda en el montepío respectivo.
 
@@ -1146,19 +909,15 @@ artículos 91° y 96°, las disposiciones de los artículos 92°, 93°, 94°, 95
 
 ## Artículo 1°.- Las personas que hubieren sufrido
 
-accidente del trabajo o que hubieren contraído enfermedad profesional, con anterioridad a la fecha de la presente ley,
-
-y que a consecuencia de ello hubieren sufrido una pérdida de su capacidad de ganancia, presumiblemente permanente, de 40% o más, y que no disfruten de otra pensión, tendrán derecho a una pensión asistencial que se determinará en la forma que este artículo establece.
+accidente del trabajo o que hubieren contraído enfermedad profesional, con anterioridad a la fecha de la presente ley, y que a consecuencia de ello hubieren sufrido una pérdida de su capacidad de ganancia, presumiblemente permanente, de 40% o más, y que no disfruten de otra pensión, tendrán derecho a una pensión asistencial que se determinará en la forma que este artículo establece.
 
 Los interesados a que se refiere el inciso anterior entrarán en el goce de sus respectivas pensiones desde el momento del diagnóstico médico posterior a la presentación de la solicitud respectiva.
 
-También tendrán derecho a pensión asistencial las viudas de ex pensionados de accidentes del trabajo o enfermedades profesionales que hubieren fallecido antes de la vigencia de la presente ley y las viudas de los actuales pensionados por la misma causa que fallezcan en el futuro,
-
-siempre que no disfruten de otra pensión. La pensión se devengará desde la fecha de la respectiva solicitud.
+También tendrán derecho a pensión asistencial las viudas de ex pensionados de accidentes del trabajo o enfermedades profesionales que hubieren fallecido antes de la vigencia de la presente ley y las viudas de los actuales pensionados por la misma causa que fallezcan en el futuro, siempre que no disfruten de otra pensión. La pensión se devengará desde la fecha de la respectiva solicitud.
 
 Las pensiones a que se refiere este artículo se otorgarán por el Servicio de Seguro Social, y su monto será fijado por el Consejo Directivo del mismo, y no podrá ser inferior al 50% de las pensiones mínimas que correspondan a los accidentados o a sus viudas, de acuerdo con la presente ley, ni exceder del 100% de las mismas.
 
-No obstante, las personas a que se refiere el inciso primero que hubieren continuado en actividad y se encuentren, a la fecha de la publicación de la presente ley, como activos en algún régimen previsional, tendrán derecho a que el monto de la pensión que les corresponda no sea inferior al 30% del sueldo base determinado en la forma Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 35 de 38 preceptuada por la ley N° 10.383, ni superior al 70% de dicho sueldo base.
+No obstante, las personas a que se refiere el inciso primero que hubieren continuado en actividad y se encuentren, a la fecha de la publicación de la presente ley, como activos en algún régimen previsional, tendrán derecho a que el monto de la pensión que les corresponda no sea inferior al 30% del sueldo base determinado en la forma preceptuada por la ley N° 10.383, ni superior al 70% de dicho sueldo base.
 
 El Consejo Directivo del Servicio de Seguro Social podrá destinar para el financiamiento de este beneficio hasta el 5% del ingreso global anual del Seguro de Accidentes del Trabajo y Enfermedades Profesionales. Para este efecto, los demás organismos administradores deberán traspasar al Servicio de Seguro Social los fondos que correspondan a un porcentaje idéntico al determinado por el Servicio.
 
@@ -1174,59 +933,43 @@ Trabajo y Enfermedades Profesionales del Servicio de Seguro Social, que se crea 
 
 ## Artículo 3°.- Para los efectos de lo dispuesto en el
 
-## artículo 82° de la presente ley, y dentro del plazo de 30 días contado desde su publicación, las Compañías de Seguros entregarán a la Superintendencia de Seguridad Social una nómina del personal de sus secciones de accidentes del trabajo y de los empleados de departamentos o secciones administrativas que estaban realizando funciones relacionadas con accidentes del trabajo al 31 de Diciembre de 1966, y que las Compañías se dispongan a despedir con motivo de la aplicación de la presente ley.
+artículo 82° de la presente ley, y dentro del plazo de 30 días contado desde su publicación, las Compañías de Seguros entregarán a la Superintendencia de Seguridad Social una nómina del personal de sus secciones de accidentes del trabajo y de los empleados de departamentos o secciones administrativas que estaban realizando funciones relacionadas con accidentes del trabajo al 31 de Diciembre de 1966, y que las Compañías se dispongan a despedir con motivo de la aplicación de la presente ley.
 
 Corresponderá a la Superintendencia de Seguridad Social la calificación definitiva de las mencionadas nóminas, y en especial determinar si el personal incluido en ellas ha desempeñado o no las funciones a que se refiere el inciso anterior. Estas decisiones no serán susceptibles de recurso alguno.
 
 La Superintendencia de Seguridad Social, para la determinación de lasrentas de estos personales, a que se refiere el inciso segundo del artículo 82°, no considerará los aumentos que les hubieren concedido durante el curso del año 1967, salvo los que hubieren sido concedidos por las leyes sobre reajustes, o por convenios que hubieren afectado a la totalidad de los empleados de la respectiva compañía, o por ascenso.
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 36 de 38
-
 ## Artículo 4°.- Las garantías constituidas en
 
-conformidad al artículo 22° de la ley N° 4.055,
-
-continuarán vigentes y se entenderán hechas para todos los efectos legales, ante el Servicio de Seguro Social.
+conformidad al artículo 22° de la ley N° 4.055, continuarán vigentes y se entenderán hechas para todos los efectos legales, ante el Servicio de Seguro Social.
 
 No obstante, los patrones podrán rescatar la obligación correspondiente pagando a dicho Servicio el capital representativo de las respectivas pensiones.
 
 ## Artículo 5°.- Las compañías que contraten seguros de
 
-accidentes del trabajo deberán atender, hata su término,
-
-los contratos vigentes y continuar sirviendo las pensiones,
-
-pero no podrán celebrar contratos nuevos que cubran estas contingencias, ni renovar los vigentes.
+accidentes del trabajo deberán atender, hata su término, los contratos vigentes y continuar sirviendo las pensiones, pero no podrán celebrar contratos nuevos que cubran estas contingencias, ni renovar los vigentes.
 
 Las Compañías de Seguros garantizarán con hipoteca o cualquiera otra caución suficiente, a favor del Servicio de Seguro Social, calificada por este Servicio, el pago de las pensiones, hasta su extinción.
 
 ## Artículo 6°.- Los empleadores que estén asegurados en
 
-la Caja de Accidentes del Trabajo, en compañías privadas,
-
-estarán exentos de la obligación de hacer las cotizaciones establecidas en esta ley hasta el término de los contratos respectivos.
+la Caja de Accidentes del Trabajo, en compañías privadas, estarán exentos de la obligación de hacer las cotizaciones establecidas en esta ley hasta el término de los contratos respectivos.
 
 Transcurrido un año, contado desde la vigencia de la presente ley, las entidades empleadoras deberán efectuar en los organismos administradores que correspondan la totalidad de las cotizaciones que resulten por aplicación de la presente ley. Los trabajadores cuyos empleadores estén asegurados a la fecha de la vigencia de la presente ley en alguna compañía mercantil, tendrán los derechos establecidos en la presente ley en caso que durante el plazo de vigencia de las respectivas pólizas, se accidenten.
 
-Asimismo, los trabajadores cuyos empleadores, a la fecha de la vigencia de la presente ley hubieren estado asegurados en la Caja de Accidentes del Trabajo o en alguna Mutualidad,
+Asimismo, los trabajadores cuyos empleadores, a la fecha de la vigencia de la presente ley hubieren estado asegurados en la Caja de Accidentes del Trabajo o en alguna Mutualidad, tendrán también derecho, desde la vigencia misma de la presente ley, a los beneficios en ella consultados, considerándolos, para todos los efectos derivados de la aplicación de la presente ley como afiliados, a partir desde su vigencia, en el Servicio de Seguro Social o en la Caja de Previsión respectiva, o en la Mutualidad de que se trate.
 
-tendrán también derecho, desde la vigencia misma de la presente ley, a los beneficios en ella consultados,
+## Artículo 7° Las rebajas a que se refiere el
 
-considerándolos, para todos los efectos derivados de la aplicación de la presente ley como afiliados, a partir desde su vigencia, en el Servicio de Seguro Social o en la Caja de Previsión respectiva, o en la Mutualidad de que se trate.
-
-## Artículo 7° Las rebajas a que se refiere el artículo 16° sólo podrán comenzar a otorgarse después de un año contado desde la promulgación de la presente ley.
+artículo 16° sólo podrán comenzar a otorgarse después de un año contado desde la promulgación de la presente ley.
 
 Además, el Presidente de la República queda                 NOTA facultado para prorrogar el plazo anterior hasta por otro año más.
 
-El DTO 44, Trabajo, publicado el 14.05.1969,
-
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 37 de 38 prorrogó por un año el plazo señalado en el presente
+El DTO 44, Trabajo, publicado el 14.05.1969, prorrogó por un año el plazo señalado en el presente
 
 ## Artículo 8°.- El personal que actualmente se
 
-desempeña a contrata en la Caja de Accidentes del Trabajo,
-
-deberá ser encasillado en la Planta en las mismas condiciones establecidas en el inciso primero del artículo 82° de la presente ley.
+desempeña a contrata en la Caja de Accidentes del Trabajo, deberá ser encasillado en la Planta en las mismas condiciones establecidas en el inciso primero del artículo 82° de la presente ley.
 
 ## Artículo 9°.- El personal de la Caja de Accidentes del
 
@@ -1235,5 +978,3 @@ Trabajo que a la fecha de vigencia de la presente ley desempeñe de hecho las fu
 por tanto, promúlguese y llévese a efecto como ley la República.
 
 Santiago, veintitrés de enero de mil novecientos sesenta y ocho.- EDUARDO FREI MONTALVA.- William Thayer.Ramón Valdivieso.
-
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 29-Sep-2020 página 38 de 38

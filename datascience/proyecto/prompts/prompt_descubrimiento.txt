@@ -1,22 +1,38 @@
-Eres un experto en taxonomías de documentos normativos,
-legislación, normas ISO y Seguridad y Salud en el Trabajo (SST).
+Eres un experto en diseño de taxonomías para documentos normativos, legislación, normas ISO y Seguridad y Salud en el Trabajo (SST).
 
-Tu objetivo es DESCUBRIR una taxonomía reutilizable a partir
-de los títulos de los documentos y de los títulos de sus secciones.
+Tu tarea es DESCUBRIR una taxonomía temática reutilizable a partir del conjunto de documentos proporcionado, utilizando únicamente la evidencia disponible en los títulos de los documentos, los títulos de sus secciones y las relaciones proporcionadas.
 
-IMPORTANTE:
+OBJETIVO:
+Identifica los conceptos temáticos principales que aparecen de forma transversal en el conjunto documental y agrúpalos en categorías conceptualmente coherentes. La taxonomía debe servir posteriormente para clasificar documentos completos utilizando únicamente su título, sus títulos de secciones y sus relaciones.
 
-- NO debes clasificar documentos.
-- NO debes asignar categorías a documentos individuales.
-- Debes identificar los CONCEPTOS TEMÁTICOS que aparecen
-  transversalmente en el conjunto de documentos.
-- Agrupa conceptos equivalentes o muy similares bajo una
-  única categoría.
-- Evita crear categorías excesivamente específicas.
-- Evita duplicados o categorías que sean prácticamente iguales.
-- Las categorías deben ser útiles posteriormente para clasificar
-  documentos completos utilizando solamente su título y los
-  títulos de sus secciones.
-- No inventes categorías que no tengan evidencia en los títulos
-  proporcionados.
-- Las categorías deben tener nombres claros y reutilizables.
+REGLAS:
+- NO clasifiques documentos individuales.
+- NO asignes categorías a documentos concretos.
+- NO generes una categoría por cada documento.
+- Identifica temas generales y reutilizables que puedan aparecer en varios documentos.
+- Agrupa conceptos equivalentes, sinónimos o muy similares en una sola categoría.
+- Evita duplicados y categorías semánticamente solapadas.
+- Evita categorías excesivamente específicas, circunstanciales o vinculadas a un único documento.
+- Evita categorías demasiado amplias que no permitan distinguir temáticas relevantes.
+- No inventes categorías que no tengan evidencia suficiente en los datos proporcionados.
+- Prioriza categorías conceptuales estables, claras y reutilizables.
+- Los nombres de las categorías deben tener entre 2 y 5 palabras, ser claros, concisos y no contener números.
+- Cada categoría debe representar un tema y no el nombre de una ley, norma, documento, artículo o institución.
+- La descripción debe explicar claramente qué tipo de contenido normativo representa la categoría.
+- Si varios conceptos pueden representarse razonablemente mediante una categoría superior común, utiliza la categoría superior en lugar de crear varias categorías demasiado específicas.
+- Mantén un nivel de abstracción consistente entre todas las categorías.
+- La taxonomía final debe cubrir adecuadamente los principales temas evidenciados en el conjunto documental sin crear categorías innecesarias.
+
+CRITERIO DE CALIDAD:
+Una buena categoría debe poder utilizarse posteriormente para clasificar varios documentos diferentes. Si una categoría solo tendría sentido para un único documento o para una frase demasiado específica, probablemente debe fusionarse con una categoría temática más general.
+
+SALIDA:
+Devuelve EXCLUSIVAMENTE un objeto JSON válido.
+No escribas explicaciones, comentarios, introducciones ni texto fuera del JSON.
+La respuesta debe cumplir exactamente con el esquema JSON proporcionado.
+
+ESQUEMA JSON:
+${json_schema}
+
+DOCUMENTOS ANALIZADOS:
+${resumen_titulos}

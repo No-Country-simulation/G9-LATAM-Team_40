@@ -1,4 +1,4 @@
-"""Orquestación del pipeline completo, con resume por documento y guardado incremental."""
+"""Orquestación del pipeline completo, con resumen incremental robusto y parseo híbrido."""
 from __future__ import annotations
 
 import gc
@@ -9,6 +9,7 @@ from pathlib import Path
 
 import spacy
 import yake
+from unstructured.partition.text import partition_text
 
 # ------------------------------------------------------------------------------
 # IMPORTACIÓN DE CONFIGURACIÓN CENTRALIZADA
@@ -24,7 +25,13 @@ from .extraccion import (
     parsear_markdown_a_secciones,
 )
 from .llm_client import ExtractorLLM
-from .normalizacion import construir_indice_entidades, normalizar_key, normalizar_texto
+from .normalizacion import (
+    construir_indice_entidades,
+    construir_mapa_lemas,
+    normalizar_key,
+    normalizar_key_lemma,
+    normalizar_texto,
+)
 from .reglas import cargar_reglas
 from .relaciones import (
     enriquecer_relaciones,
@@ -35,7 +42,6 @@ from .relaciones import (
 )
 
 logger = logging.getLogger(__name__)
-
 
 
 def _cargar_documentos_procesados(out_file: Path) -> dict:
@@ -50,37 +56,31 @@ def _cargar_documentos_procesados(out_file: Path) -> dict:
         return {}
 
 
-def _documento_ya_completo(
-    doc_guardado: dict | None,
-    num_secciones_esperadas: int
-) -> bool:
+def _documento_ya_completo(doc_guardado: dict | None) -> bool:
+    """
+    Verifica si el documento ya está guardado en el JSON previo.
+    Se considera completo si existe y tiene al menos una sección procesada,
+    evitando re-procesamientos por metadatos opcionales o conteos variables.
+    """
     if not doc_guardado:
         return False
-
-    metadata = doc_guardado.get("metadata", {})
-
-    if "indice" not in metadata:
-        return False
-
-    if "bibliografia" not in metadata:
-        return False
-
     secciones = doc_guardado.get("secciones", [])
-
-    return len(secciones) == num_secciones_esperadas
+    return len(secciones) > 0
 
 
 class Pipeline:
     def __init__(self, settings: Settings) -> None:
         settings.ensure_dirs()
         self.settings = settings
-        self.reglas = cargar_reglas( config_path=settings.CONFIG_RULES_PATH, relations_path=settings.RELATIONS_PATH, glosario_path=settings.GLOSARIO_PATH
-)
+        self.reglas = cargar_reglas(
+            config_path=settings.CONFIG_RULES_PATH,
+            relations_path=settings.RELATIONS_PATH,
+            glosario_path=settings.GLOSARIO_PATH
+        )
 
         self.indice_entidades = construir_indice_entidades(self.reglas.diccionario_dominio)
         self.patrones_dominio = construir_patrones_dominio(self.reglas.diccionario_dominio)
 
-        
         self.nlp = spacy.load(settings.SPACY_MODEL)
         ruler = self.nlp.add_pipe("entity_ruler", before="parser")
         ruler.add_patterns([
@@ -90,7 +90,7 @@ class Pipeline:
 
         self.kw_extractor = yake.KeywordExtractor(lan="es", n=3, dedupLim=0.8, top=20)
 
-        # Precompilación de expresiones regulares para el glosario (optimización O(1) de pasadas sobre el texto)
+        # Precompilación de expresiones regulares para el glosario
         self._patron_glosario = None
         if self.reglas.glosario:
             terminos_ordenados = sorted(self.reglas.glosario.keys(), key=len, reverse=True)
@@ -99,27 +99,22 @@ class Pipeline:
                 re.IGNORECASE
             )
 
-# En src/extraccion/pipeline.py
-
         self.llm = ExtractorLLM(
             gemini_api_key=settings.GEMINI_API_KEY,
-            # Pasamos la lista completa de modelos de Gemini
-            gemini_models=[settings.GEMINI_MODEL_1, settings.GEMINI_MODEL_2], 
+            gemini_models=[settings.GEMINI_MODEL_1, settings.GEMINI_MODEL_2],
             deepseek_api_key=settings.DEEPSEEK_API_KEY,
             deepseek_model=settings.DEEPSEEK_MODEL,
             deepseek_base_url=settings.DEEPSEEK_BASE_URL,
             prompt_path=settings.PROMPT_EXTRACTION_PATH,
-            max_retries=settings.GEMINI_MAX_RETRIES, 
+            max_retries=settings.GEMINI_MAX_RETRIES,
             rate_limit_seconds=settings.GEMINI_RATE_LIMIT_SECONDS,
         )
 
     def _tipo_documento(self, archivo: Path):
         if "ISOS" in archivo.parts:
             return "ISO"
-
         if "LEYES" in archivo.parts:
             return "LEY"
-
         return "DESCONOCIDO"
 
     def _procesar_seccion(self, seccion: dict, doc) -> dict:
@@ -141,7 +136,11 @@ class Pipeline:
                     "origen": "spacy_entity_ruler",
                 })
 
-        entidades_dominio = list({(normalizar_key(e["texto"]), e["tipo"]): e for e in entidades_dominio}.values())
+        mapa_lemas = construir_mapa_lemas(doc)
+        entidades_dominio = list({
+            (normalizar_key_lemma(e["texto"], mapa_lemas), e["tipo"]): e
+            for e in entidades_dominio
+        }.values())
 
         relaciones_spacy = enriquecer_relaciones(
             extraer_relaciones_spacy(doc, self.reglas.mapa_relaciones), entidades_dominio
@@ -154,7 +153,8 @@ class Pipeline:
         ]
 
         entidades_final, relaciones_final = list(entidades_dominio), list(relaciones_spacy)
-        llamo_llm = seccion_es_relevante(texto, entidades_dominio, self.reglas.mapa_relaciones)
+        llamo_llm = seccion_es_relevante(texto, entidades_dominio, self.reglas.mapa_relaciones, conceptos)
+        modelo_llm_usado = None
 
         if llamo_llm:
             glosario_relevante = {}
@@ -174,18 +174,21 @@ class Pipeline:
                 entidades_dominio,
                 glosario_relevante
             )
-            
-            entidades_final = merge_entidades(data_llm.get("entidades", []), entidades_dominio)
+
+            entidades_final = merge_entidades(data_llm.get("entidades", []), entidades_dominio, texto)
             relaciones_final = merge_relaciones(data_llm.get("relaciones", []), relaciones_spacy)
+            modelo_llm_usado = data_llm.get("modelo_usado")
 
         return {
             "titulo": seccion["titulo"],
             "nivel": seccion["nivel"],
             "ruta_jerarquica": seccion["ruta_jerarquica"],
+            "texto": texto,
             "entidades": entidades_final,
             "conceptos": conceptos,
             "relaciones": relaciones_final,
             "llm_consultado": llamo_llm,
+            "modelo_llm_usado": modelo_llm_usado,
         }
 
     def _procesar_documento(self, archivo: Path, documento_parsed: dict | None = None) -> dict | None:
@@ -221,15 +224,14 @@ class Pipeline:
         }
 
     def ejecutar(self) -> None:
-        # Construimos los grupos dinámicamente usando RUTAS_CATEGORIAS de settings
         grupos = []
         for cat_info in self.settings.RUTAS_CATEGORIAS:
             categoria = cat_info["categoria"]
-            output_dir = cat_info["output_dir"]  # Esta es la ruta donde están los .md
-            
-            # Seleccionamos el archivo JSON de salida correspondiente según la categoría
+            output_dir = cat_info["output_dir"]
+
             if categoria == "ISOS":
                 archivo_salida = self.settings.FILE_ISO_EXTRACCION
+
             elif categoria == "LEYES":
                 archivo_salida = self.settings.FILE_LEYES_EXTRACCION
             else:
@@ -237,10 +239,7 @@ class Pipeline:
 
             archivos_md = sorted(output_dir.rglob("*.md")) if output_dir.exists() else []
             grupos.append((categoria, archivos_md, archivo_salida))
-
-        # El resto de tu lógica para procesar los grupos...
-        for nombre_grupo, archivos, output in grupos:
-            logger.info("Procesando grupo: %s (%d archivos)", nombre_grupo, len(archivos))
+            logger.info("Grupo:", grupos)
 
         totales_archivos = sum(len(archivos) for _, archivos, _ in grupos)
         logger.info("Documentos encontrados: %d", totales_archivos)
@@ -250,7 +249,6 @@ class Pipeline:
             if not archivos:
                 continue
 
-            # Carga de JSON previa fuera del bucle de documentos
             documentos_previos = _cargar_documentos_procesados(output)
             documentos_finales = dict(documentos_previos)
 
@@ -260,7 +258,19 @@ class Pipeline:
             for archivo in archivos:
                 self.tipo_documento = tipo
                 try:
-                    # Un único parseo de Markdown
+                    # 1. Comprobación anticipada: si el documento ya está en el JSON, se omite
+                    doc_previo = documentos_previos.get(archivo.name)
+
+                    if _documento_ya_completo(doc_previo):
+                        logger.info(
+                            "[%d/%d] ✅ %s ya procesado (omitido)",
+                            idx_global,
+                            totales_archivos,
+                            archivo.name
+                        )
+                        continue
+
+                    # 2. Parseo y procesamiento únicamente si el documento no existe o falta
                     documento_parsed = parsear_markdown_a_secciones(archivo)
                     secciones = documento_parsed.get("secciones", [])
 
@@ -273,21 +283,9 @@ class Pipeline:
                         )
                         continue
 
-                    doc_previo = documentos_previos.get(archivo.name)
-
-                    if _documento_ya_completo(doc_previo, len(secciones)):
-                        logger.info(
-                            "[%d/%d] ✅ %s ya procesado",
-                            idx_global,
-                            totales_archivos,
-                            archivo.name
-                        )
-                        continue
-
                     if doc_previo is not None:
                         logger.info("🔄 %s incompleto — se reprocesa.", archivo.name)
 
-                    # Se reutiliza el resultado del parseo
                     resultado = self._procesar_documento(archivo, documento_parsed=documento_parsed)
 
                     if resultado is None:

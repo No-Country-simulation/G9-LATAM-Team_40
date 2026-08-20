@@ -31,3 +31,6 @@ env/
 
 # --- OCI ---
 .oci/
+
+# Claves privadas
+*.pem

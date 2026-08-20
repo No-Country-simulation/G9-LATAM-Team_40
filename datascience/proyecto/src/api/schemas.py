@@ -2,7 +2,7 @@
 Esquemas de Pydantic para la API de FastAPI.
 """
 from __future__ import annotations
-from typing import List, Optional
+from typing import List
 from pydantic import BaseModel, Field
 
 
@@ -15,14 +15,23 @@ class QueryRequest(BaseModel):
 
 
 class TrazabilidadSeccion(BaseModel):
-    seccion_id: str
+    """
+    IMPORTANTE: estos campos deben coincidir EXACTO con las claves que arma
+    PipelineGraphRAG.responder_consulta() en main.py (ver el dict dentro de
+    "trazabilidad"). Si cambias un nombre de campo en uno de los dos lugares,
+    cámbialo también en el otro, o FastAPI devolverá 500 (ValidationError) al
+    intentar construir QueryResponse.
+    """
     documento_id: str
-    documento_nombre: str
+    documento_titulo: str
+    categoria: str = ""
+    palabras_clave: List[str] = []
     titulo_seccion: str
     ruta_jerarquica: List[str] = []
     nivel: int
     dominio: str
     score: float
+    source_path: str = ""
 
 
 class QueryResponse(BaseModel):

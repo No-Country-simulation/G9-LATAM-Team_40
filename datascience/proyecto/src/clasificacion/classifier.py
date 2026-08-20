@@ -15,14 +15,14 @@ from openai import OpenAI
 from pydantic import ValidationError
 
 from schemas.documento_clasificado import LoteClasificado
-from settings import Settings
+from settings import settings
 
 logger = logging.getLogger(__name__)
 
 
 class DocumentClassifier:
 
-    def __init__(self, settings: Settings, categorias_nombres: list[str]):
+    def __init__(self, settings: settings, categorias_nombres: list[str]):
         self.settings = settings
         self.categorias_nombres = categorias_nombres
         self.client = OpenAI(
@@ -33,7 +33,7 @@ class DocumentClassifier:
         self.prompt_template = self._cargar_prompt_template()
 
     def _cargar_prompt_template(self) -> Template:
-        path = self.settings.PROMPTS_DIR / "prompt_clasificacion.txt"
+        path = self.settings.PROMT_CLASSIFIER_PATH
         if not path.exists():
             raise FileNotFoundError(f"Prompt no encontrado en: {path.resolve()}")
         return Template(path.read_text(encoding="utf-8"))
@@ -51,6 +51,7 @@ class DocumentClassifier:
                 "documento_id": doc.get("documento_id", "desconocido"),
                 "titulo": doc.get("titulo_documento") or doc.get("documento_nombre") or "Sin título",
                 "secciones": titulos_secciones,
+                "relaciones": doc.get("relaciones", []),
             })
         return resumen
 
@@ -66,11 +67,14 @@ class DocumentClassifier:
             # Extraer nombres y confianzas
             nombres_categorias = [cat_obj["categoria"] for cat_obj in cat_asignadas]
             confianzas_valores = [cat_obj["confianza"] for cat_obj in cat_asignadas]
-            
+            palabras_claves = [cat_obj.get("palabras_claves", []) for cat_obj in cat_asignadas]
+
+
             clasificaciones.append({
                 "documento_id": doc_dump.get("documento_id"),
                 "categorias_asignadas": nombres_categorias,
                 "confianzas": confianzas_valores,
+                "palabras_claves": palabras_claves, 
             })
         
         if len(clasificaciones) != len(lote):
@@ -107,7 +111,7 @@ class DocumentClassifier:
                    int(sum(len(c.get("categorias_asignadas", [])) for c in clasificaciones_ordenadas) / max(1, len(clasificaciones_ordenadas))))
 
         return clasificaciones_ordenadas
-
+    
     @staticmethod
     def _normalizar(texto: str) -> str:
         texto = unicodedata.normalize("NFD", str(texto).strip().lower())
@@ -181,24 +185,19 @@ class DocumentClassifier:
         titulo = doc.get("titulo_documento") or doc.get("documento_nombre") or "Sin título"
         titulos_secciones = doc.get("titulos_secciones", [])[:5]  # Limitar a 5 secciones
         
-        prompt_etiqueta = f"""
-Analiza el siguiente documento y sugiere UNA ÚNICA categoría o etiqueta que lo describa mejor.
+        prompt_template = settings.PROMPT_CLASSIFIER_ETIQUETA.read_text(
+            encoding="utf-8"
+        )
 
-Título del documento: {titulo}
-
-Secciones principales:
-{json.dumps(titulos_secciones, ensure_ascii=False, indent=2)}
-
-Responde SOLO con una categoría en formato JSON simple:
-{{"etiqueta": "CATEGORÍA_SUGERIDA"}}
-
-La categoría debe ser:
-- Específica y descriptiva
-- Una o dos palabras máximo
-- Relacionada con el contenido
-- Única y original
-"""
-        
+        prompt_etiqueta = prompt_template.format(
+            titulo=titulo,
+            titulos_secciones=json.dumps(
+                titulos_secciones,
+                ensure_ascii=False,
+                indent=2
+            )
+        )
+                
         try:
             response = self.client.chat.completions.create(
                 model=self.settings.DEEPSEEK_MODEL,

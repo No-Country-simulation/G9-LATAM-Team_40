@@ -1,0 +1,6 @@
+[DEFAULT]
+user=ocid1.user.oc1..aaaaaaaavabohyalxjsanvore4oraszhdlbfeckj4qwod7jprgzt4wximekq
+fingerprint=d8:a1:c4:bf:05:08:db:53:5b:f3:84:e2:b1:6b:cf:94
+key_file=C:\Users\USUARIO\OneDrive\Documentos\nayeli_v2\proyecto\oci\Private Key OCI.pem
+tenancy=ocid1.tenancy.oc1..aaaaaaaaystkvos2ywbymyuadjck36d4njfeb3qfhbtezi3qr6eiowltfu3a
+region=sa-santiago-1

@@ -6,9 +6,13 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, List
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# FIX: settings.py vive en proyecto/settings.py. Un solo .parent da "proyecto/",
+# que es donde también vive el .env real (proyecto/.env). Esto funciona igual
+# en local y en Docker: en el contenedor, tras aplanar proyecto/ a /app/,
+# settings.py y .env quedan juntos en /app/ — sigue siendo "un solo .parent".
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -19,22 +23,19 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    # ==========================================================================
-    # 1. RUTAS BASE DEL PROYECTO
-    # ==========================================================================
-    ROOT_DIR: Path = Field(default_factory=lambda: Path(__file__).resolve().parent.parent.parent)
-    
+    ROOT_DIR: Path = Field(default_factory=lambda: Path(__file__).resolve().parent.parent.parent) # apartir de seting general
+
     @property
     def DB_DIR(self) -> Path:
         return self.ROOT_DIR / "db"
 
     @property
     def JSON_INPUT_DIR(self) -> Path:
-        return self.DB_DIR / "json_input"
+        return self.DB_DIR / "input_json"
 
     @property
     def SALIDA_JSON_DIR(self) -> Path:
-        return self.DB_DIR / "salida_json"
+        return self.DB_DIR / "output_json"
 
     @property
     def ARCHIVOS_DIR(self) -> Path:
@@ -56,10 +57,23 @@ class Settings(BaseSettings):
     GEMINI_RATE_LIMIT_SECONDS: float = 5.0
 
     MODELO_EMBEDDINGS: str = Field(
-        default="paraphrase-multilingual-mpnet-base-v2", 
+        default="paraphrase-multilingual-mpnet-base-v2",
         validation_alias="MODELO_EMBEDDINGS"
     )
     SPACY_MODEL: str = Field(default="es_dep_news_trf", validation_alias="SPACY_MODEL")
+
+    # Fuente de datos: la API sincroniza OCI a DB_DIR antes de cargar GraphRAG.
+    DATA_SOURCE: str = Field(default="local", validation_alias="DATA_SOURCE")
+    OCI_BUCKET_NAME: str = Field(
+        default="",
+        validation_alias=AliasChoices("OCI_BUCKET_NAME", "OCI_DATASET_BUCKET"),
+    )
+    OCI_NAMESPACE: str = Field(default="", validation_alias="OCI_NAMESPACE")
+    OCI_PREFIX: str = Field(default="prod", validation_alias="OCI_PREFIX")
+    OCI_AUTH_MODE: str = Field(default="api_key", validation_alias="OCI_AUTH_MODE")
+    OCI_CONFIG_FILE: str = Field(default="", validation_alias="OCI_CONFIG_FILE")
+    OCI_CONFIG_PROFILE: str = Field(default="DEFAULT", validation_alias="OCI_CONFIG_PROFILE")
+    OCI_SYNC_ON_STARTUP: bool = Field(default=True, validation_alias="OCI_SYNC_ON_STARTUP")
 
     # ==========================================================================
     # 3. REGLAS Y PROMPTS
@@ -80,17 +94,27 @@ class Settings(BaseSettings):
     def CLEANING_RULES_PATH(self) -> Path:
         return self.JSON_INPUT_DIR / "cleaning_rules.json"
 
+    # PROMPTS 
+
     @property
     def PROMPTS_DIR(self) -> Path:
-        return self.ROOT_DIR / "proyecto" / "prompts"
+
+        return PROJECT_DIR / "prompts"
 
     @property
     def PROMPT_EXTRACTION_PATH(self) -> Path:
-        return self.PROMPTS_DIR / "extraction_prompt.txt"
+        return self.PROMPTS_DIR / "prompt_extraction.txt"
+    @property
+    def PROMPT_CLASSIFIER_ETIQUETA(self) -> Path:
+        return self.PROMPTS_DIR / "prompt_etiqueta.txt"
+
+    @property
+    def PROMT_CLASSIFIER_PATH(self)->Path:
+        return self.PROMPTS_DIR / "prompt_clasificacion.txt"
 
     @property
     def PROMPT_RAG_SISTEMA_PATH(self) -> Path:
-        return self.PROMPTS_DIR / "rag_sistema_prompt.txt"
+        return self.PROMPTS_DIR / "prompt_rag_sistema.txt"
 
     # ==========================================================================
     # 4. PARÁMETROS POR ETAPAS
@@ -152,9 +176,6 @@ class Settings(BaseSettings):
     def FILE_TAXONOMIA_DESCUBIERTA(self) -> Path:
         return self.SALIDA_JSON_DIR / "taxonomia_descubierta.json"
 
-    @property
-    def FILE_METADATA_CLASIFICACION(self) -> Path:
-        return self.SALIDA_JSON_DIR / "metadata_clasificacion_llm.json"
 
     @property
     def INPUT_FILES_MAP(self) -> Dict[str, Path]:
@@ -167,7 +188,7 @@ class Settings(BaseSettings):
     def RUTAS_CATEGORIAS(self) -> List[Dict[str, Path]]:
         return [
             {
-                "categoria": "ISO",
+                "categoria": "ISOS",
                 "input_dir": self.ARCHIVOS_DIR / "ISOS" / "pdf",
                 "output_dir": self.ARCHIVOS_DIR / "ISOS" / "md",
             },
@@ -184,7 +205,7 @@ class Settings(BaseSettings):
     @property
     def produccion_backups_dir(self) -> Path:
         return self.DB_DIR / "backups"
-    
+
     @property
     def GEMINI_MODELS(self) -> List[str]:
         return [self.GEMINI_MODEL_1, self.GEMINI_MODEL_2]

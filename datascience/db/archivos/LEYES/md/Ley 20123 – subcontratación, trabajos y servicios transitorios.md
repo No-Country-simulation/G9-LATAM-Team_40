@@ -1,22 +1,15 @@
 ---
 title: "Ley 20123 – subcontratación, trabajos y servicios transitorios"
-source_file: "Ley 20123 – subcontratación, trabajos y servicios transitorios.pdf"
-source_path: "C:/Users/USUARIO/OneDrive/Documentos/knogment_naye/db/salida_markdown_limpio/LEYES/pdf/Ley 20123 – subcontratación, trabajos y servicios transitorios.pdf"
+source_path: "C:\Users\USUARIO\OneDrive\Documentos\nayeli_v2\db\archivos\LEYES\pdf\Ley 20123 – subcontratación, trabajos y servicios transitorios.pdf"
 category: "LEYES"
-processed_date: "2026-08-08 15:20:49"
+processed_date: "2026-08-17 02:36:40"
 ---
 
-# Ley 20123 – subcontratación, trabajos y servicios transitorios
+REGULA TRABAJO EN REGIMEN DE SUBCONTRATACION, EL FUNCIONAMIENTO DE LAS EMPRESAS DE SERVICIOS TRANSITORIOS Y EL CONTRATO DE TRABAJO DE SERVICIOS TRANSITORIOS MINISTERIO DEL TRABAJO Y PREVISIÓN SOCIAL; SUBSECRETARÍA DEL TRABAJO
 
-# **Ley 20123** REGULA TRABAJO EN REGIMEN DE SUBCONTRATACION, EL FUNCIONAMIENTO DE LAS EMPRESAS DE SERVICIOS TRANSITORIOS Y EL CONTRATO DE TRABAJO DE SERVICIOS TRANSITORIOS
+## LEY NUM. 20.123
 
-### MINISTERIO DEL TRABAJO Y PREVISIÓN SOCIAL; SUBSECRETARÍA DEL TRABAJO
-
-Fecha Publicación: 16-OCT-2006 | Fecha Promulgación: 05-OCT-2006 Tipo Versión: Única De : 14-ENE-2007 Url Corta: http://bcn.cl/2epvc
-
-LEY NUM. 20.123
-
-### REGULA TRABAJO EN REGIMEN DE SUBCONTRATACION, EL FUNCIONAMIENTO DE LAS EMPRESAS DE
+REGULA TRABAJO EN REGIMEN DE SUBCONTRATACION, EL FUNCIONAMIENTO DE LAS EMPRESAS DE
 
 ### SERVICIOS TRANSITORIOS Y EL CONTRATO DE TRABAJO DE SERVICIOS TRANSITORIOS
 
@@ -30,27 +23,23 @@ siguiente Proyecto de ley:
 
 siguientes incisos segundo y tercero, nuevos:
 
-"Las empresas que utilicen servicios de intermediarios agrícolas o de empresas contratistas no inscritas en la forma que señala el inciso precedente, serán sancionadas con multa a beneficio fiscal de conformidad a lo dispuesto en el
+"Las empresas que utilicen servicios de intermediarios agrícolas o de empresas contratistas no inscritas en la forma que señala el inciso precedente, serán sancionadas con multa a beneficio fiscal de conformidad a lo dispuesto en el artículo 477.
 
-## artículo 477.
-
-Cuando los servicios prestados se limiten sólo a la intermediación de trabajadores a una faena, se aplicará lo dispuesto en el inciso segundo del
-
-## artículo 183-A, debiendo entenderse que dichos trabajadores son dependientes del
-
-dueño de la obra, empresa o faena.".
+Cuando los servicios prestados se limiten sólo a la intermediación de trabajadores a una faena, se aplicará lo dispuesto en el inciso segundo del artículo 183-A, debiendo entenderse que dichos trabajadores son dependientes del dueño de la obra, empresa o faena.".
 
 ## Artículo 3º.- Agrégase al LIBRO I del Código del Trabajo, el siguiente
 
 ## Título VII, nuevo:
 
-"Título VII Del trabajo en régimen de subcontratación y del trabajo en empresas de servicios transitorios Párrafo 1º Del trabajo en régimen de subcontratación
+"Título VII Del trabajo en régimen de subcontratación y del trabajo en empresas de servicios transitorios
+
+## Párrafo 1º
+
+Del trabajo en régimen de subcontratación
 
 ## Artículo 183-A.- Es trabajo en régimen de subcontratación, aquél realizado
 
-en virtud de un contrato de trabajo por un trabajador para un empleador, denominado contratista o subcontratista, cuando éste, en razón de un acuerdo contractual, se Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 1 de 11 encarga de ejecutar obras o servicios, por su cuenta y riesgo y con trabajadores bajo su dependencia, para una tercera persona natural o jurídica dueña de la obra,
-
-empresa o faena, denominada la empresa principal, en la que se desarrollan los servicios o ejecutan las obras contratadas. Con todo, no quedarán sujetos a las normas de este Párrafo las obras o los servicios que se ejecutan o prestan de manera discontinua o esporádica.
+en virtud de un contrato de trabajo por un trabajador para un empleador, denominado contratista o subcontratista, cuando éste, en razón de un acuerdo contractual, se encarga de ejecutar obras o servicios, por su cuenta y riesgo y con trabajadores bajo su dependencia, para una tercera persona natural o jurídica dueña de la obra, empresa o faena, denominada la empresa principal, en la que se desarrollan los servicios o ejecutan las obras contratadas. Con todo, no quedarán sujetos a las normas de este Párrafo las obras o los servicios que se ejecutan o prestan de manera discontinua o esporádica.
 
 Si los servicios prestados se realizan sin sujeción a los requisitos señalados en el inciso anterior o se limitan sólo a la intermediación de trabajadores a una faena, se entenderá que el empleador es el dueño de la obra, empresa o faena, sin perjuicio de las sanciones que correspondan por aplicación del artículo 478.
 
@@ -64,9 +53,7 @@ La empresa principal responderá de iguales obligaciones que afecten a los subco
 
 El trabajador, al entablar la demanda en contra de su empleador directo, podrá hacerlo en contra de todos aquellos que puedan responder de sus derechos, en conformidad a las normas de este Párrafo.
 
-En los casos de construcción de edificaciones por un precio único prefijado,
-
-no procederán estas responsabilidades cuando quien encargue la obra sea una persona natural.
+En los casos de construcción de edificaciones por un precio único prefijado, no procederán estas responsabilidades cuando quien encargue la obra sea una persona natural.
 
 ## Artículo 183-C.- La empresa principal, cuando así lo solicite, tendrá derecho
 
@@ -82,53 +69,37 @@ El mismo derecho tendrá el contratista respecto de sus subcontratistas. Si se e
 
 En todo caso, la empresa principal o el contratista, en su caso, podrá pagar por subrogación al trabajador o institución previsional acreedora.
 
-La Dirección del Trabajo deberá poner en conocimiento de la empresa principal,
-
-las infracciones a la legislación laboral y previsional que se constaten en las fiscalizaciones que se practiquen a sus contratistas o subcontratistas. Igual Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 2 de 11 obligación tendrá para con los contratistas, respecto de sus subcontratistas.
+La Dirección del Trabajo deberá poner en conocimiento de la empresa principal, las infracciones a la legislación laboral y previsional que se constaten en las fiscalizaciones que se practiquen a sus contratistas o subcontratistas. Igual obligación tendrá para con los contratistas, respecto de sus subcontratistas.
 
 ## Artículo 183-D.- Si la empresa principal hiciere efectivo el derecho a ser
 
 informada y el derecho de retención a que se refieren los incisos primero y tercero del artículo anterior, responderá subsidiariamente de aquellas obligaciones laborales y previsionales que afecten a los contratistas y subcontratistas en favor de los trabajadores de éstos, incluidas las eventuales indemnizaciones legales que correspondan por el término de la relación laboral. Tal responsabilidad estará limitada al tiempo o período durante el cual el o los trabajadores del contratista o subcontratista prestaron servicios en régimen de subcontratación para el dueño de la obra, empresa o faena. Igual responsabilidad asumirá el contratista respecto de las obligaciones que afecten a sus subcontratistas, a favor de los trabajadores de éstos.
 
-Se aplicará también, lo dispuesto en el inciso precedente, en el caso que,
-
-habiendo sido notificada por la Dirección del Trabajo de las infracciones a la legislación laboral y previsional que se constaten en las fiscalizaciones que se practiquen a sus contratistas o subcontratistas, la empresa principal o contratista,
-
-según corresponda, hiciere efectivo el derecho de retención a que se refiere el inciso tercero del artículo precedente.
+Se aplicará también, lo dispuesto en el inciso precedente, en el caso que, habiendo sido notificada por la Dirección del Trabajo de las infracciones a la legislación laboral y previsional que se constaten en las fiscalizaciones que se practiquen a sus contratistas o subcontratistas, la empresa principal o contratista, según corresponda, hiciere efectivo el derecho de retención a que se refiere el inciso tercero del artículo precedente.
 
 ## Artículo 183-E.- Sin perjuicio de las obligaciones de la empresa principal,
 
 contratista y subcontratista respecto de sus propios trabajadores en virtud de lo dispuesto en el artículo 184, la empresa principal deberá adoptar las medidas necesarias para proteger eficazmente la vida y salud de todos los trabajadores que laboran en su obra, empresa o faena, cualquiera sea su dependencia, en conformidad a lo dispuesto en el artículo 66 bis de la ley Nº 16.744 y el artículo 3º del decreto supremo Nº 594, de 1999, del Ministerio de Salud.
 
-En los casos de construcción de edificaciones por un precio único prefijado,
-
-no procederán las obligaciones y responsabilidades señaladas en el inciso precedente, cuando quien encargue la obra sea una persona natural.
+En los casos de construcción de edificaciones por un precio único prefijado, no procederán las obligaciones y responsabilidades señaladas en el inciso precedente, cuando quien encargue la obra sea una persona natural.
 
 Sin perjuicio de los derechos que se reconocen en este Párrafo 1º al trabajador en régimen de subcontratación, respecto del dueño de la obra, empresa o faena, el trabajador gozará de todos los derechos que las leyes del trabajo le reconocen en relación con su empleador.
 
-## Párrafo 2º De las empresas de servicios transitorios, del contrato de puesta a disposición de trabajadores y del contrato de trabajo de servicios transitorios
+## Párrafo 2º
+
+De las empresas de servicios transitorios, del contrato de puesta a disposición de trabajadores y del contrato de trabajo de servicios transitorios
 
 ## Artículo 183-F.- Para los fines de este Código, se entiende por:
 
-- a) Empresa de Servicios Transitorios: toda persona jurídica, inscrita en el
+a) Empresa de Servicios Transitorios: toda persona jurídica, inscrita en el registro respectivo, que tenga por objeto social exclusivo poner a disposición de terceros denominados para estos efectos empresas usuarias, trabajadores para cumplir en estas últimas, tareas de carácter transitorio u ocasional, como asimismo la selección, capacitación y formación de trabajadores, así como otras actividades afines en el ámbito de los recursos humanos.
 
-registro respectivo, que tenga por objeto social exclusivo poner a disposición de terceros denominados para estos efectos empresas usuarias, trabajadores para cumplir en estas últimas, tareas de carácter transitorio u ocasional, como asimismo la selección, capacitación y formación de trabajadores, así como otras actividades afines en el ámbito de los recursos humanos.
+b) Usuaria: toda persona natural o jurídica que contrata con una empresa de servicios transitorios, la puesta a disposición de trabajadores para realizar labores o tareas transitorias u ocasionales, cuando concurra alguna de las circunstancias enumeradas en el artículo 183-Ñ de este Código.
 
-- b) Usuaria: toda persona natural o jurídica que contrata con una empresa de
-
-servicios transitorios, la puesta a disposición de trabajadores para realizar labores o tareas transitorias u ocasionales, cuando concurra alguna de las circunstancias enumeradas en el artículo 183-Ñ de este Código.
-
-- c) Trabajador de Servicios Transitorios: todo aquel que ha convenido un contrato
-
-de trabajo con una empresa de servicios transitorios para ser puesto a disposición de una o más usuarias de aquélla, de acuerdo a las disposiciones de este Párrafo
-
-2º.
+c) Trabajador de Servicios Transitorios: todo aquel que ha convenido un contrato de trabajo con una empresa de servicios transitorios para ser puesto a disposición de una o más usuarias de aquélla, de acuerdo a las disposiciones de este Párrafo 2º.
 
 ## Artículo 183-G.- La Dirección del Trabajo fiscalizará el cumplimiento de las
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 3 de 11 normas de este Párrafo 2º en el o los lugares de la prestación de los servicios,
-
-como en la empresa de servicios transitorios.
+normas de este Párrafo 2º en el o los lugares de la prestación de los servicios, como en la empresa de servicios transitorios.
 
 Asimismo, podrá revisar los contenidos del Contrato de Servicios Transitorios, o puesta a disposición, entre ambas empresas, a fin de fiscalizar los supuestos que habilitan la celebración de un contrato de trabajo de servicios transitorios.
 
@@ -140,9 +111,7 @@ De las Empresas de Servicios Transitorios
 
 ## Artículo 183-I.- Las empresas de servicios transitorios no podrán ser
 
-matrices, filiales, coligadas, relacionadas ni tener interés directo o indirecto,
-
-participación o relación societaria de ningún tipo, con empresas usuarias que contraten sus servicios.
+matrices, filiales, coligadas, relacionadas ni tener interés directo o indirecto, participación o relación societaria de ningún tipo, con empresas usuarias que contraten sus servicios.
 
 La infracción a la presente norma se sancionará con su cancelación en el Registro de Empresas de Servicios Transitorios y con una multa a la usuaria de 10 unidades tributarias mensuales por cada trabajador contratado, mediante resolución fundada del Director del Trabajo.
 
@@ -168,13 +137,9 @@ La resolución que ordene la constitución de dicha garantía, no será suscepti
 
 ## Artículo 183-K.- Las empresas de servicios transitorios deberán inscribirse en
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 4 de 11 un registro especial y público que al efecto llevará la Dirección del Trabajo. Al solicitar su inscripción en tal registro, la empresa respectiva deberá acompañar los antecedentes que acrediten su personalidad jurídica, su objeto social y la individualización de sus representantes legales. Su nombre o razón social deberá incluir la expresión "Empresa de Servicios Transitorios" o la sigla "EST".
+un registro especial y público que al efecto llevará la Dirección del Trabajo. Al solicitar su inscripción en tal registro, la empresa respectiva deberá acompañar los antecedentes que acrediten su personalidad jurídica, su objeto social y la individualización de sus representantes legales. Su nombre o razón social deberá incluir la expresión "Empresa de Servicios Transitorios" o la sigla "EST".
 
-La Dirección del Trabajo, en un plazo de sesenta días, podrá observar la inscripción en el registro si faltara alguno de los requisitos mencionados en el inciso precedente, o por no cumplir la solicitante los requisitos establecidos en el
-
-## artículo 183-F, letra a), al cabo de los cuales la solicitud se entenderá aprobada
-
-si no se le hubieran formulado observaciones.
+La Dirección del Trabajo, en un plazo de sesenta días, podrá observar la inscripción en el registro si faltara alguno de los requisitos mencionados en el inciso precedente, o por no cumplir la solicitante los requisitos establecidos en el artículo 183-F, letra a), al cabo de los cuales la solicitud se entenderá aprobada si no se le hubieran formulado observaciones.
 
 En igual plazo, la empresa de servicios transitorios podrá subsanar las observaciones que se le hubieran formulado, bajo apercibimiento de tenerse por desistida de su solicitud por el solo ministerio de la ley. Podrá asimismo, dentro de los quince días siguientes a su notificación, reclamar de dichas observaciones o de la resolución que rechace la reposición, ante la Corte de Apelaciones del domicilio del reclamante para que ésta ordene su inscripción en el registro.
 
@@ -190,13 +155,7 @@ servicios transitorios sin ajustar su constitución y funcionamiento a las exige
 
 ordenar la cancelación de la inscripción del registro de una empresa de servicios transitorios, en los siguientes casos:
 
-- a) por incumplimientos reiterados y graves de la legislación laboral o
-
-previsional, o
-
-- b) por quiebra de la empresa de servicios transitorios, salvo que se decrete la
-
-continuidad de su giro.
+a) por incumplimientos reiterados y graves de la legislación laboral o previsional, o b) por quiebra de la empresa de servicios transitorios, salvo que se decrete la continuidad de su giro.
 
 Para los efectos de la letra a) precedente, se entenderá que una empresa incurre en infracciones reiteradas cuando ha sido objeto de tres o más sanciones aplicadas por la autoridad administrativa o judicial, como consecuencia del incumplimiento de una o más obligaciones legales, en el plazo de un año. Se considerarán graves todas aquellas infracciones que, atendidos la materia involucrada y el número de trabajadores afectados, perjudiquen notablemente el ejercicio de los derechos establecidos en las leyes laborales, especialmente las infracciones a las normas contenidas en los Capítulos II, V y VI del Título I del LIBRO I de este Código, como asimismo las cometidas a las normas del Título II del LIBRO II del mismo texto legal.
 
@@ -206,13 +165,11 @@ Del contrato de puesta a disposición de trabajadores
 
 ## Artículo 183-N.- La puesta a disposición de trabajadores de servicios
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 5 de 11 transitorios a una usuaria por una empresa de servicios transitorios, deberá constar por escrito en un contrato de puesta a disposición de trabajadores de servicios transitorios, que deberá indicar la causal invocada para la contratación de servicios transitorios de conformidad con el artículo siguiente, los puestos de trabajo para los cuales se realiza, la duración de la misma y el precio convenido.
+transitorios a una usuaria por una empresa de servicios transitorios, deberá constar por escrito en un contrato de puesta a disposición de trabajadores de servicios transitorios, que deberá indicar la causal invocada para la contratación de servicios transitorios de conformidad con el artículo siguiente, los puestos de trabajo para los cuales se realiza, la duración de la misma y el precio convenido.
 
 Asimismo, el contrato de puesta a disposición de trabajadores de servicios transitorios deberá señalar si los trabajadores puestos a disposición tendrán o no derecho, durante la vigencia de dicho contrato, a la utilización de transporte e instalaciones colectivas que existan en la usuaria.
 
-La individualización de las partes deberá hacerse con indicación del nombre,
-
-domicilio y número de cédula de identidad o rol único tributario de los contratantes. En el caso de personas jurídicas, se deberá, además, individualizar a el o los representantes legales.
+La individualización de las partes deberá hacerse con indicación del nombre, domicilio y número de cédula de identidad o rol único tributario de los contratantes. En el caso de personas jurídicas, se deberá, además, individualizar a el o los representantes legales.
 
 La escrituración del contrato de puesta a disposición de trabajadores de servicios transitorios deberá suscribirse dentro de los cinco días siguientes a la incorporación del trabajador. Cuando la duración del mismo sea inferior a cinco días, la escrituración deberá hacerse dentro de los dos días de iniciada la prestación de servicios.
 
@@ -222,27 +179,15 @@ La falta de contrato escrito de puesta a disposición de trabajadores de servici
 
 trabajadores de servicios transitorios cuando en la usuaria se dé alguna de las circunstancias siguientes:
 
-- a) suspensión del contrato de trabajo o de la obligación de prestar servicios,
+a) suspensión del contrato de trabajo o de la obligación de prestar servicios, según corresponda, de uno o más trabajadores por licencias médicas, descansos de maternidad o feriados;
 
-según corresponda, de uno o más trabajadores por licencias médicas, descansos de maternidad o feriados;
+b) eventos extraordinarios, tales como la organización de congresos, conferencias, ferias, exposiciones u otros de similar naturaleza;
 
-- b) eventos extraordinarios, tales como la organización de congresos,
+c) proyectos nuevos y específicos de la usuaria, tales como la construcción de nuevas instalaciones, la ampliación de las ya existentes o expansión a nuevos mercados;
 
-conferencias, ferias, exposiciones u otros de similar naturaleza;
+d) período de inicio de actividades en empresas nuevas;
 
-- c) proyectos nuevos y específicos de la usuaria, tales como la construcción de
-
-nuevas instalaciones, la ampliación de las ya existentes o expansión a nuevos mercados;
-
-- d) período de inicio de actividades en empresas nuevas;
-
-- e) aumentos ocasionales, sean o no periódicos, o extraordinarios de actividad
-
-en una determinada sección, faena o establecimiento de la usuaria; o
-
-- f) trabajos urgentes, precisos e impostergables que requieran una ejecución
-
-inmediata, tales como reparaciones en las instalaciones y servicios de la usuaria.
+e) aumentos ocasionales, sean o no periódicos, o extraordinarios de actividad en una determinada sección, faena o establecimiento de la usuaria; o f) trabajos urgentes, precisos e impostergables que requieran una ejecución inmediata, tales como reparaciones en las instalaciones y servicios de la usuaria.
 
 ## Artículo 183-O.- El plazo del contrato de puesta a disposición de trabajadores
 
@@ -250,27 +195,15 @@ de servicios transitorios deberá ajustarse a las siguientes normas.
 
 En el caso señalado en la letra a) del artículo anterior, la puesta a disposición del trabajador podrá cubrir el tiempo de duración de la ausencia del trabajador reemplazado, por la suspensión del contrato o de la obligación de prestar servicios, según sea el caso.
 
-En los casos señalados en las letras b) y e) del artículo anterior, el contrato de trabajo para prestar servicios en una misma usuaria no podrá exceder de 90 días. En el caso de las letras c) y d) dicho plazo será de 180 días, no siendo ambos casos susceptibles de renovación. Sin embargo, si al tiempo de la terminación del contrato de trabajo subsisten las circunstancias que motivaron su celebración,
-
-se podrá prorrogar el contrato hasta completar los 90 ó 180 días en su caso.
+En los casos señalados en las letras b) y e) del artículo anterior, el contrato de trabajo para prestar servicios en una misma usuaria no podrá exceder de 90 días. En el caso de las letras c) y d) dicho plazo será de 180 días, no siendo ambos casos susceptibles de renovación. Sin embargo, si al tiempo de la terminación del contrato de trabajo subsisten las circunstancias que motivaron su celebración, se podrá prorrogar el contrato hasta completar los 90 ó 180 días en su caso.
 
 ## Artículo 183-P.- Sin perjuicio de lo señalado en el artículo 183-Ñ, no se
 
-podrá contratar la puesta a disposición de trabajadores de servicios transitorios,
+podrá contratar la puesta a disposición de trabajadores de servicios transitorios, en los siguientes casos:
 
-en los siguientes casos:
+a) para realizar tareas en las cuales se tenga la facultad de representar a la usuaria, tales como los gerentes, subgerentes, agentes o apoderados;
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 6 de 11
-
-- a) para realizar tareas en las cuales se tenga la facultad de representar a la
-
-usuaria, tales como los gerentes, subgerentes, agentes o apoderados;
-
-- b) para reemplazar a trabajadores que han declarado la huelga legal en el
-
-respectivo proceso de negociación colectiva; o
-
-- c) para ceder trabajadores a otras empresas de servicios transitorios.
+b) para reemplazar a trabajadores que han declarado la huelga legal en el respectivo proceso de negociación colectiva; o c) para ceder trabajadores a otras empresas de servicios transitorios.
 
 La contravención a lo dispuesto en este artículo excluirá a la usuaria de la aplicación de las normas del presente Párrafo 2º. En consecuencia, el trabajador se considerará como dependiente de la usuaria, vínculo que se regirá por las normas de la legislación laboral común.
 
@@ -304,15 +237,13 @@ después de expirado el plazo de su contrato de trabajo, éste se transformará 
 
 ## Artículo 183-U.- Los contratos de trabajo celebrados en supuestos distintos a
 
-aquellos que justifican la contratación de servicios transitorios de conformidad con el artículo 183-Ñ, o que tengan por objeto encubrir una relación de trabajo de carácter permanente con la usuaria, se entenderán celebrados en fraude a la ley,
-
-excluyendo a la usuaria de la aplicación de las normas del presente Párrafo 2º. En consecuencia, el trabajador se considerará como dependiente de la usuaria, vínculo que se regirá por las normas de la legislación laboral común, sin perjuicio de las demás sanciones que correspondan.
+aquellos que justifican la contratación de servicios transitorios de conformidad con el artículo 183-Ñ, o que tengan por objeto encubrir una relación de trabajo de carácter permanente con la usuaria, se entenderán celebrados en fraude a la ley, excluyendo a la usuaria de la aplicación de las normas del presente Párrafo 2º. En consecuencia, el trabajador se considerará como dependiente de la usuaria, vínculo que se regirá por las normas de la legislación laboral común, sin perjuicio de las demás sanciones que correspondan.
 
 ## Artículo 183-V.- El trabajador de servicios transitorios que haya prestado
 
 servicios, continua o discontinuamente, en virtud de uno o más contratos de trabajo celebrados con una misma empresa de servicios transitorios, durante a lo menos 30 días en los doce meses siguientes a la fecha del primer contrato, tendrá derecho a una indemnización compensatoria del feriado.
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 7 de 11 Por cada nuevo período de doce meses contado desde que se devengó la última compensación del feriado, el trabajador de servicios transitorios tendrá derecho a ésta.
+Por cada nuevo período de doce meses contado desde que se devengó la última compensación del feriado, el trabajador de servicios transitorios tendrá derecho a ésta.
 
 La indemnización será equivalente a la remuneración íntegra de los días de feriado que proporcionalmente le correspondan al trabajador según los días trabajados en la respectiva anualidad. La remuneración se determinará considerando el promedio de lo devengado por el trabajador durante los últimos 90 días efectivamente trabajados. Si el trabajador hubiera trabajado menos de 90 días en la respectiva anualidad, se considerará la remuneración de los días efectivamente trabajados para la determinación de la remuneración.
 
@@ -340,31 +271,21 @@ La usuaria deberá mantener reserva de toda la información y datos privados del
 
 ## Artículo 183-Z.- En la remuneración convenida, se considerará la
 
-gratificación legal, el desahucio, las indemnizaciones por años de servicios y sustitutiva del aviso previo, y cualquier otro concepto que se devengue en proporción al tiempo servido, salvo la compensación del feriado que establece el
-
-## artículo 183-V.
+gratificación legal, el desahucio, las indemnizaciones por años de servicios y sustitutiva del aviso previo, y cualquier otro concepto que se devengue en proporción al tiempo servido, salvo la compensación del feriado que establece el artículo 183-V.
 
 ## Artículo 183-AA.- La usuaria que contrate a un trabajador de servicios
 
-transitorios por intermedio de empresas no inscritas en el registro que para tales efectos llevará la Dirección del Trabajo, quedará, respecto de dicho trabajador,
-
-excluida de la aplicación de las normas del presente Párrafo 2º. En consecuencia,
-
-el trabajador se considerará como dependiente de la usuaria, vínculo que se regirá por las normas de la legislación laboral común.
+transitorios por intermedio de empresas no inscritas en el registro que para tales efectos llevará la Dirección del Trabajo, quedará, respecto de dicho trabajador, excluida de la aplicación de las normas del presente Párrafo 2º. En consecuencia, el trabajador se considerará como dependiente de la usuaria, vínculo que se regirá por las normas de la legislación laboral común.
 
 Además, la usuaria será sancionada administrativamente por la Inspección del Trabajo respectiva, con una multa equivalente a 10 unidades tributarias mensuales por cada trabajador contratado.
 
 ## Artículo 183-AB.- La usuaria será subsidiariamente responsable de las
 
-obligaciones laborales y previsionales que afecten a las empresas de servicios Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 8 de 11 transitorios a favor de los trabajadores de éstas, en los términos previstos en este Párrafo.
+obligaciones laborales y previsionales que afecten a las empresas de servicios transitorios a favor de los trabajadores de éstas, en los términos previstos en este Párrafo.
 
 No obstante lo dispuesto en el inciso precedente, será de responsabilidad directa de la usuaria el cumplimiento de las normas referidas a la higiene y seguridad en el trabajo, incluidas las disposiciones legales y reglamentarias relativas al Seguro Social contra Riesgos de Accidentes del Trabajo y Enfermedades Profesionales de la ley Nº 16.744, especialmente las medidas de prevención de riesgos que deba adoptar respecto de sus trabajadores permanentes. Asimismo, deberá observar lo dispuesto en el inciso tercero del artículo 66 bis de la ley Nº 16.744.
 
-Para efectos de dar cumplimiento a lo dispuesto en el artículo 76 de la ley Nº
-
-16.744, la usuaria denunciará inmediatamente al organismo administrador al que se
-
-encuentra afiliada o adherida la respectiva empresa de servicios transitorios, la ocurrencia de cualquiera de los hechos indicados en la norma legal antes citada. Al mismo tiempo, deberá notificar el siniestro a la empresa de servicios transitorios.
+Para efectos de dar cumplimiento a lo dispuesto en el artículo 76 de la ley Nº 16.744, la usuaria denunciará inmediatamente al organismo administrador al que se encuentra afiliada o adherida la respectiva empresa de servicios transitorios, la ocurrencia de cualquiera de los hechos indicados en la norma legal antes citada. Al mismo tiempo, deberá notificar el siniestro a la empresa de servicios transitorios.
 
 Serán también de responsabilidad de la usuaria, las indemnizaciones a que se refiere el artículo 69 de la ley Nº 16.744. Sin perjuicio de lo anterior, la empresa de servicios transitorios deberá constatar que el estado de salud del trabajador sea compatible con la actividad específica que desempeñará.
 
@@ -372,9 +293,7 @@ Normas Generales
 
 ## Artículo 183-AC.- En el caso de los trabajadores con discapacidad, el plazo
 
-máximo de duración del contrato de puesta a disposición de trabajadores de servicios transitorios establecido en el párrafo segundo del inciso primero del
-
-## artículo 183-O, será de seis meses renovables.
+máximo de duración del contrato de puesta a disposición de trabajadores de servicios transitorios establecido en el párrafo segundo del inciso primero del artículo 183-O, será de seis meses renovables.
 
 ## Artículo 183-AD.- Las empresas de servicios transitorios estarán obligadas a
 
@@ -398,53 +317,43 @@ El referido Organismo Administrador deberá, en el plazo de 30 días contado des
 
 Corresponderá a la Superintendencia de Seguridad Social velar por el cumplimiento de esta obligación por parte de los Organismos Administradores.".
 
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 9 de 11
-
 ## Artículo 5°.- Intercálase en el artículo 477 del Código del Trabajo, un
 
-### inciso séptimo nuevo, pasando el actual inciso séptimo a ser final:
+inciso séptimo nuevo, pasando el actual inciso séptimo a ser final:
 
-"Tratándose de empresas de veinticinco trabajadores o menos, la Dirección del Trabajo podrá autorizar, a solicitud del afectado, y sólo por una vez en el año,
-
-la sustitución de la multa impuesta por infracción a normas de higiene y seguridad,
-
-por la incorporación en un programa de asistencia al cumplimiento, en el que se acredite la corrección de la o las infracciones que dieron origen a la sanción y la puesta en marcha de un sistema de gestión de seguridad y salud en el trabajo. Dicho programa deberá implementarse con la asistencia técnica del Organismo Administrador de la ley Nº 16.744, al que se encuentre afiliada o adherida la empresa infractora y deberá ser presentado para su aprobación por la Dirección del Trabajo, debiendo mantenerse permanentemente a su disposición en los lugares de trabajo.".
+"Tratándose de empresas de veinticinco trabajadores o menos, la Dirección del Trabajo podrá autorizar, a solicitud del afectado, y sólo por una vez en el año, la sustitución de la multa impuesta por infracción a normas de higiene y seguridad, por la incorporación en un programa de asistencia al cumplimiento, en el que se acredite la corrección de la o las infracciones que dieron origen a la sanción y la puesta en marcha de un sistema de gestión de seguridad y salud en el trabajo. Dicho programa deberá implementarse con la asistencia técnica del Organismo Administrador de la ley Nº 16.744, al que se encuentre afiliada o adherida la empresa infractora y deberá ser presentado para su aprobación por la Dirección del Trabajo, debiendo mantenerse permanentemente a su disposición en los lugares de trabajo.".
 
 ## Artículo 6°.- Sustitúyese el inciso primero del artículo 478 del Código del
 
 Trabajo, por el siguiente:
 
-"Artículo 478.- Se sancionará con una multa a beneficio fiscal de 5 a 100 unidades tributarias mensuales, al empleador que simule la contratación de trabajadores a través de terceros, cuyo reclamo se regirá por lo dispuesto en el
-
-## artículo 474. En este caso, el empleador quedará sujeto al cumplimiento de todas
-
-las obligaciones laborales y previsionales y al pago de todas las prestaciones que correspondieren respecto de los trabajadores objetos de la simulación.".
+"Artículo 478.- Se sancionará con una multa a beneficio fiscal de 5 a 100 unidades tributarias mensuales, al empleador que simule la contratación de trabajadores a través de terceros, cuyo reclamo se regirá por lo dispuesto en el artículo 474. En este caso, el empleador quedará sujeto al cumplimiento de todas las obligaciones laborales y previsionales y al pago de todas las prestaciones que correspondieren respecto de los trabajadores objetos de la simulación.".
 
 ## Artículo 7°.- Modifícase la ley Nº 16.744, de la siguiente forma:
 
-- a) Incorpórase a continuación del artículo 66, el siguiente artículo 66 bis:
+a) Incorpórase a continuación del artículo 66, el siguiente artículo 66 bis:
 
-"Artículo 66 bis.- Los empleadores que contraten o subcontraten con otros la realización de una obra, faena o servicios propios de su giro, deberán vigilar el cumplimiento por parte de dichos contratistas o subcontratistas de la normativa relativa a higiene y seguridad, debiendo para ello implementar un sistema de gestión de la seguridad y salud en el trabajo para todos los trabajadores involucrados,
-
-cualquiera que sea su dependencia, cuando en su conjunto agrupen a más de 50 trabajadores.
+"Artículo 66 bis.- Los empleadores que contraten o subcontraten con otros la realización de una obra, faena o servicios propios de su giro, deberán vigilar el cumplimiento por parte de dichos contratistas o subcontratistas de la normativa relativa a higiene y seguridad, debiendo para ello implementar un sistema de gestión de la seguridad y salud en el trabajo para todos los trabajadores involucrados, cualquiera que sea su dependencia, cuando en su conjunto agrupen a más de 50 trabajadores.
 
 Para la implementación de este sistema de gestión, la empresa principal deberá confeccionar un reglamento especial para empresas contratistas y subcontratistas, en el que se establezca como mínimo las acciones de coordinación entre los distintos empleadores de las actividades preventivas, a fin de garantizar a todos los trabajadores condiciones de higiene y seguridad adecuadas. Asimismo, se contemplarán en dicho reglamento los mecanismos para verificar su cumplimiento por parte de la empresa mandante y las sanciones aplicables.
 
-Asimismo, corresponderá al mandante, velar por la constitución y funcionamiento de un Comité Paritario de Higiene y Seguridad y un Departamento de Prevención de Riesgos para tales faenas, aplicándose a su respecto para calcular el número de trabajadores exigidos por los incisos primero y cuarto, del artículo 66,
+Asimismo, corresponderá al mandante, velar por la constitución y funcionamiento de un Comité Paritario de Higiene y Seguridad y un Departamento de Prevención de Riesgos para tales faenas, aplicándose a su respecto para calcular el número de trabajadores exigidos por los incisos primero y cuarto, del artículo 66, respectivamente, la totalidad de los trabajadores que prestan servicios en un mismo lugar de trabajo, cualquiera sea su dependencia. Los requisitos para la constitución y funcionamiento de los mismos serán determinados por el reglamento que dictará el Ministerio del Trabajo y Previsión Social.
 
-respectivamente, la totalidad de los trabajadores que prestan servicios en un mismo lugar de trabajo, cualquiera sea su dependencia. Los requisitos para la constitución y funcionamiento de los mismos serán determinados por el reglamento que dictará el Ministerio del Trabajo y Previsión Social.
+b) Agréganse en el artículo 76 los siguientes incisos cuarto, quinto y final:
 
-- b) Agréganse en el artículo 76 los siguientes incisos cuarto, quinto y final:
-
-"Sin perjuicio de lo dispuesto en los incisos precedentes, en caso de accidentes del trabajo fatales y graves, el empleador deberá informar inmediatamente a la Inspección del Trabajo y a la Secretaría Regional Ministerial de Salud que corresponda, acerca de la ocurrencia de cualquiera de estos hechos. Corresponderá a la Superintendencia de Seguridad Social impartir las instrucciones sobre la forma en Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 10 de 11 que deberá cumplirse esta obligación.
+"Sin perjuicio de lo dispuesto en los incisos precedentes, en caso de accidentes del trabajo fatales y graves, el empleador deberá informar inmediatamente a la Inspección del Trabajo y a la Secretaría Regional Ministerial de Salud que corresponda, acerca de la ocurrencia de cualquiera de estos hechos. Corresponderá a la Superintendencia de Seguridad Social impartir las instrucciones sobre la forma en que deberá cumplirse esta obligación.
 
 En estos mismos casos el empleador deberá suspender de forma inmediata las faenas afectadas y, de ser necesario, permitir a los trabajadores la evacuación del lugar de trabajo. La reanudación de faenas sólo podrá efectuarse cuando, previa fiscalización del organismo fiscalizador, se verifique que se han subsanado las deficiencias constatadas.
 
 Las infracciones a lo dispuesto en los incisos cuarto y quinto, serán sancionadas con multa a beneficio fiscal de cincuenta a ciento cincuenta unidades tributarias mensuales, las que serán aplicadas por los servicios fiscalizadores a que se refiere el inciso cuarto.".
 
-## Artículo primero transitorio.- Las empresas que a la fecha de publicación de la presente ley, desarrollen actividades reguladas por la misma, deberán presentar su solicitud de inscripción, dentro del plazo de 180 días a contar de su vigencia.
+## Artículo primero transitorio.- Las empresas que a la fecha de publicación de
 
-## Artículo segundo transitorio.- Esta ley entrará en vigencia 90 días después de la fecha de su publicación.".
+la presente ley, desarrollen actividades reguladas por la misma, deberán presentar su solicitud de inscripción, dentro del plazo de 180 días a contar de su vigencia.
+
+## Artículo segundo transitorio.- Esta ley entrará en vigencia 90 días después
+
+de la fecha de su publicación.".
 
 Habiéndose cumplido con lo establecido en el Nº 1º del Artículo 93 de la Constitución Política de la República y por cuanto he tenido a bien aprobarlo y sancionarlo; por tanto promúlguese y llévese a efecto como Ley de la República.
 
@@ -452,24 +361,12 @@ Santiago, 5 de cotubre de 2006.- MICHELLE BACHELET JERIA, Presidenta de la Repú
 
 Lo que transcribo a Ud. para su conocimiento.- Saluda atentamente a Ud., Zarko Luksic Sandoval, Subsecretario del Trabajo.
 
-Tribunal Constitucional Proyecto de ley que regula el trabajo en régimen de subcontratación, el funcionamiento de las empresas de servicios transitorios y el contrato de trabajo de servicios transitorios El Secretario del Tribunal Constitucional, quien suscribe, certifica que el Honorable Senado envió el proyecto de ley enunciado en el rubro, aprobado por el Congreso Nacional, a fin de que este Tribunal ejerciera el control de constitucionalidad respecto de los artículos 183-H, artículo 183-I, inciso tercero,
+Tribunal Constitucional Proyecto de ley que regula el trabajo en régimen de subcontratación, el funcionamiento de las empresas de servicios transitorios y el contrato de trabajo de servicios transitorios El Secretario del Tribunal Constitucional, quien suscribe, certifica que el Honorable Senado envió el proyecto de ley enunciado en el rubro, aprobado por el Congreso Nacional, a fin de que este Tribunal ejerciera el control de constitucionalidad respecto de los artículos 183-H, artículo 183-I, inciso tercero, artículo 183-K, incisos tercero y cuarto, artículo 183-L y artículo 183-M, inciso tercero, todos del artículo tercero permanente del mismo, y por sentencia de 30 de agosto de 2006, dictada en los autos Rol Nº 536-2006, declaró:
 
-## artículo 183-K, incisos tercero y cuarto, artículo 183-L y artículo 183-M, inciso
+1.   Que la frase "previa consignación de la tercera parte de la multa aplicada, en caso que correspondiere" contenida en el inciso tercero del artículo 183-I, que el artículo tercero del proyecto introduce en el Código del Trabajo, es inconstitucional y debe eliminarse de su texto;
 
-tercero, todos del artículo tercero permanente del mismo, y por sentencia de 30 de agosto de 2006, dictada en los autos Rol Nº 536-2006, declaró:
+2.   Que el inciso tercero del artículo 183-I, que el artículo tercero del proyecto introduce en el Código del Trabajo es constitucional, sin perjuicio de lo resuelto en el número anterior.
 
-1.   Que la frase "previa consignación de la tercera parte de la multa aplicada, en
-
-caso que correspondiere" contenida en el inciso tercero del artículo 183-I, que el artículo tercero del proyecto introduce en el Código del Trabajo, es inconstitucional y debe eliminarse de su texto;
-
-2.   Que el inciso tercero del artículo 183-I, que el artículo tercero del proyecto
-
-introduce en el Código del Trabajo es constitucional, sin perjuicio de lo resuelto en el número anterior.
-
-3.   Que los artículos 183-H, 183-K, incisos tercero y cuarto, 183-L y 183-M, inciso
-
-tercero, que el artículo tercero del proyecto introduce en el Código del Trabajo son constitucionales.
+3.   Que los artículos 183-H, 183-K, incisos tercero y cuarto, 183-L y 183-M, inciso tercero, que el artículo tercero del proyecto introduce en el Código del Trabajo son constitucionales.
 
 Santiago, 30 de agosto de 2006.- Rafael Larraín Cruz, Secretario.
-
-Biblioteca del Congreso Nacional de Chile - www.leychile.cl - documento generado el 08-Oct-2020 página 11 de 11

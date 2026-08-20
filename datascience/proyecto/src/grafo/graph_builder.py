@@ -1,46 +1,87 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
-import hashlib
-from datetime import datetime
 from pathlib import Path
-from typing import Any
 
+import numpy as np
 from sentence_transformers import SentenceTransformer
 
 from settings import settings
-# Se asume que filtros provee estas utilidades; puedes ajustarlo a tu entorno.
-from .filtros import es_texto_valido, normalizar_key, limpiar_label
+from .filtros import normalizar_key
 
 logger = logging.getLogger("GraphRAGBuilder")
 
+# Umbrales de similitud coseno para decidir si una sección/relación nueva
+# se une a un nodo existente o crea uno nuevo. Ajustar según pruebas reales.
+UMBRAL_SIMILITUD_N2 = 0.72
+UMBRAL_SIMILITUD_N3 = 0.75
+
+
 class GraphRAGBuilder:
+
     def __init__(self, ruta_grafo: Path, ruta_embeddings: Path):
         self.ruta_grafo = ruta_grafo
         self.ruta_embeddings = ruta_embeddings
+
+        # Modelo de embeddings
         self.modelo_embeddings = SentenceTransformer(settings.MODELO_EMBEDDINGS)
-        
-        # Estructuras de datos para el Grafo de Conocimiento Global
-        self.categorias: dict[str, dict] = {}
-        self.documentos: dict[str, dict] = {}
-        self.secciones: dict[str, dict] = {}
-        self.nodos: dict[str, dict] = {}        # Entidades y Conceptos
-        self.relaciones: dict[str, dict] = {}   # Relaciones extraídas y estructurales
-        self.rutas: list[dict] = []             # Rutas precalculadas (opcional)
-        
+
+        # ==========================================
+        # ESTRUCTURA DEL GRAFO JERÁRQUICO
+        # ==========================================
+        self.nivel_1_categorias: dict[str, dict] = {}
+        self.nivel_2_subcategorias: dict[str, dict] = {}
+        self.nivel_3_relaciones: dict[str, dict] = {}
+        self.embeddings_store: dict[str, list] = {}
+
+        # Cargar información existente
         self.embeddings_store = self._cargar_store_embeddings()
         self._cargar_grafo_existente()
 
+    # ==========================================================
+    # UTILIDADES
+    # ==========================================================
+
+    def _generar_id_hash(self, base_string: str, prefijo: str) -> str:
+        """Genera un ID determinístico basado en contenido."""
+        hash_obj = hashlib.md5(base_string.encode("utf-8")).hexdigest()
+        return f"{prefijo}_{hash_obj[:12]}"
+
+    def _normalizar_cluster_id(self, cluster_id: str, categoria: str) -> str:
+        """Usa el cluster_id original o genera uno a partir de la categoría."""
+        if cluster_id:
+            return normalizar_key(cluster_id)
+        return f"CAT_{normalizar_key(categoria)}"
+
+    def _generar_descripcion_categoria(
+        self, categoria: str, palabras_claves: list[str]
+    ) -> str:
+        """Genera una descripción simple basada en categoría y palabras clave."""
+        if palabras_claves:
+            keywords = ", ".join(palabras_claves[:8])
+            return (
+                f"Categoría temática relacionada con {categoria.lower()}, "
+                f"incluyendo conceptos como: {keywords}."
+            )
+        return f"Categoría temática: {categoria}."
+
+    # ==========================================================
+    # EMBEDDINGS Y PERSISTENCIA
+    # ==========================================================
+
     def _cargar_store_embeddings(self) -> dict:
+        """Carga embeddings previamente generados."""
         if self.ruta_embeddings.exists():
             try:
                 return json.loads(self.ruta_embeddings.read_text(encoding="utf-8"))
             except Exception as e:
-                logger.error("Error al cargar embeddings guardados: %s", e)
+                logger.error("Error al cargar embeddings: %s", e)
         return {}
 
     def guardar_store_embeddings(self) -> None:
+        """Guarda los embeddings en disco."""
         self.ruta_embeddings.parent.mkdir(parents=True, exist_ok=True)
         self.ruta_embeddings.write_text(
             json.dumps(self.embeddings_store, ensure_ascii=False, indent=2),
@@ -48,276 +89,346 @@ class GraphRAGBuilder:
         )
 
     def _cargar_grafo_existente(self) -> None:
-        """Carga el estado del grafo desde el JSON si ya existe, respetando la nueva estructura."""
-        if self.ruta_grafo.exists():
-            try:
-                data = json.loads(self.ruta_grafo.read_text(encoding="utf-8"))
-                grafo = data.get("grafo_conocimiento", {})
-                self.categorias = {c["id"]: c for c in grafo.get("categorias", [])}
-                self.documentos = {d["id"]: d for d in grafo.get("documentos", [])}
-                self.secciones = {s["id"]: s for s in grafo.get("secciones", [])}
-                self.nodos = {n["id"]: n for n in grafo.get("nodos", [])}
-                self.relaciones = {r["id"]: r for r in grafo.get("relaciones", [])}
-                self.rutas = grafo.get("rutas", [])
-            except Exception as e:
-                logger.error("Error al cargar el grafo existente: %s. Empezando de cero.", e)
-
-    def guardar_grafo(self) -> None:
-        """Exporta el grafo estructurado exactamente como se solicita."""
-        self._generar_relaciones_entre_documentos()
-        
-        grafo_json = {
-            "grafo_conocimiento": {
-                "categorias": list(self.categorias.values()),
-                "documentos": list(self.documentos.values()),
-                "secciones": list(self.secciones.values()),
-                "nodos": list(self.nodos.values()),
-                "relaciones": list(self.relaciones.values()),
-                "rutas": self.rutas
-            }
-        }
-        
-        self.ruta_grafo.parent.mkdir(parents=True, exist_ok=True)
-        self.ruta_grafo.write_text(
-            json.dumps(grafo_json, ensure_ascii=False, indent=2), 
-            encoding="utf-8"
-        )
-
-    def _generar_id_hash(self, base_string: str, prefijo: str = "REL") -> str:
-        """Genera un identificador determinístico basado en el contenido."""
-        hash_obj = hashlib.md5(base_string.encode("utf-8")).hexdigest()
-        return f"{prefijo}_{hash_obj[:12]}"
-
-    def procesar_documento(self, doc: dict) -> None:
-        doc_original_id = doc.get("documento_id", "unknown")
-        doc_nombre = doc.get("documento_nombre", "Sin Nombre")
-        doc_id = f"DOC_{normalizar_key(doc_original_id)}"
-        
-        # 1. Procesar Documento
-        self.documentos[doc_id] = {
-            "id": doc_id,
-            "tipo": "DOCUMENTO",
-            "documento_id": doc_original_id,
-            "nombre": doc_nombre,
-            "metadata": doc.get("metadata", {}),
-            "clasificacion_llm": doc.get("clasificacion_llm", {})
-        }
-
-        # 2. Procesar Categorías y relacionar con el Documento
-        clasificacion_llm = doc.get("clasificacion_llm", {})
-        clasificaciones = clasificacion_llm.get("clasificaciones", [])
-        
-        for clasif in clasificaciones:
-            categoria_nombre = clasif.get("categoria", "General")
-            cat_id = f"CAT_{normalizar_key(categoria_nombre)}"
-            
-            if cat_id not in self.categorias:
-                self.categorias[cat_id] = {
-                    "id": cat_id,
-                    "tipo": "CATEGORIA",
-                    "nombre": categoria_nombre,
-                    "confianza": clasif.get("confianza", 1.0)
-                }
-            
-            # Relación: CATEGORIA -> CLASIFICA -> DOCUMENTO
-            rel_cat_doc_id = self._generar_id_hash(f"{cat_id}_CLASIFICA_{doc_id}")
-            self.relaciones[rel_cat_doc_id] = {
-                "id": rel_cat_doc_id,
-                "sujeto_id": cat_id,
-                "tipo": "CLASIFICA",
-                "objeto_id": doc_id
-            }
-
-        # 3. Procesar Secciones, Entidades, Conceptos y Relaciones
-        secciones = doc.get("secciones", [])
-        for idx, sec in enumerate(secciones):
-            sec_titulo = sec.get("titulo", f"Seccion {idx}")
-            sec_id = f"SEC_{normalizar_key(doc_original_id)}_{idx}"
-            ruta_jerarquica = sec.get("ruta_jerarquica", [])
-            
-            # Nodo de Sección
-            self.secciones[sec_id] = {
-                "id": sec_id,
-                "tipo": "SECCION",
-                "documento_id": doc_original_id,
-                "documento_nombre": doc_nombre,
-                "titulo": sec_titulo,
-                "nivel": sec.get("nivel", 1),
-                "ruta_jerarquica": ruta_jerarquica
-            }
-
-            # Relación estructural: DOCUMENTO -> CONTIENE -> SECCION
-            rel_doc_sec_id = self._generar_id_hash(f"{doc_id}_CONTIENE_{sec_id}")
-            self.relaciones[rel_doc_sec_id] = {
-                "id": rel_doc_sec_id,
-                "sujeto_id": doc_id,
-                "tipo": "CONTIENE",
-                "objeto_id": sec_id
-            }
-
-            # Procesar Entidades
-            for ent in sec.get("entidades", []):
-                canonical = ent.get("canonical") or ent.get("texto")
-                if not canonical or not es_texto_valido(canonical):
-                    continue
-                
-                ent_id = f"ENT_{normalizar_key(canonical)}"
-                self._registrar_nodo_semantico(
-                    nodo_id=ent_id,
-                    tipo="ENTIDAD",
-                    nombre=canonical,
-                    subtipo=ent.get("tipo", "DESCONOCIDO"),
-                    doc_id=doc_id,
-                    doc_original_id=doc_original_id,
-                    doc_nombre=doc_nombre,
-                    sec_id=sec_id,
-                    sec_titulo=sec_titulo,
-                    ruta_jerarquica=ruta_jerarquica,
-                    origen=ent.get("origen", "llm")
-                )
-
-            # Procesar Conceptos
-            for con in sec.get("conceptos", []):
-                concepto_texto = con.get("concepto")
-                if not concepto_texto or not es_texto_valido(concepto_texto):
-                    continue
-                
-                con_id = f"CON_{normalizar_key(concepto_texto)}"
-                self._registrar_nodo_semantico(
-                    nodo_id=con_id,
-                    tipo="CONCEPTO",
-                    nombre=concepto_texto,
-                    score=con.get("score", 0.0),
-                    doc_id=doc_id,
-                    doc_original_id=doc_original_id,
-                    doc_nombre=doc_nombre,
-                    sec_id=sec_id,
-                    sec_titulo=sec_titulo,
-                    ruta_jerarquica=ruta_jerarquica,
-                    origen="llm"
-                )
-
-            # Procesar Relaciones Semánticas (sujeto -> verbo -> objeto)
-            for rel in sec.get("relaciones", []):
-                sujeto_norm = normalizar_key(rel.get("sujeto", ""))
-                objeto_norm = normalizar_key(rel.get("objeto", ""))
-                tipo_relacion = rel.get("relacion", "RELACIONADO_CON")
-                
-                # Asumimos que los IDs de sujeto y objeto ya existen como ENT_ o CON_
-                # Para mayor robustez, se busca en los nodos, pero generamos el prefijo base ENT_ asumiendo entidades
-                sujeto_id = f"ENT_{sujeto_norm}" if f"ENT_{sujeto_norm}" in self.nodos else f"CON_{sujeto_norm}"
-                objeto_id = f"ENT_{objeto_norm}" if f"ENT_{objeto_norm}" in self.nodos else f"CON_{objeto_norm}"
-                
-                # Si por error de extracción el LLM inventó un término que no está en la lista de entidades,
-                # lo ignoramos o forzamos su creación (aquí forzamos creación rápida como concepto por seguridad)
-                if sujeto_id not in self.nodos: sujeto_id = f"CON_{sujeto_norm}"
-                if objeto_id not in self.nodos: objeto_id = f"CON_{objeto_norm}"
-
-                rel_sem_id = self._generar_id_hash(f"{sujeto_id}_{tipo_relacion}_{objeto_id}_{doc_id}_{sec_id}", "REL")
-                
-                self.relaciones[rel_sem_id] = {
-                    "id": rel_sem_id,
-                    "sujeto_id": sujeto_id,
-                    "tipo": tipo_relacion,
-                    "objeto_id": objeto_id,
-                    "trazabilidad": {
-                        "documento_id": doc_original_id,
-                        "documento_nombre": doc_nombre,
-                        "seccion_id": sec_id,
-                        "titulo_seccion": sec_titulo,
-                        "ruta_jerarquica": ruta_jerarquica,
-                        "contexto": rel.get("contexto", ""),
-                        "origen": rel.get("origen", "llm"),
-                        "confianza": rel.get("confianza", 1.0)
-                    }
-                }
-
-    def _registrar_nodo_semantico(self, nodo_id: str, tipo: str, nombre: str, doc_id: str, 
-                                  doc_original_id: str, doc_nombre: str, sec_id: str, 
-                                  sec_titulo: str, ruta_jerarquica: list, origen: str, 
-                                  subtipo: str = None, score: float = None):
-        """Agrega un nodo global (Entidad/Concepto) y centraliza sus apariciones para trazabilidad."""
-        if nodo_id not in self.nodos:
-            self.nodos[nodo_id] = {
-                "id": nodo_id,
-                "tipo": tipo,
-                "nombre": nombre,
-                "apariciones": []
-            }
-            if subtipo: self.nodos[nodo_id]["subtipo"] = subtipo
-            if score: self.nodos[nodo_id]["score"] = score
-
-        aparicion = {
-            "documento_id": doc_original_id,
-            "documento_nombre": doc_nombre,
-            "seccion_id": sec_id,
-            "titulo_seccion": sec_titulo,
-            "ruta_jerarquica": ruta_jerarquica,
-            "origen": origen
-        }
-        
-        # Evitar duplicar la misma aparición si el concepto se extrae varias veces en la misma sección
-        if aparicion not in self.nodos[nodo_id]["apariciones"]:
-            self.nodos[nodo_id]["apariciones"].append(aparicion)
-
-    def _generar_relaciones_entre_documentos(self) -> None:
-        """Infere y crea relaciones entre documentos que comparten las mismas entidades."""
-        # Agrupar documentos por entidad
-        for nodo_id, nodo_data in self.nodos.items():
-            docs_asociados = list({ap["documento_id"] for ap in nodo_data.get("apariciones", [])})
-            
-            # Si una entidad aparece en 2 o más documentos distintos
-            if len(docs_asociados) > 1:
-                for i in range(len(docs_asociados)):
-                    for j in range(i + 1, len(docs_asociados)):
-                        doc_1 = f"DOC_{normalizar_key(docs_asociados[i])}"
-                        doc_2 = f"DOC_{normalizar_key(docs_asociados[j])}"
-                        
-                        rel_id = self._generar_id_hash(f"{doc_1}_COMPARTE_{doc_2}_{nodo_id}", "REL_DOC")
-                        if rel_id not in self.relaciones:
-                            self.relaciones[rel_id] = {
-                                "id": rel_id,
-                                "sujeto_id": doc_1,
-                                "tipo": "COMPARTE_ENTIDAD",
-                                "objeto_id": doc_2,
-                                "evidencia": {
-                                    "nodo_compartido": nodo_id
-                                }
-                            }
-
-    def recolectar_nodos_sin_embedding(self) -> dict[str, str]:
-        """Identifica qué Categorías, Entidades o Conceptos aún no tienen vector generado."""
-        pendientes = {}
-        # También incrustamos Categorías para búsquedas top-level
-        for cat_id, data in self.categorias.items():
-            if cat_id not in self.embeddings_store:
-                pendientes[cat_id] = data["nombre"]
-                
-        for nodo_id, data in self.nodos.items():
-            if nodo_id not in self.embeddings_store:
-                pendientes[nodo_id] = data["nombre"]
-                
-        return pendientes
-
-    def generar_y_guardar_embeddings(self) -> None:
-        """Genera los vectores sólo para los nodos semánticos que falten."""
-        nodos_pendientes = self.recolectar_nodos_sin_embedding()
-        if not nodos_pendientes:
-            logger.info("No hay nodos nuevos para generar embeddings.")
+        """Carga un grafo previamente construido desde disco."""
+        if not self.ruta_grafo.exists():
             return
-            
-        textos = list(nodos_pendientes.values())
-        ids = list(nodos_pendientes.keys())
-        
-        logger.info(f"Generando {len(textos)} embeddings nuevos...")
+
+        try:
+            data = json.loads(self.ruta_grafo.read_text(encoding="utf-8"))
+            grafo = data.get("grafo_conceptual", {})
+
+            self.nivel_1_categorias = {
+                nodo["id"]: nodo for nodo in grafo.get("nivel_1_categorias", [])
+            }
+            self.nivel_2_subcategorias = {
+                nodo["id"]: nodo for nodo in grafo.get("nivel_2_subcategorias", [])
+            }
+            self.nivel_3_relaciones = {
+                nodo["id"]: nodo for nodo in grafo.get("nivel_3_relaciones", [])
+            }
+
+            logger.info(
+                "Grafo existente cargado: %d categorías, %d secciones, %d relaciones.",
+                len(self.nivel_1_categorias),
+                len(self.nivel_2_subcategorias),
+                len(self.nivel_3_relaciones),
+            )
+
+        except Exception as e:
+            logger.error(
+                "Error al cargar grafo existente: %s. Se iniciará un nuevo grafo.", e
+            )
+            self.nivel_1_categorias = {}
+            self.nivel_2_subcategorias = {}
+            self.nivel_3_relaciones = {}
+
+    # ==========================================================
+    # PROCESAMIENTO PRINCIPAL
+    # ==========================================================
+
+    def _agrupar_secciones_semanticamente(
+        self, secciones: list[dict], cluster_id: str
+    ) -> list[dict]:
+        """Agrupa secciones nuevas comparando su embedding (similitud coseno)
+        contra los nodos N2 YA EXISTENTES bajo este cluster_id (por id). Si
+        ninguno supera el umbral, la sección se vuelve el ancla de un grupo
+        nuevo (mismo comportamiento de creación que antes)."""
+        if not secciones:
+            return []
+
         vectores = self.modelo_embeddings.encode(
-            textos,
+            [s["titulo"] for s in secciones],
             normalize_embeddings=True,
             show_progress_bar=False,
         )
-        
-        for eid, vector in zip(ids, vectores):
-            self.embeddings_store[eid] = vector.tolist()
-            
+
+        # Candidatos = nodos N2 ya persistidos bajo esta categoría, con embedding disponible
+        candidatos: dict[str, list] = {
+            nodo["titulo_nodo_2"]: self.embeddings_store[sec_id]
+            for sec_id, nodo in self.nivel_2_subcategorias.items()
+            if nodo["parent_id"] == cluster_id and sec_id in self.embeddings_store
+        }
+
+        grupos: dict[str, list[dict]] = {}
+
+        for seccion, vector in zip(secciones, vectores):
+            vector = vector.tolist()
+            mejor_titulo, mejor_sim = None, 0.0
+
+            for titulo_candidato, vector_candidato in candidatos.items():
+                sim = float(np.dot(vector, vector_candidato))
+                if sim > mejor_sim:
+                    mejor_sim, mejor_titulo = sim, titulo_candidato
+
+            if mejor_titulo is not None and mejor_sim >= UMBRAL_SIMILITUD_N2:
+                titulo_grupo = mejor_titulo
+            else:
+                titulo_grupo = seccion["titulo"]
+                # queda disponible para comparar contra las siguientes secciones de este mismo lote
+                candidatos[titulo_grupo] = vector
+
+            grupos.setdefault(titulo_grupo, []).append(seccion)
+
+        return [{"titulo": titulo, "secciones": secs} for titulo, secs in grupos.items()]
+
+    def _agrupar_relaciones_semanticamente(
+        self, relaciones: list[dict], sec_id: str
+    ) -> list[dict]:
+        """Mismo criterio que _agrupar_secciones_semanticamente, pero para
+        relaciones dentro de un nodo N2 (sec_id) puntual."""
+        if not relaciones:
+            return []
+
+        titulos = [
+            f'{item["relacion"].get("sujeto", "")} → {item["relacion"].get("objeto", "")}'
+            for item in relaciones
+        ]
+        vectores = self.modelo_embeddings.encode(
+            titulos,batch_size=settings.BATCH_SIZE_EMBEDDINGS, normalize_embeddings=True, show_progress_bar=False
+        )
+
+        candidatos: dict[str, list] = {
+            nodo["titulonodo_nivel_3"]: self.embeddings_store[rel_id]
+            for rel_id, nodo in self.nivel_3_relaciones.items()
+            if nodo["parent_id"] == sec_id and rel_id in self.embeddings_store
+        }
+
+        grupos: dict[str, list[dict]] = {}
+
+        for item, titulo_item, vector in zip(relaciones, titulos, vectores):
+            vector = vector.tolist()
+            mejor_titulo, mejor_sim = None, 0.0
+
+            for titulo_candidato, vector_candidato in candidatos.items():
+                sim = float(np.dot(vector, vector_candidato))
+                if sim > mejor_sim:
+                    mejor_sim, mejor_titulo = sim, titulo_candidato
+
+            if mejor_titulo is not None and mejor_sim >= UMBRAL_SIMILITUD_N3:
+                titulo_grupo = mejor_titulo
+            else:
+                titulo_grupo = titulo_item
+                candidatos[titulo_grupo] = vector
+
+            grupos.setdefault(titulo_grupo, []).append(item)
+
+        return [{"titulo": titulo, "relaciones": items} for titulo, items in grupos.items()]
+
+    # ------------------------------------------------------------------
+    # Fusión defensiva de referencias en nodos ya existentes (evita que
+    # una colisión de hash (mismo título -> mismo sec_id/rel_id) borre o
+    # ignore silenciosamente las referencias de un documento nuevo.
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _fusionar_secciones_nodo(nodo_n2: dict, secciones_grupo: list[dict]) -> None:
+        """Agrega a nodo_n2['secciones'] las referencias {documento_id, titulo}
+        de secciones_grupo que todavía no estén presentes (dedup por par)."""
+        existentes = {
+            (s.get("documento_id"), s.get("titulo"))
+            for s in nodo_n2.get("secciones", [])
+        }
+
+        for s in secciones_grupo:
+            clave = (s["documento_id"], s["titulo"])
+            if clave in existentes:
+                continue
+            nodo_n2.setdefault("secciones", []).append({
+                "documento_id": s["documento_id"],
+                "titulo": s["titulo"],
+            })
+            existentes.add(clave)
+
+    @staticmethod
+    def _fusionar_relaciones_nodo(nodo_n3: dict, relaciones_grupo: list[dict]) -> None:
+        """Agrega a nodo_n3['relaciones'] las relaciones de relaciones_grupo que
+        todavía no estén presentes (dedup por contenido completo, ya que una
+        relación no tiene un id propio más allá de sus campos)."""
+        existentes = {
+            json.dumps(r, sort_keys=True, ensure_ascii=False)
+            for r in nodo_n3.get("relaciones", [])
+        }
+
+        for r in relaciones_grupo:
+            nueva = {
+                "documento_id": r["documento_id"],
+                "titulo_seccion": r["titulo_seccion"],
+                **r["relacion"],
+            }
+            clave = json.dumps(nueva, sort_keys=True, ensure_ascii=False)
+            if clave in existentes:
+                continue
+            nodo_n3.setdefault("relaciones", []).append(nueva)
+            existentes.add(clave)
+
+    def procesar_categoria(self, categoria: str, documentos: list[dict],
+                            documentos_categoria: list[dict]) -> None:
+        """Construye N1 por categoría, N2 por agrupación semántica de secciones y N3 por agrupación semántica de relaciones."""
+
+        if not categoria or not documentos:
+            return
+
+        # NIVEL 1: CATEGORÍA
+        cluster_id = self._normalizar_cluster_id("", categoria)
+
+        if cluster_id not in self.nivel_1_categorias:
+            confianzas = [d.get("confianza", 1.0) for d in documentos_categoria]
+            self.nivel_1_categorias[cluster_id] = {
+                "id": cluster_id,
+                "titulo": categoria,
+                "confianza": sum(confianzas) / len(confianzas) if confianzas else 1.0
+            }
+
+        # SECCIONES DE TODOS LOS DOCUMENTOS DE LA CATEGORÍA
+        secciones = []
+        for doc in documentos:
+            for seccion in doc.get("secciones", []):
+                titulo = seccion.get("titulo", "").strip()
+                if titulo:
+                    secciones.append({
+                        "documento_id": doc.get("documento_id"),
+                        "titulo": titulo,
+                        "nivel": seccion.get("nivel"),
+                        "ruta_jerarquica": seccion.get("ruta_jerarquica", []),
+                        "relaciones": seccion.get("relaciones", [])
+                    })
+
+        # NIVEL 2: AGRUPAR TÍTULOS SEMÁNTICAMENTE (contra nodos existentes por id)
+        grupos_n2 = self._agrupar_secciones_semanticamente(secciones, cluster_id)
+
+        for grupo in grupos_n2:
+            titulo_n2 = grupo["titulo"]
+            secciones_grupo = grupo["secciones"]
+
+            sec_id = self._generar_id_hash(f"{cluster_id}|{titulo_n2}", "SEC")
+
+            if sec_id not in self.nivel_2_subcategorias:
+                self.nivel_2_subcategorias[sec_id] = {
+                    "id": sec_id,
+                    "parent_id": cluster_id,
+                    "titulo_nodo_2": titulo_n2,
+                    "secciones": [],
+                }
+                # El embedding se guarda de inmediato para que, dentro de la misma
+                # corrida, otros documentos ya puedan compararse contra este nodo.
+                if sec_id not in self.embeddings_store:
+                    vector_ancla = self.modelo_embeddings.encode(
+                        titulo_n2,batch_size=settings.BATCH_SIZE_EMBEDDINGS, normalize_embeddings=True, show_progress_bar=False
+                    )
+                    self.embeddings_store[sec_id] = vector_ancla.tolist()
+
+            # FIX (antes se perdía si el nodo ya existía por colisión de título):
+            # se fusionan las referencias nuevas dentro del nodo existente.
+            self._fusionar_secciones_nodo(self.nivel_2_subcategorias[sec_id], secciones_grupo)
+
+            # RELACIONES DE LAS SECCIONES DEL N2
+            relaciones = []
+            for seccion in secciones_grupo:
+                for relacion in seccion.get("relaciones", []):
+                    sujeto = relacion.get("sujeto", "").strip()
+                    objeto = relacion.get("objeto", "").strip()
+
+                    if sujeto and objeto:
+                        relaciones.append({
+                            "documento_id": seccion["documento_id"],
+                            "titulo_seccion": seccion["titulo"],
+                            "relacion": relacion
+                        })
+
+            # NIVEL 3: AGRUPAR RELACIONES SEMÁNTICAMENTE DENTRO DEL N2 (contra nodos existentes por id)
+            grupos_n3 = self._agrupar_relaciones_semanticamente(relaciones, sec_id)
+
+            for grupo_n3 in grupos_n3:
+                titulo_n3 = grupo_n3["titulo"]
+                relaciones_grupo = grupo_n3["relaciones"]
+
+                rel_id = self._generar_id_hash(f"{sec_id}|{titulo_n3}", "REL")
+
+                if rel_id not in self.nivel_3_relaciones:
+                    self.nivel_3_relaciones[rel_id] = {
+                        "id": rel_id,
+                        "parent_id": sec_id,
+                        "titulonodo_nivel_3": titulo_n3,
+                        "relaciones": [],
+                    }
+                    if rel_id not in self.embeddings_store:
+                        vector_ancla = self.modelo_embeddings.encode(
+                            titulo_n3,batch_size=settings.BATCH_SIZE_EMBEDDINGS, normalize_embeddings=True, show_progress_bar=False
+                        )
+                        self.embeddings_store[rel_id] = vector_ancla.tolist()
+
+                # FIX: mismo criterio que en N2, se fusionan en vez de descartar.
+                self._fusionar_relaciones_nodo(self.nivel_3_relaciones[rel_id], relaciones_grupo)
+
+    # ==========================================================
+    # GESTIÓN DE EMBEDDINGS
+    # ==========================================================
+    def recolectar_nodos_sin_embedding(self) -> dict[str, str]:
+        pendientes = {}
+
+        for nodo in self.nivel_1_categorias.values():
+            nodo_id = nodo["id"]
+            texto = nodo.get("titulo", "")
+            if nodo_id not in self.embeddings_store and texto:
+                pendientes[nodo_id] = texto
+
+        for nodo in self.nivel_2_subcategorias.values():
+            nodo_id = nodo["id"]
+            texto = nodo.get("titulo_nodo_2", "")
+            if nodo_id not in self.embeddings_store and texto:
+                pendientes[nodo_id] = texto
+
+        for nodo in self.nivel_3_relaciones.values():
+            nodo_id = nodo["id"]
+            texto = nodo.get("titulonodo_nivel_3", "")
+            if nodo_id not in self.embeddings_store and texto:
+                pendientes[nodo_id] = texto
+
+        return pendientes
+
+    def generar_y_guardar_embeddings(self) -> None:
+        """Genera y almacena vectores de embedding de forma incremental.
+        Ahora también actúa como red de seguridad: la mayoría de los nodos
+        nuevos ya quedaron con su embedding guardado desde procesar_categoria."""
+        nodos_pendientes = self.recolectar_nodos_sin_embedding()
+
+        if not nodos_pendientes:
+            logger.info("No hay nodos nuevos para generar embeddings.")
+            self.guardar_store_embeddings()
+            return
+
+        ids = list(nodos_pendientes.keys())
+        textos = list(nodos_pendientes.values())
+
+        logger.info("Generando %d embeddings nuevos...", len(textos))
+        vectores = self.modelo_embeddings.encode(
+            textos, batch_size=settings.BATCH_SIZE_EMBEDDINGS,
+normalize_embeddings=True, show_progress_bar=False
+        )
+
+        for nodo_id, vector in zip(ids, vectores):
+            self.embeddings_store[nodo_id] = vector.tolist()
+
         self.guardar_store_embeddings()
-        logger.info("Embeddings guardados exitosamente.")
+        logger.info("Embeddings guardados correctamente.")
+
+    # ==========================================================
+    # GUARDAR GRAFO FINAL
+    # ==========================================================
+
+    def guardar_grafo(self) -> None:
+        """Exporta el grafo estructurado en formato JSON a disco."""
+        grafo_json = {
+            "grafo_conceptual": {
+                "nivel_1_categorias": list(self.nivel_1_categorias.values()),
+                "nivel_2_subcategorias": list(self.nivel_2_subcategorias.values()),
+                "nivel_3_relaciones": list(self.nivel_3_relaciones.values()),
+            }
+        }
+
+        self.ruta_grafo.parent.mkdir(parents=True, exist_ok=True)
+        self.ruta_grafo.write_text(
+            json.dumps(grafo_json, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+        logger.info("Grafo guardado correctamente: %s", self.ruta_grafo)

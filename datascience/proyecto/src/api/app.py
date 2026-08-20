@@ -11,6 +11,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from settings import settings
+from storage.oci_object_storage import sync_metadata_from_oci
 from main import PipelineGraphRAG  # Ajusta a "from .main import PipelineGraphRAG" si está en el mismo paquete
 from .schemas import QueryRequest, QueryResponse
 
@@ -22,9 +23,20 @@ rag_pipeline: PipelineGraphRAG | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Carga los modelos en memoria una sola vez al arrancar."""
+    """Carga los modelos en memoria una sola vez al arrancar.
+
+    IMPORTANTE: aquí solo se sincronizan el grafo y los embeddings (livianos).
+    Los .secciones.json de cada documento NO se descargan aquí — se resuelven
+    bajo demanda dentro de IndiceGrafo, solo cuando un documento_id específico
+    aparece en la trazabilidad de una consulta real (ver indice_grafo.py).
+    """
     global rag_pipeline
     settings.ensure_dirs()
+
+    if settings.DATA_SOURCE.lower() == "oci" and settings.OCI_SYNC_ON_STARTUP:
+        logger.info("Sincronizando grafo + embeddings desde OCI Object Storage antes de iniciar la API...")
+        sync_metadata_from_oci(settings)
+        logger.info("Metadata sincronizada. Los documentos (.secciones.json) se resolverán bajo demanda por consulta.")
 
     logger.info("Cargando Pipeline GraphRAG en memoria...")
     try:
@@ -64,7 +76,13 @@ def health_check():
 
 @app.post("/api/v1/query", response_model=QueryResponse)
 def responder_pregunta(payload: QueryRequest):
-    """Endpoint principal de consulta GraphRAG. Devuelve respuesta + trazabilidad completa."""
+    """Endpoint principal de consulta GraphRAG. Devuelve respuesta + trazabilidad completa.
+
+    Internamente, la resolución de cada sección (dentro de rag_pipeline.responder_consulta)
+    puede disparar una descarga puntual a OCI la primera vez que se necesita un
+    documento_id nuevo (ver IndiceGrafo._resolver_documento_lazy). Consultas
+    posteriores al mismo documento no vuelven a tocar red (queda cacheado en RAM).
+    """
     if rag_pipeline is None:
         raise HTTPException(status_code=503, detail="El modelo GraphRAG aún no está inicializado.")
 

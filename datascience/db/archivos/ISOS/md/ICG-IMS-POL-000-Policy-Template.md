@@ -1,12 +1,9 @@
 ---
 title: "ICG-IMS-POL-000-Policy-Template"
-source_file: "ICG-IMS-POL-000-Policy-Template.pdf"
-source_path: "C:/Users/USUARIO/OneDrive/Documentos/knogment_naye/db/salida_markdown_limpio/ISOS/pdf/ICG-IMS-POL-000-Policy-Template.pdf"
-category: "ISO_HSEQ"
-processed_date: "2026-08-08 15:28:39"
+source_path: "C:\Users\USUARIO\OneDrive\Documentos\nayeli_v2\db\archivos\ISOS\pdf\ICG-IMS-POL-000-Policy-Template.pdf"
+category: "ISO"
+processed_date: "2026-08-17 02:36:02"
 ---
-
-# ICG-IMS-POL-000-Policy-Template
 
 ### POLICY TEMPLATE ICG-IMS-POL-000
 
@@ -36,4 +33,8 @@ Managers and Supervisors are responsible for implementing this policy within the
 
 Workers and Contractors are responsible for complying with this policy, procedures, and participating in consultation and improvement activities.
 
-Authorised by [Director's Name] [Company Name] ICG-IMS-POL-000 POLICY TEMPLATE Rev 1 Page 1 of 1
+Authorised by [Director's Name] [Company Name] ICG-IMS-POL-000
+
+### POLICY TEMPLATE
+
+Rev 1

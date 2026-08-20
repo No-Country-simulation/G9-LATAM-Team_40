@@ -150,7 +150,7 @@ class ExtractorLLM:
             try:
                 logger.info("Intentando con: %s:%s", entry['proveedor'], entry['modelo'])
                 texto = self._invocar(entry, prompt)
-                
+
                 # ÉXITO: Mantenemos este modelo como el principal para futuras llamadas
                 self._active_idx = idx
                 return texto
@@ -158,19 +158,19 @@ class ExtractorLLM:
             except Exception as e:
                 ultimo_error = e
                 logger.warning("Fallo en %s:%s - Error: %s", entry['proveedor'], entry['modelo'], e)
-                
+
                 # AQUÍ LA LÓGICA DE ROTACIÓN:
-                # Si falló, movemos el cursor al siguiente para que la próxima 
+                # Si falló, movemos el cursor al siguiente para que la próxima
                 # llamada (o el siguiente paso del loop) use el siguiente.
                 self._active_idx = (idx + 1) % n
-                
-                # Si es un error temporal (cuota), el loop continúa automáticamente 
+
+                # Si es un error temporal (cuota), el loop continúa automáticamente
                 # al siguiente modelo (paso siguiente).
                 continue
 
         # Si llegamos aquí, todos los modelos fallaron en esta vuelta
         raise RuntimeError(f"Todos los modelos agotados. Último error: {ultimo_error}")
-    
+
     # ----------------------------------------------------------------------
     def analizar_seccion(
         self,
@@ -193,6 +193,10 @@ class ExtractorLLM:
             try:
                 raw_text = self._llm_call(prompt)
 
+                # FIX #5: capturamos qué modelo del pool sticky respondió realmente
+                # ANTES de que una siguiente llamada pueda mover el cursor.
+                modelo_usado = self.modelo_activo
+
                 raw_text = raw_text.strip()
                 if raw_text.startswith("```"):
                     raw_text = raw_text.split("\n", 1)[-1]
@@ -200,7 +204,9 @@ class ExtractorLLM:
                     raw_text = raw_text.rsplit("```", 1)[0]
                 raw_text = raw_text.strip()
 
-                return AnalisisSeccionLLM.model_validate_json(raw_text).model_dump()
+                resultado = AnalisisSeccionLLM.model_validate_json(raw_text).model_dump()
+                resultado["modelo_usado"] = modelo_usado
+                return resultado
 
             except (ValidationError, json.JSONDecodeError) as e:
                 if intento < self._max_retries:
@@ -208,7 +214,7 @@ class ExtractorLLM:
                     time.sleep(2)
                     continue
                 logger.error("Fallo final de validación JSON tras %s reintentos: %s", self._max_retries, e)
-                return {"entidades": [], "relaciones": [], "glosario_relevante": {}, "error": str(e)}
+                return {"entidades": [], "relaciones": [], "glosario_relevante": {}, "error": str(e), "modelo_usado": None}
 
             except RuntimeError as e:
                 # Todos los modelos del pool fallaron en este intento de _llm_call.
@@ -220,8 +226,8 @@ class ExtractorLLM:
                     time.sleep(2)
                     continue
                 logger.error("Fallo crítico: todos los modelos fallaron tras %s reintentos: %s", self._max_retries, e)
-                return {"entidades": [], "relaciones": [], "glosario_relevante": {}, "error": str(e)}
+                return {"entidades": [], "relaciones": [], "glosario_relevante": {}, "error": str(e), "modelo_usado": None}
 
             except Exception as e:
                 logger.error("Error crítico procesando la sección: %s", e)
-                return {"entidades": [], "relaciones": [], "glosario_relevante": {}, "error": str(e)}
+                return {"entidades": [], "relaciones": [], "glosario_relevante": {}, "error": str(e), "modelo_usado": None}

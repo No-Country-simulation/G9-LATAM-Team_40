@@ -25,24 +25,33 @@ class TaxonomiaDescubierta(BaseModel):
 class CategoriaAsignada(BaseModel):
     categoria: str = Field(
         description=(
-            "Nombre de la categoría asignada. Usa el nombre EXACTO de una "
-            "categoría existente en la taxonomía si alguna aplica bien al "
-            "documento. Si NINGUNA categoría existente lo describe "
-            "adecuadamente, propone un nombre nuevo, claro y conciso "
-            "(2-5 palabras, sin números), consistente en estilo con las "
-            "categorías existentes."
+            "Nombre exacto de una categoría existente en la taxonomía "
+            "o una nueva si ninguna aplica."
         )
     )
+
     confianza: float = Field(
         ge=0.0,
         le=1.0,
         description="Confianza entre 0.0 y 1.0."
     )
-    justificacion: str = Field(
-        default="",
-        description="Justificación basada únicamente en título y títulos de secciones."
+
+    palabras_claves: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Entre 3 y 8 términos o frases breves extraídos "
+            "exclusivamente del título y títulos de secciones del documento "
+            "que justifican la asignación de esta categoría."
+        )
     )
 
+    justificacion: str = Field(
+        default="",
+        description=(
+            "Justificación breve basada únicamente en el título "
+            "y títulos de secciones."
+        )
+    )
 
 class ClasificacionDocumento(BaseModel):
     documento_id: str = Field(

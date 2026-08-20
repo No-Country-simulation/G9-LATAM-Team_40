@@ -1,11 +1,22 @@
 """
 Script principal (Orquestador) de Retrieval y Generación Aumentada (RAG) basado en el Grafo Global.
-Etapa 4: reutiliza los nodos, apariciones y relaciones ya construidos en la Etapa 3.
+Etapa 4: reutiliza los nodos (CAT / SEC / REL) ya construidos en la Etapa 3.
 No re-embebe secciones ni re-filtra archivos crudos por consulta.
+
+FLUJO:
+    1. Embeber la consulta del usuario.
+    2. Comparar contra embeddings_store (ids de CUALQUIER nivel: CAT/SEC/REL) -> top-K nodos.
+    3. Por cada nodo top-K, subir por parent_id hasta su(s) nodo(s) SEC (nivel_2),
+       y resolver el CONTENIDO REAL de cada referencia {documento_id, titulo} contra
+       el archivo fuente '<documento_id>.secciones.json' (esto es lo que antes se
+       llamaba "apariciones", pero ahora viene directo del árbol REL->SEC->CAT).
+    4. Filtrar y priorizar candidatos (score, nivel, tope por documento, balance por dominio).
+    5. Construir el contexto final con trazabilidad completa (documento_id, título,
+       categoría, palabras clave, dominio, nivel, ruta_jerarquica, source_path).
+    6. Enviar el contexto al LLM y devolver la respuesta + trazabilidad.
 """
 from __future__ import annotations
 
-import json
 import logging
 import sys
 import textwrap
@@ -84,6 +95,7 @@ class PipelineGraphRAG:
 
     # --------------------------------------------------------------------
     # PASO 1: Nodos semánticos más relevantes (con score)
+    # Los ids en embeddings_store pueden ser de CUALQUIER nivel: CAT, SEC o REL.
     # --------------------------------------------------------------------
     def _buscar_nodos_relevantes(self, emb_consulta: np.ndarray) -> List[tuple[str, float]]:
         embeddings_dict = self.indice.embeddings_store
@@ -112,44 +124,50 @@ class PipelineGraphRAG:
         return resultado
 
     # --------------------------------------------------------------------
-    # PASO 2: Candidatos de sección a partir de las 'apariciones' de los nodos
+    # PASO 2: Candidatos de sección, recorriendo REL/SEC/CAT -> nodo(s) SEC
+    # -> referencias {documento_id, titulo} -> contenido real resuelto contra
+    # el archivo fuente. El nivel real de cada sección solo se conoce aquí
+    # (viene del archivo fuente, no del grafo), por eso la resolución de
+    # contenido ocurre en este paso y no al final.
     # --------------------------------------------------------------------
     def _construir_candidatos_secciones(self, top_nodos: List[tuple[str, float]]) -> Dict[str, Dict[str, Any]]:
         candidatos: Dict[str, Dict[str, Any]] = {}
 
         for nodo_id, score in top_nodos:
-            nodo = self.indice.nodos.get(nodo_id)
-            if nodo is None:
-                logger.info("Nodo %s sin trazabilidad de sección directa (probable CATEGORIA); se omite.", nodo_id)
+            nodos_sec = self.indice.resolver_nodos_seccion_desde_nodo(nodo_id)
+            if not nodos_sec:
+                logger.info("Nodo %s sin nodos SEC asociados; se omite.", nodo_id)
                 continue
 
-            for aparicion in nodo.get("apariciones", []):
-                seccion_id = aparicion.get("seccion_id")
-                if not seccion_id:
-                    continue
+            for nodo_sec in nodos_sec:
+                resueltos = self.indice.resolver_contenido_nodo_seccion(nodo_sec)
 
-                sec_meta = self.indice.secciones.get(seccion_id)
-                if not sec_meta:
-                    continue
+                for item in resueltos:
+                    documento_id = item["documento_id"]
+                    titulo_seccion = item["titulo_seccion"]
+                    clave = f"{documento_id}::{titulo_seccion}"
 
-                documento_id = sec_meta.get("documento_id")
-                dominio = self.indice.resolver_dominio_documento(documento_id)
+                    existente = candidatos.get(clave)
+                    if existente is None or score > existente["score"]:
+                        info_doc = self.indice.obtener_info_documento(documento_id)
+                        info_clasif = self.indice.obtener_categoria_y_palabras_clave(documento_id)
+                        candidatos[clave] = {
+                            "clave": clave,
+                            "documento_id": documento_id,
+                            "documento_titulo": info_doc.get("titulo") or documento_id,
+                            "categoria": info_clasif.get("categoria", ""),
+                            "palabras_clave": info_clasif.get("palabras_clave", []),
+                            "titulo_seccion": titulo_seccion,
+                            "ruta_jerarquica": self._sanear_ruta_jerarquica(item.get("ruta_jerarquica", [])),
+                            "nivel": item.get("nivel") or 1,
+                            "dominio": item["dominio"],
+                            "contenido": item["texto"],
+                            "source_path": item.get("source_path", ""),
+                            "score": score,
+                            "nodo_origen": nodo_sec.get("id"),
+                        }
 
-                existente = candidatos.get(seccion_id)
-                if existente is None or score > existente["score"]:
-                    candidatos[seccion_id] = {
-                        "seccion_id": seccion_id,
-                        "documento_id": documento_id,
-                        "documento_nombre": sec_meta.get("documento_nombre"),
-                        "titulo_seccion": sec_meta.get("titulo"),
-                        "ruta_jerarquica": self._sanear_ruta_jerarquica(sec_meta.get("ruta_jerarquica", [])),
-                        "nivel": sec_meta.get("nivel", 1),
-                        "dominio": dominio,
-                        "score": score,
-                        "nodo_origen": nodo_id,
-                    }
-
-        logger.info("[2/4] Secciones candidatas (vía apariciones de nodos): %d", len(candidatos))
+        logger.info("[2/4] Secciones candidatas (vía nodos SEC resueltos): %d", len(candidatos))
         return candidatos
 
     # --------------------------------------------------------------------
@@ -160,7 +178,7 @@ class PipelineGraphRAG:
         """
         Defensa contra rutas jerárquicas corruptas (bloques de texto completo capturados
         como 'encabezado padre' por un parser de Markdown deficiente en etapas previas).
-        Truncar cada elemento y conserva solo los N más cercanos a la sección (los últimos),
+        Trunca cada elemento y conserva solo los N más cercanos a la sección (los últimos),
         que son los de mayor valor de trazabilidad real.
         """
         if not ruta:
@@ -260,33 +278,37 @@ class PipelineGraphRAG:
                 logger.info(
                     "Balance de dominio: reemplazando sección de menor score (%s, %.4f) "
                     "por candidato de dominio faltante '%s' (%s, %.4f).",
-                    seleccion[idx_peor]["seccion_id"], seleccion[idx_peor]["score"],
-                    dominio, mejor_del_dominio["seccion_id"], mejor_del_dominio["score"]
+                    seleccion[idx_peor]["clave"], seleccion[idx_peor]["score"],
+                    dominio, mejor_del_dominio["clave"], mejor_del_dominio["score"]
                 )
                 seleccion[idx_peor] = mejor_del_dominio
 
         return sorted(seleccion, key=lambda c: c["score"], reverse=True)
 
     # --------------------------------------------------------------------
-    # PASO 4: Resolución de contenido + contexto con trazabilidad completa
+    # PASO 4: Formateo del contexto final (el contenido ya viene resuelto
+    # desde el Paso 2; aquí solo se descartan candidatos sin texto y se
+    # redondea el score para presentación).
     # --------------------------------------------------------------------
-    def _resolver_contexto(self, secciones_seleccionadas: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    @staticmethod
+    def _formatear_contexto(secciones_seleccionadas: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         contexto: List[Dict[str, Any]] = []
 
         for sec in secciones_seleccionadas:
-            resuelto = self.indice.resolver_contenido_seccion(sec["seccion_id"])
-            if not resuelto or not resuelto["texto"]:
+            if not sec.get("contenido"):
                 continue
 
             contexto.append({
-                "seccion_id": sec["seccion_id"],
                 "documento_id": sec["documento_id"],
-                "documento_nombre": sec["documento_nombre"],
+                "documento_titulo": sec["documento_titulo"],
+                "categoria": sec.get("categoria", ""),
+                "palabras_clave": sec.get("palabras_clave", []),
                 "titulo_seccion": sec["titulo_seccion"],
                 "ruta_jerarquica": sec["ruta_jerarquica"],
                 "nivel": sec["nivel"],
-                "dominio": resuelto["dominio"],
-                "contenido": resuelto["texto"],
+                "dominio": sec["dominio"],
+                "contenido": sec["contenido"],
+                "source_path": sec.get("source_path", ""),
                 "score": round(sec["score"], 4),
                 "nodo_origen": sec["nodo_origen"],
             })
@@ -303,7 +325,7 @@ class PipelineGraphRAG:
         top_nodos = self._buscar_nodos_relevantes(emb_consulta)
         candidatos = self._construir_candidatos_secciones(top_nodos)
         seleccionadas = self._seleccionar_secciones(candidatos)
-        return self._resolver_contexto(seleccionadas)
+        return self._formatear_contexto(seleccionadas)
 
     # --------------------------------------------------------------------
     # Generación de respuesta
@@ -321,7 +343,8 @@ class PipelineGraphRAG:
 
         bloque_contexto = "".join([
             f"\n--- SECCIÓN {i+1} "
-            f"[Doc: {c['documento_nombre']} ({c['documento_id']}) | "
+            f"[Doc: {c['documento_titulo']} ({c['documento_id']}) | "
+            f"Categoría: {c['categoria'] or 'N/D'} | "
             f"Ruta: {' > '.join(c['ruta_jerarquica']) if c['ruta_jerarquica'] else c['titulo_seccion']} | "
             f"Nivel: {c['nivel']} | Dominio: {c['dominio']} | Score: {c['score']}] ---\n"
             f"{c['contenido']}\n"
@@ -345,14 +368,16 @@ class PipelineGraphRAG:
             "respuesta": respuesta.choices[0].message.content,
             "trazabilidad": [
                 {
-                    "seccion_id": c["seccion_id"],
                     "documento_id": c["documento_id"],
-                    "documento_nombre": c["documento_nombre"],
+                    "documento_titulo": c["documento_titulo"],
+                    "categoria": c.get("categoria", ""),
+                    "palabras_clave": c.get("palabras_clave", []),
                     "titulo_seccion": c["titulo_seccion"],
                     "ruta_jerarquica": c["ruta_jerarquica"],
                     "nivel": c["nivel"],
                     "dominio": c["dominio"],
                     "score": c["score"],
+                    "source_path": c.get("source_path", ""),
                 }
                 for c in contexto
             ],
@@ -393,13 +418,16 @@ def imprimir_resultado(pregunta: str, resultado: Dict[str, Any]) -> None:
     print("-" * ancho)
 
     if not trazabilidad:
-        print("  (sin fuentes — no se encontró contexto suficiente)")
+        print("   (sin fuentes — no se encontró contexto suficiente)")
     else:
         for i, t in enumerate(trazabilidad, start=1):
-            print(f"\n  [{i}] {t['documento_nombre']}  (dominio: {t['dominio']}, nivel: {t['nivel']}, score: {t['score']})")
-            print(f"      Sección : {t['titulo_seccion']}")
-            print(f"      Ruta    : {_formatear_ruta(t['ruta_jerarquica'])}")
-            print(f"      ID      : {t['seccion_id']}")
+            print(f"\n   [{i}] {t['documento_titulo']}  (dominio: {t['dominio']}, nivel: {t['nivel']}, score: {t['score']})")
+            print(f"       Categoría      : {t.get('categoria') or '(sin categoría)'}")
+            print(f"       Palabras clave : {', '.join(t.get('palabras_clave') or []) or '(sin palabras clave)'}")
+            print(f"       Sección : {t['titulo_seccion']}")
+            print(f"       Ruta    : {_formatear_ruta(t['ruta_jerarquica'])}")
+            print(f"       Doc ID  : {t['documento_id']}")
+            print(f"       Fuente  : {t.get('source_path') or '(sin source_path)'}")
 
     print("\n" + "-" * ancho)
     print(f"Tiempo total: {resultado['tiempo_segundos']} s")

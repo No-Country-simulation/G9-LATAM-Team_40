@@ -14,7 +14,7 @@ from string import Template
 from openai import OpenAI
 from pydantic import ValidationError
 
-from schemas import TaxonomiaDescubierta
+from schemas.documento_clasificado import TaxonomiaDescubierta
 from settings import settings
 
 logging.basicConfig(
@@ -32,9 +32,16 @@ def normalizar_nombre_categoria(nombre: str) -> str:
 
 def cargar_titulos() -> list[dict]:
     documentos = []
-    for tipo, ruta in settings.INPUT_FILES.items():
-        if not ruta.exists():
-            logger.warning("No existe: %s — se omite '%s'.", ruta, tipo)
+    for tipo, ruta in [
+        ("LEYES", settings.FILE_LEYES_EXTRACCION),
+        ("ISO", settings.FILE_ISO_EXTRACCION),
+    ]:
+        if not ruta.exists(): 
+            logger.warning(
+                "No existe: %s — se omite '%s'.",
+                ruta,
+                tipo
+            )
             continue
 
         lista_docs = json.loads(ruta.read_text(encoding="utf-8"))
@@ -50,11 +57,14 @@ def cargar_titulos() -> list[dict]:
                 if isinstance(sec, dict) and sec.get("titulo", "").strip()
             ]
 
+            relaciones = doc.get("relaciones", [])
+
             documentos.append({
                 "documento_id": identificador,
                 "tipo_documento": tipo,
                 "titulo_documento": titulo,
                 "titulos_secciones": titulos_secciones,
+                "relaciones": relaciones,
             })
     return documentos
 
@@ -76,11 +86,18 @@ def descubrir_taxonomia(documentos: list[dict], reintentos: int = 2) -> list[dic
     settings.validate_keys()
     client = OpenAI(api_key=settings.DEEPSEEK_API_KEY, base_url=settings.DEEPSEEK_BASE_URL)
 
+    # AJUSTE 1: Incluimos las relaciones en el resumen enviado al LLM
     resumen_titulos = [
-        {"documento_id": d["documento_id"], "tipo_documento": d["tipo_documento"], "titulo": d["titulo_documento"], "secciones": d["titulos_secciones"]}
+        {
+            "documento_id": d["documento_id"], 
+            "tipo_documento": d["tipo_documento"], 
+            "titulo": d["titulo_documento"], 
+            "secciones": d["titulos_secciones"],
+            "relaciones": d["relaciones"] # <--- Ahora el LLM puede descubrir categorías basadas en relaciones
+        }
         for d in documentos
     ]
-    logger.info("Enviando al LLM títulos de %d documentos.", len(resumen_titulos))
+    logger.info("Enviando al LLM datos de %d documentos (incluyendo relaciones).", len(resumen_titulos))
 
     prompt_path = settings.PROMPTS_DIR / "prompt_descubrimiento.txt"
     if not prompt_path.exists():
@@ -92,32 +109,32 @@ def descubrir_taxonomia(documentos: list[dict], reintentos: int = 2) -> list[dic
         resumen_titulos=json.dumps(resumen_titulos, ensure_ascii=False, indent=2),
         json_schema=json.dumps(TaxonomiaDescubierta.model_json_schema(), ensure_ascii=False),
     )
-
     for intento in range(reintentos + 1):
-        try:
-            logger.info("Intento de descubrimiento %d/%d", intento + 1, reintentos + 1)
-            res = client.chat.completions.create(
-                model=settings.DEEPSEEK_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                response_format={"type": "json_object"},
-                temperature=0.2,
-            )
+            try:
+                logger.info("Intento de descubrimiento %d/%d", intento + 1, reintentos + 1)
+                res = client.chat.completions.create(
+                    model=settings.DEEPSEEK_MODEL,
+                    messages=[{"role": "user", "content": prompt}],
+                    response_format={"type": "json_object"},
+                    temperature=0.2,
+                )
 
-            content = res.choices[0].message.content or ""
-            raw = re.sub(r"^```json\s*|\s*```$", "", content.strip())
-            taxonomia = TaxonomiaDescubierta.model_validate_json(raw)
+                content = res.choices[0].message.content or ""
+                raw = re.sub(r"^```json\s*|\s*```$", "", content.strip())
+                taxonomia = TaxonomiaDescubierta.model_validate_json(raw)
 
-            if len(taxonomia.categorias) < settings.MIN_CATEGORIAS:
-                logger.warning("El LLM propuso %d categorías. Mínimo esperado: %d.", len(taxonomia.categorias), settings.MIN_CATEGORIAS)
-                if intento < reintentos:
-                    continue
+                # Validar mínimo de categorías
+                if len(taxonomia.categorias) < settings.MIN_CATEGORIAS:
+                    logger.warning("El LLM propuso %d categorías. Mínimo esperado: %d.", len(taxonomia.categorias), settings.MIN_CATEGORIAS)
+                    if intento < reintentos:
+                        continue
 
-            return [cat.model_dump() for cat in taxonomia.categorias]
+                return [cat.model_dump() for cat in taxonomia.categorias]
 
-        except (ValidationError, json.JSONDecodeError, Exception) as e:
-            logger.warning("Error en intento %d/%d: %s", intento + 1, reintentos + 1, e)
-            if intento == reintentos:
-                raise RuntimeError(f"No se pudo generar la taxonomía tras {reintentos + 1} intentos: {e}")
+            except (ValidationError, json.JSONDecodeError, Exception) as e:
+                logger.warning("Error en intento %d/%d: %s", intento + 1, reintentos + 1, e)
+                if intento == reintentos:
+                    raise RuntimeError(f"No se pudo generar la taxonomía tras {reintentos + 1} intentos: {e}")
 
     raise RuntimeError("No se pudo generar la taxonomía.")
 

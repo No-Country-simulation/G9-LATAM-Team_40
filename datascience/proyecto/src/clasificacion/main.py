@@ -1,11 +1,3 @@
-"""
-Módulo principal de orquestación para la Etapa 2 (Clasificación).
-
-Sin memoria de corridas anteriores: cada ejecución procesa TODOS los
-documentos desde cero y sobreescribe el archivo de salida completo.
-No hay reutilización de clasificaciones previas ni backups.
-"""
-
 from __future__ import annotations
 
 import json
@@ -50,13 +42,28 @@ def ejecutar_clasificacion() -> None:
     storage = StorageManager(settings)
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    logger.info("Iniciando Etapa 2 - Clasificación (sin memoria). run_id=%s", run_id)
+    # 0. Verificación automática: Si no existe la taxonomía, ejecutar Etapa 1 primero
+    path_taxonomia = settings.FILE_TAXONOMIA_DESCUBIERTA
+    if not path_taxonomia.exists():
+        logger.info("No se encontró el archivo de taxonomía en %s.", path_taxonomia)
+        logger.info("Iniciando automáticamente la Etapa 1 (Descubrimiento de Taxonomía)...")
+        try:
+            # Importa y ejecuta la función principal de la Etapa 1
+            from .descubrimiento_taxonomia import ejecutar_descubrimiento
+            ejecutar_descubrimiento()
+            logger.info("Etapa 1 completada con éxito. Continuando con la clasificación...")
+        except Exception as e:
+            raise RuntimeError(
+                f"No se pudo generar la taxonomía automáticamente en la Etapa 1: {e}"
+            ) from e
+
+    logger.info("Iniciando Etapa 2 - Clasificación con Memoria Incremental. run_id=%s", run_id)
 
     # 1. Cargar taxonomía
     info_taxonomia, nombres_a_id, lista_nombres_categorias = storage.cargar_taxonomia()
     if not lista_nombres_categorias:
-        raise RuntimeError("No se encontró ninguna categoría en la taxonomía. Ejecuta primero la Etapa 1.")
-
+        raise RuntimeError("No se encontró ninguna categoría en la taxonomía. Ejecuta primero la Etapa 1.") 
+    
     logger.info("Taxonomía cargada: %d categorías", len(lista_nombres_categorias))
 
     mapa_normalizado_id = {
@@ -64,9 +71,8 @@ def ejecutar_clasificacion() -> None:
         for nombre, cluster_id in nombres_a_id.items()
     }
 
-    # Slugs ya usados en la taxonomía, para no colisionar al crear categorías nuevas.
+    # Slugs ya usados en la taxonomía
     slugs_usados = set(info_taxonomia.get("categorias", {}).keys())
-
     classifier = DocumentClassifier(settings, lista_nombres_categorias)
     settings.SALIDA_JSON_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -85,20 +91,45 @@ def ejecutar_clasificacion() -> None:
             logger.warning("Tipo de documento no reconocido: %s. Se omite.", tipo)
             continue
 
-        lista_docs = json.loads(ruta.read_text(encoding="utf-8"))
-        logger.info("Procesando tipo: %s | Documentos encontrados: %d", tipo_normalizado, len(lista_docs))
+        # Cargar documentos fuente actuales
+        lista_docs_fuente = json.loads(ruta.read_text(encoding="utf-8"))
+        logger.info("Tipo: %s | Total documentos en fuente: %d", tipo_normalizado, len(lista_docs_fuente))
 
-        # Sin memoria: se procesan TODOS los documentos, siempre.
+        # Cargar resultados previos si existen (Memoria / Persistencia)
+        documentos_previos_map = {}
+        if path_salida.exists():
+            try:
+                docs_previos = json.loads(path_salida.read_text(encoding="utf-8"))
+                for doc_p in docs_previos:
+                    # Reconstruir identificador idéntico al generador
+                    idx_temp = 0 # fallback match
+                    identif_p = (
+                        doc_p.get("documento_id")
+                        or doc_p.get("metadata", {}).get("archivo")
+                    )
+                    if identif_p:
+                        documentos_previos_map[identif_p] = doc_p
+                logger.info("Se recuperaron %d documentos clasificados previamente.", len(documentos_previos_map))
+            except Exception as e:
+                logger.warning("No se pudo leer el archivo previo en %s: %s", path_salida, e)
+
         resultado_actual: list[dict] = []
-
         pendientes = []
-        for idx, doc in enumerate(lista_docs):
+
+        for idx, doc in enumerate(lista_docs_fuente):
             identificador = (
                 doc.get("documento_id")
                 or doc.get("metadata", {}).get("archivo")
                 or f"{tipo_normalizado}_{idx}"
             )
 
+            # Si el documento ya fue clasificado anteriormente, respetamos su clasificación previa
+            if identificador in documentos_previos_map:
+                logger.debug("Documento ya existente conservado: '%s'", identificador)
+                resultado_actual.append(documentos_previos_map[identificador])
+                continue
+
+            # Si es nuevo, preparamos sus metadatos basados estrictamente en títulos y nombres
             titulo = doc.get("documento_nombre") or identificador
             titulos_secciones = [
                 s.get("titulo", "").strip()
@@ -110,24 +141,32 @@ def ejecutar_clasificacion() -> None:
                 "documento_id": identificador,
                 "titulo_documento": titulo,
                 "titulos_secciones": titulos_secciones,
-                "doc_original": doc,
+                "relaciones": doc.get("relaciones", []), 
             })
 
-        # 3. Procesamiento por lotes
+        logger.info("Documentos nuevos pendientes de clasificar: %d", len(pendientes))
+
+        if not pendientes:
+            logger.info("No hay nuevos documentos para procesar en tipo=%s.", tipo_normalizado)
+            storage.guardar_json_atomico(path_salida, resultado_actual)
+            continue
+
+        # 3. Procesamiento por lotes solo para documentos NUEVOS
         lote_size = settings.DOCUMENTOS_POR_LOTE
         for idx_lote, i in enumerate(range(0, len(pendientes), lote_size), start=1):
             lote = pendientes[i : i + lote_size]
-            logger.info("Procesando lote %d: %d documentos", idx_lote, len(lote))
+            logger.info("Procesando lote NUEVO %d: %d documentos", idx_lote, len(lote))
 
             resultado_lote = classifier.clasificar_lote(lote)
             mapa_resultado = {r.get("documento_id"): r for r in resultado_lote if r.get("documento_id")}
 
             for item in lote:
                 doc_id = item["documento_id"]
-                r = mapa_resultado.get(doc_id, {"categorias_asignadas": [], "confianzas": []})
-
+                r = mapa_resultado.get(doc_id, {"categorias_asignadas": [], "confianzas": [], "palabras_claves": []})
                 categorias = r.get("categorias_asignadas", [])
                 confianzas = r.get("confianzas", [])
+                lista_palabras = r.get("palabras_claves", [])
+
                 clasificaciones = []
                 clusters_vistos = set()
 
@@ -141,22 +180,18 @@ def ejecutar_clasificacion() -> None:
                     except (TypeError, ValueError):
                         confianza = 0.0
 
-                    if not (0.0 <= confianza <= 1.0):
-                        logger.warning("Confianza inválida %.3f. Doc=%s Cat=%s", confianza, doc_id, nombre_limpio)
-                        continue
-
-                    if confianza < settings.UMBRAL_CONFIANZA:
+                    if not (0.0 <= confianza <= 1.0) or confianza < settings.UMBRAL_CONFIANZA:
                         continue
 
                     nombre_norm = normalizar_texto(nombre_limpio)
                     cluster_id = mapa_normalizado_id.get(nombre_norm)
 
+                    # Si la categoría no encaja en las existentes, se crea una nueva (Dinámica)
                     if cluster_id is None:
-                        # Categoría nueva propuesta por el LLM: se crea y se agrega a la taxonomía.
                         cluster_id = generar_slug_categoria(nombre_limpio, slugs_usados)
                         info_taxonomia.setdefault("categorias", {})[cluster_id] = {
                             "nombre": nombre_limpio,
-                            "descripcion": f"Categoría autogenerada por el clasificador (detectada en '{doc_id}').",
+                            "descripcion": f"Categoría autogenerada basada en títulos (detectada en '{doc_id}').",
                             "tipo": "autogenerada",
                             "run_id": run_id,
                         }
@@ -165,44 +200,38 @@ def ejecutar_clasificacion() -> None:
                         mapa_normalizado_id[nombre_norm] = cluster_id
                         lista_nombres_categorias.append(nombre_limpio)
 
-                        logger.info("NUEVA CATEGORÍA CREADA: '%s' -> %s (doc '%s')", nombre_limpio, cluster_id, doc_id)
-
+                        logger.info("NUEVA CATEGORÍA DINÁMICA CREADA: '%s' -> %s (por doc '%s')", nombre_limpio, cluster_id, doc_id)
                     if cluster_id not in clusters_vistos:
                         clusters_vistos.add(cluster_id)
+
+                        palabras_cat = lista_palabras[posicion] if posicion < len(lista_palabras) else []
+
                         clasificaciones.append({
                             "cluster_id": cluster_id,
                             "categoria": nombre_limpio,
                             "confianza": confianza,
+                            "palabras_claves": palabras_cat
                         })
 
                 etiqueta = {
+                    "documento_id": doc_id,
+                    "fecha_procesamiento": datetime.now().isoformat(),
                     "run_id": run_id,
                     "taxonomia_run_id": info_taxonomia.get("run_id", "unknown"),
                     "modelo_llm": settings.DEEPSEEK_MODEL,
                     "tipo_documento": tipo_normalizado,
                     "clasificaciones": clasificaciones,
-                    "revisar_manual": len(clasificaciones) == 0,
                 }
 
-                doc_actualizado = dict(item["doc_original"])
-                doc_actualizado["clasificacion_llm"] = etiqueta
-                resultado_actual.append(doc_actualizado)
+                resultado_actual.append(etiqueta)
 
-            logger.info("Lote %d procesado completamente: %d documentos", idx_lote, len(lote))
-
-        # Guardado único al final del tipo de documento (sin backups, sobreescribe directo)
+        # Guardado incremental actualizado
         storage.guardar_json_atomico(path_salida, resultado_actual)
-        logger.info("Clasificación terminada para tipo=%s | salida=%s | documentos=%d", tipo_normalizado, path_salida.name, len(resultado_actual))
+        logger.info("Clasificación incremental finalizada para tipo=%s | salida=%s | total documentos=%d", 
+                    tipo_normalizado, path_salida.name, len(resultado_actual))
 
-    # 4. Guardar taxonomía actualizada con las categorías nuevas
+    # 4. Guardar taxonomía actualizada en caso de haber descubierto nuevas categorías
     path_taxonomia = settings.FILE_TAXONOMIA_DESCUBIERTA
     path_taxonomia.parent.mkdir(parents=True, exist_ok=True)
     path_taxonomia.write_text(json.dumps(info_taxonomia, ensure_ascii=False, indent=2), encoding="utf-8")
-    logger.info("Taxonomía actualizada guardada en %s", settings.FILE_TAXONOMIA_DESCUBIERTA)
-
-    logger.info("Etapa 2 finalizada correctamente. run_id=%s", run_id)
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    ejecutar_clasificacion()
+    logger.info("Taxonomía actualizada guardada correctamente.")

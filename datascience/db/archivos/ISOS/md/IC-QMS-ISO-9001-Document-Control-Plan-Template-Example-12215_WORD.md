@@ -1,14 +1,11 @@
 ---
 title: "IC-QMS-ISO-9001-Document-Control-Plan-Template-Example-12215_WORD"
-source_file: "IC-QMS-ISO-9001-Document-Control-Plan-Template-Example-12215_WORD.pdf"
-source_path: "C:/Users/USUARIO/OneDrive/Documentos/knogment_naye/db/salida_markdown_limpio/ISOS/pdf/IC-QMS-ISO-9001-Document-Control-Plan-Template-Example-12215_WORD.pdf"
-category: "ISO_HSEQ"
-processed_date: "2026-08-08 15:28:13"
+source_path: "C:\Users\USUARIO\OneDrive\Documentos\nayeli_v2\db\archivos\ISOS\pdf\IC-QMS-ISO-9001-Document-Control-Plan-Template-Example-12215_WORD.pdf"
+category: "ISO"
+processed_date: "2026-08-17 02:35:46"
 ---
 
-# IC-QMS-ISO-9001-Document-Control-Plan-Template-Example-12215_WORD
-
-# **QMS ISO 9001 Document Control Plan Template** <!-- Start of picture text --> QMS ISO 9001 Document Control Plan<br><!-- End of picture text --> |Company Name<br>Prepared by|Reviewed by|Date<br>Approved by| |---|---|---| ## 1. Purpose This section defines the purpose of the Document Control Plan, which is to establish a procedure for the management, control, and revision of all documents relevant to the Quality Management System (QMS) to ensure that they remain current, approved, and properly maintained. The purpose is also to comply with ISO 9001 requirements for document control.
+# **QMS ISO 9001 Document Control Plan Template** QMS ISO 9001 Document Control Plan |Company NamePrepared by|Reviewed by|DateApproved by| |---|---|---| ## 1. Purpose This section defines the purpose of the Document Control Plan, which is to establish a procedure for the management, control, and revision of all documents relevant to the Quality Management System (QMS) to ensure that they remain current, approved, and properly maintained. The purpose is also to comply with ISO 9001 requirements for document control.
 
 Text ## 2. Scope This section outlines the types of documents covered by the Document Control Plan, including policies, procedures, work instructions, forms, manuals, and external documents relevant to the QMS. The scope defines which departments or processes are subject to document control and the applicability of the control system across the organization.
 

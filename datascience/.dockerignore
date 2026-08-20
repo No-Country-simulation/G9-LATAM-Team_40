@@ -1,30 +1,26 @@
-# Se coloca en la RAÍZ del repo (junto a db/ y proyecto/), no en docker/.
+# Secretos: NUNCA deben quedar horneados en la imagen (se montan por volumen en runtime)
+.env
+**/*.pem
+oci/
 
-.git
-.gitignore
-
-# db/ nunca debe entrar a la imagen (son datos, se montan por volumen)
+# Datos (se montan por volumen, no deben ir en la imagen)
 db/
 
-# Secretos: el .env real se monta por volumen, no se hornea en la imagen
-proyecto/.env
-**/.env
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
 
-# Cache local de Python
-**/__pycache__/
-**/*.pyc
-**/.pytest_cache/
-**/.mypy_cache/
-
-# Entornos virtuales locales, si los tienes fuera de Docker
-**/.venv/
-**/venv/
-
-# Editores / SO
+# Control de versiones / editor
+.git/
+.gitignore
 .vscode/
 .idea/
-.DS_Store
 
-# Modelos descargados localmente fuera de Docker (si existiera esa carpeta)
-modelo_local_class/
-models_cache/
+# Tests y misceláneos que no hacen falta en runtime
+tests/
+*.md
+.pytest_cache/
