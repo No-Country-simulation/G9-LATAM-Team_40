@@ -1,6 +1,5 @@
 package com.techcontent.ai.integration.ml;
 
-import com.techcontent.ai.dto.MlResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
@@ -25,32 +24,54 @@ class MlClientTest {
     private MockRestServiceServer server;
 
     @Test
-    void predict_respuestaValida_deberiaDeserializarCorrectamente() {
+    void queryGraphRag_respuestaValida_deberiaDeserializarCorrectamente() {
         String json = """
-                {"categoria":"Backend","probabilidad":0.93,"palabras_clave":["Java","Spring Boot"]}
+                {
+                  "pregunta": "Texto sobre Java y Spring Boot",
+                  "respuesta": "Spring Boot simplifica la creación de aplicaciones Java.",
+                  "trazabilidad": [
+                    {
+                      "documento_id": "doc123",
+                      "documento_titulo": "Manual Spring Boot",
+                      "categoria": "Backend",
+                      "palabras_clave": ["Java", "Spring Boot"],
+                      "titulo_seccion": "Introducción",
+                      "ruta_jerarquica": ["Capítulo 1"],
+                      "nivel": 1,
+                      "dominio": "Desarrollo",
+                      "score": 0.93,
+                      "source_path": "/docs/spring.pdf"
+                    }
+                  ],
+                  "tiempo_segundos": 1.2
+                }
                 """;
 
-        server.expect(requestTo("http://ml-test/predict"))
+        server.expect(requestTo("http://ml-test/api/v1/query"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-        MlResponse response = mlClient.predict("Texto sobre Java y Spring Boot");
+        QueryResponse response = mlClient.queryGraphRag("Texto sobre Java y Spring Boot");
 
-        assertThat(response.categoria()).isEqualTo("Backend");
-        assertThat(response.probabilidad()).isEqualTo(0.93);
-        assertThat(response.palabrasClave()).containsExactly("Java", "Spring Boot");
+        assertThat(response.respuesta()).isEqualTo("Spring Boot simplifica la creación de aplicaciones Java.");
+        assertThat(response.trazabilidad()).hasSize(1);
+
+        TrazabilidadSeccionDto trazabilidad = response.trazabilidad().get(0);
+        assertThat(trazabilidad.categoria()).isEqualTo("Backend");
+        assertThat(trazabilidad.score()).isEqualTo(0.93);
+        assertThat(trazabilidad.palabrasClave()).containsExactly("Java", "Spring Boot");
 
         server.verify();
     }
 
     @Test
-    void predict_errorDelServidor_deberiaLanzarMlServiceException() {
-        server.expect(requestTo("http://ml-test/predict"))
+    void queryGraphRag_errorDelServidor_deberiaLanzarMlServiceException() {
+        server.expect(requestTo("http://ml-test/api/v1/query"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withServerError());
 
-        assertThatThrownBy(() -> mlClient.predict("texto de prueba"))
+        assertThatThrownBy(() -> mlClient.queryGraphRag("texto de prueba"))
                 .isInstanceOf(MlServiceException.class)
                 .hasMessageContaining("error");
 
@@ -58,11 +79,11 @@ class MlClientTest {
     }
 
     @Test
-    void predict_servidorNoDisponible_deberiaLanzarMlServiceException() {
-        server.expect(requestTo("http://ml-test/predict"))
+    void queryGraphRag_servidorNoDisponible_deberiaLanzarMlServiceException() {
+        server.expect(requestTo("http://ml-test/api/v1/query"))
                 .andRespond(withException(new java.io.IOException("Connection refused")));
 
-        assertThatThrownBy(() -> mlClient.predict("texto de prueba"))
+        assertThatThrownBy(() -> mlClient.queryGraphRag("texto de prueba"))
                 .isInstanceOf(MlServiceException.class)
                 .hasMessageContaining("conectar");
 

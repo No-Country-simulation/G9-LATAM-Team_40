@@ -1,12 +1,15 @@
 package com.techcontent.ai.domain.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techcontent.ai.api.dto.request.ContenidoLoteRequest;
 import com.techcontent.ai.api.dto.request.ContenidoRequest;
 import com.techcontent.ai.api.dto.response.ContenidoResponse;
 import com.techcontent.ai.domain.model.Contenido;
 import com.techcontent.ai.domain.repository.ContenidoRepository;
 import com.techcontent.ai.integration.ml.MlClient;
-import com.techcontent.ai.dto.MlResponse;
+import com.techcontent.ai.integration.ml.QueryResponse;
+import com.techcontent.ai.integration.ml.TrazabilidadSeccionDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +22,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +33,9 @@ class ContenidoServiceTest {
 
     @Mock
     private MlClient mlClient;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private ContenidoService service;
@@ -44,17 +51,28 @@ class ContenidoServiceTest {
                 .categoria(categoria)
                 .probabilidad(probabilidad)
                 .palabrasClave(keywords)
+                .respuesta("Respuesta de prueba del LLM")
+                .grafoData("[]")
                 .procesadoEn(LocalDateTime.now())
                 .build();
     }
 
+    private QueryResponse crearQueryResponseSimulado(String categoria, Double score, List<String> keywords) {
+        TrazabilidadSeccionDto trazabilidad = new TrazabilidadSeccionDto(
+                "doc1", "Titulo Doc", categoria, keywords,
+                "Seccion 1", List.of("Cap 1"), 1, "Dominio", score, "/path/doc.pdf"
+        );
+        return new QueryResponse("Pregunta test", "Respuesta de prueba del LLM", List.of(trazabilidad), 1.0);
+    }
+
     @Test
-    void clasificar_deberiaLlamarAlMlYPersistirElContenido() {
+    void clasificar_deberiaLlamarAlMlYPersistirElContenido() throws JsonProcessingException {
         ContenidoRequest request = new ContenidoRequest("Titulo", "Texto de prueba para clasificar");
-        MlResponse mlResponse = new MlResponse("Backend", 0.93, List.of("Java", "Spring"));
+        QueryResponse queryResponse = crearQueryResponseSimulado("Backend", 0.93, List.of("Java", "Spring"));
         UUID savedId = UUID.randomUUID();
 
-        when(mlClient.predict(request.texto())).thenReturn(mlResponse);
+        when(mlClient.queryGraphRag(request.texto())).thenReturn(queryResponse);
+        when(objectMapper.writeValueAsString(any())).thenReturn("[]");
         when(repository.save(any(Contenido.class))).thenReturn(contenidoGuardado(savedId, "Backend", 0.93, List.of("Java", "Spring")));
 
         ContenidoResponse response = service.clasificar(request, USER_ID);
@@ -62,35 +80,43 @@ class ContenidoServiceTest {
         assertThat(response.categoria()).isEqualTo("Backend");
         assertThat(response.probabilidad()).isEqualTo(0.93);
         assertThat(response.palabrasClave()).containsExactly("Java", "Spring");
+        assertThat(response.respuesta()).isEqualTo("Respuesta de prueba del LLM");
 
-        verify(mlClient, times(1)).predict(request.texto());
+        verify(mlClient, times(1)).queryGraphRag(request.texto());
         verify(repository, times(1)).save(any(Contenido.class));
     }
 
     @Test
-    void procesarLote_deberiaClasificarCadaItemDelLote() {
+    void procesarLote_deberiaClasificarCadaItemDelLote() throws JsonProcessingException {
         ContenidoRequest item1 = new ContenidoRequest("Titulo 1", "Texto numero uno para clasificar");
         ContenidoRequest item2 = new ContenidoRequest("Titulo 2", "Texto numero dos para clasificar");
         ContenidoLoteRequest loteRequest = new ContenidoLoteRequest(List.of(item1, item2));
 
-        MlResponse mlResponse = new MlResponse("Frontend", 0.88, List.of("React", "TypeScript"));
+        QueryResponse queryResponse = crearQueryResponseSimulado("Frontend", 0.88, List.of("React", "TypeScript"));
 
-        when(mlClient.predict(any())).thenReturn(mlResponse);
+        when(mlClient.queryGraphRag(any())).thenReturn(queryResponse);
+        when(objectMapper.writeValueAsString(any())).thenReturn("[]");
         when(repository.save(any(Contenido.class))).thenAnswer(inv -> {
             Contenido c = inv.getArgument(0);
-            c = Contenido.builder()
-                    .id(UUID.randomUUID()).userId(USER_ID).titulo(c.getTitulo())
-                    .texto(c.getTexto()).categoria(c.getCategoria()).probabilidad(c.getProbabilidad())
-                    .palabrasClave(c.getPalabrasClave()).procesadoEn(c.getProcesadoEn())
+            return Contenido.builder()
+                    .id(UUID.randomUUID())
+                    .userId(USER_ID)
+                    .titulo(c.getTitulo())
+                    .texto(c.getTexto())
+                    .categoria(c.getCategoria())
+                    .probabilidad(c.getProbabilidad())
+                    .palabrasClave(c.getPalabrasClave())
+                    .respuesta(c.getRespuesta())
+                    .grafoData(c.getGrafoData())
+                    .procesadoEn(c.getProcesadoEn())
                     .build();
-            return c;
         });
 
         List<ContenidoResponse> responses = service.procesarLote(loteRequest, USER_ID);
 
         assertThat(responses).hasSize(2);
         assertThat(responses).allMatch(r -> r.categoria().equals("Frontend"));
-        verify(mlClient, times(2)).predict(any());
+        verify(mlClient, times(2)).queryGraphRag(any());
         verify(repository, times(2)).save(any(Contenido.class));
     }
 

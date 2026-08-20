@@ -81,9 +81,17 @@ class ContenidoControllerIntegrationTest {
     @Test
     void POST_conJwtValidoYBodyValido_deberiaRetornar200ConLaRespuestaDeClasificacion() throws Exception {
         ContenidoRequest request = new ContenidoRequest("Titulo de prueba", "Texto de prueba con mas de veinte caracteres para validacion");
+
+        // Se instancian los 8 parámetros correspondientes al nuevo ContenidoResponse
         ContenidoResponse mockResponse = new ContenidoResponse(
-                UUID.randomUUID().toString(), "Backend", 0.95,
-                List.of("Java", "Spring"), List.of(), LocalDateTime.now()
+                UUID.randomUUID().toString(),
+                "Backend",
+                0.95,
+                List.of("Java", "Spring"),
+                List.of(),
+                "Spring Boot simplifica el desarrollo.",
+                List.of(),
+                LocalDateTime.now()
         );
 
         when(contenidoService.clasificar(any(), any(UUID.class))).thenReturn(mockResponse);
@@ -95,7 +103,8 @@ class ContenidoControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.categoria").value("Backend"))
                 .andExpect(jsonPath("$.probabilidad").value(0.95))
-                .andExpect(jsonPath("$.palabrasClave[0]").value("Java"));
+                .andExpect(jsonPath("$.palabras_clave[0]").value("Java"))
+                .andExpect(jsonPath("$.respuesta").value("Spring Boot simplifica el desarrollo."));
     }
 
     @Test

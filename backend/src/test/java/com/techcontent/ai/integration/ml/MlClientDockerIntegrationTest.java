@@ -1,14 +1,11 @@
 package com.techcontent.ai.integration.ml;
 
-import com.techcontent.ai.dto.MlResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import org.springframework.web.client.RestClient;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @EnabledIfEnvironmentVariable(
@@ -18,25 +15,26 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class MlClientDockerIntegrationTest {
 
     @Test
-    void predict_conServicioDockerReal_retornaPrediccion() {
+    void queryGraphRag_conServicioDockerReal_retornaRespuestaYTrazabilidad() {
 
-
-       
         MlClient mlClient = new MlClient(
-             RestClient.builder().requestFactory(new SimpleClientHttpRequestFactory()),
-             "http://localhost:5000"
+                RestClient.builder().requestFactory(new SimpleClientHttpRequestFactory()),
+                "http://localhost:5000"
         );
 
-        MlResponse response = mlClient.predict(
+        QueryResponse response = mlClient.queryGraphRag(
                 "Cómo desarrollar una API REST con Java y Spring Boot"
         );
 
         assertNotNull(response);
-        assertEquals("Backend", response.categoria());
-        assertEquals(0.89, response.probabilidad());
-        assertEquals(
-                List.of("Java", "Spring Boot", "API REST"),
-                response.palabrasClave()
-        );
+        assertNotNull(response.respuesta(), "La respuesta del LLM no debe ser nula");
+        assertFalse(response.respuesta().isBlank(), "La respuesta del LLM no debe estar vacía");
+
+        assertNotNull(response.trazabilidad(), "La lista de trazabilidad no debe ser nula");
+        assertFalse(response.trazabilidad().isEmpty(), "Debe retornar al menos un nodo/sección de trazabilidad");
+
+        TrazabilidadSeccionDto fuente = response.trazabilidad().get(0);
+        assertNotNull(fuente.categoria(), "La categoría de la fuente no debe ser nula");
+        assertNotNull(fuente.score(), "El score de la fuente no debe ser nulo");
     }
 }
