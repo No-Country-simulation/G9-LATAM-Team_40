@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +14,7 @@ public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
 
-    public List<CategoriaResponse> listarConConteo() {
-        return categoriaRepository.findCategoriasConConteo();
+    public List<CategoriaResponse> listarConConteo(UUID userId) {
+        return categoriaRepository.findCategoriasConConteoByUserId(userId);
     }
 }

@@ -48,8 +48,8 @@ public class Contenido {
     private LocalDateTime procesadoEn;
 
     @Column(columnDefinition = "TEXT")
-    private String respuesta; // Guarda la respuesta generada por el LLM
+    private String respuesta;
 
     @Column(name = "grafo_data", columnDefinition = "TEXT")
-    private String grafoData; // Guarda la trazabilidad / grafo como String JSON
+    private String grafoData;
 }
