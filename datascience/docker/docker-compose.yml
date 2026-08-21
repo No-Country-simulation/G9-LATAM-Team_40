@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..                  # Raíz del repositorio (NAYELI_V2/)
+      dockerfile: docker/Dockerfile
+      args:
+        SPACY_MODEL: ${SPACY_MODEL:-es_dep_news_trf}
+    image: knogment_naye:latest
+    container_name: knogment_naye_app
+
+    ports:
+      - "5000:5000"
+
+    # .env real vive en proyecto/.env
+    env_file:
+      - ../proyecto/.env
+
+    volumes:
+      # 1. Datos y persistencia fuera del contenedor. db/ es hermano de
+      #    docker/ y proyecto/ en la raíz del repo — mount directo.
+      #    NOTA: si ../db no existe todavía en el host, créalo ANTES de
+      #    levantar el compose (mkdir -p ../db), o Docker lo crea automático
+      #    como root y el usuario 'appuser' (uid 1000) del contenedor no
+      #    podrá escribir ahí (permission denied al sincronizar/cachear).
+      - ../db:/app/db
+
+      # 2. .env como solo lectura.
+      - ../proyecto/.env:/app/.env:ro
+
+      # 3. Llave privada de OCI (autenticación api_key). Sin este mount,
+      #    OCI_CLI_KEY_FILE / OCI_CONFIG_FILE apunta a una ruta que solo
+      #    existe en tu Windows local y la autenticación falla dentro del
+      #    contenedor. Copia tu .pem a proyecto/oci/ en el host y actualiza
+      #    tu .env para que OCI_CLI_KEY_FILE (o el key_file dentro de
+      #    ~/.oci/config si usas OCI_CONFIG_FILE) apunte a la ruta interna
+      #    de abajo: /app/oci/oci_api_key.pem (ruta Linux, sin espacios).
+      - ../proyecto/oci/oci_api_key.pem:/app/oci/oci_api_key.pem:ro
+
+      # 4. Caché persistente para modelos de embeddings.
+      - models_cache:/app/.cache
+
+      # 5. Hot-reload de desarrollo: código fuente vivo desde el host.
+      #    Como settings.py vive DENTRO de src/, este único mount ya lo
+      #    cubre — no hace falta un mount aparte para settings.py.
+      #    NOTA: el CMD del Dockerfile no usa --reload, así que este mount
+      #    te evita tener que reconstruir la imagen al editar código, pero
+      #    igual necesitas "docker compose restart app" para que el cambio
+      #    tome efecto (no se recarga solo en caliente).
+      - ../proyecto/src:/app/src
+
+      # 6. Hot-reload de prompts (si iteras seguido sobre ellos).
+      - ../proyecto/prompts:/app/prompts
+
+    restart: unless-stopped
+
+volumes:
+  models_cache:
+    name: knogment_naye_models_cache   # Se coloca en la RAÍZ del repo, no en docker/.

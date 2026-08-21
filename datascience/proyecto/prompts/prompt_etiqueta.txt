@@ -1,0 +1,15 @@
+Analiza el siguiente documento y sugiere UNA ÚNICA categoría o etiqueta que lo describa mejor.
+
+Título del documento: {titulo}
+
+Secciones principales:
+{titulos_secciones}
+
+Responde SOLO con una categoría en formato JSON simple:
+{{"etiqueta": "CATEGORÍA_SUGERIDA"}}
+
+La categoría debe ser:
+- Específica y descriptiva
+- Una o dos palabras máximo
+- Relacionada con el contenido
+- Única y original

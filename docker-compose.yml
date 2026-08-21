@@ -30,7 +30,7 @@ services:
       db:
         condition: service_healthy
       ml-service:
-        condition: service_started
+        condition: service_healthy
     networks:
       - techcontent-net
     restart: unless-stopped
@@ -57,18 +57,35 @@ services:
   ml-service:
     build:
       context: ./datascience
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
+      args:
+        SPACY_MODEL: ${SPACY_MODEL:-es_dep_news_trf}
     container_name: techcontent-ml-service
     ports:
       - "${ML_SERVICE_PORT:-5000}:5000"
     environment:
-      MODEL_PATH: ${MODEL_PATH:-./models/classifier.joblib}
-      OCI_CLI_USER: ${OCI_CLI_USER}
-      OCI_CLI_TENANCY: ${OCI_CLI_TENANCY}
-      OCI_CLI_REGION: ${OCI_CLI_REGION}
-      OCI_CLI_FINGERPRINT: ${OCI_CLI_FINGERPRINT}
-      OCI_CLI_KEY_FILE: ${OCI_CLI_KEY_FILE}
-      OCI_MODEL_BUCKET: ${OCI_MODEL_BUCKET}
+      DATA_SOURCE: ${DATA_SOURCE:-local}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      MODELO_EMBEDDINGS: ${MODELO_EMBEDDINGS:-paraphrase-multilingual-mpnet-base-v2}
+      SPACY_MODEL: ${SPACY_MODEL:-es_dep_news_trf}
+      OCI_BUCKET_NAME: ${OCI_BUCKET_NAME:-${OCI_DATASET_BUCKET:-}}
+      OCI_DATASET_BUCKET: ${OCI_DATASET_BUCKET:-}
+      OCI_NAMESPACE: ${OCI_NAMESPACE:-}
+      OCI_PREFIX: ${OCI_PREFIX:-prod}
+      OCI_AUTH_MODE: ${OCI_AUTH_MODE:-api_key}
+      OCI_CONFIG_FILE: ${OCI_CONFIG_FILE:-}
+      OCI_CONFIG_PROFILE: ${OCI_CONFIG_PROFILE:-DEFAULT}
+      OCI_SYNC_ON_STARTUP: ${OCI_SYNC_ON_STARTUP:-true}
+      OCI_CLI_USER: ${OCI_CLI_USER:-}
+      OCI_CLI_TENANCY: ${OCI_CLI_TENANCY:-}
+      OCI_CLI_REGION: ${OCI_CLI_REGION:-}
+      OCI_CLI_FINGERPRINT: ${OCI_CLI_FINGERPRINT:-}
+      OCI_CLI_KEY_FILE: ${OCI_CLI_KEY_FILE:-}
+    volumes:
+      - ./datascience/db:/app/db
+      - ml-models-cache:/app/.cache
     networks:
       - techcontent-net
     restart: unless-stopped
@@ -183,4 +200,6 @@ networks:
 
 volumes:
   supabase-db-data:
+    driver: local
+  ml-models-cache:
     driver: local

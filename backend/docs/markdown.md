@@ -197,20 +197,20 @@ archivos
 
 Adapta la comunicacion con servicios externos. Implementa los clientes HTTP y los adaptadores necesarios para conectarse al Motor ML (FastAPI), a OCI Object Storage y a Supabase Auth. Ningun otro paquete conoce los detalles de estos servicios externos.
 
-### Responsabilidades
-- Enviar textos al Motor ML y recibir categoria, probabilidad y palabras clave
+- Enviar consultas al pipeline GraphRAG y recibir respuesta, categoría, keywords y trazabilidad
 - Subir, descargar y listar archivos en OCI Object Storage
 - Delegar registro y login a Supabase Auth (GoTrue)
-- Aislar los detalles de red del resto de la aplicacion
+- Aislar los detalles de red del resto de la aplicación
 
 ### Estructura interna
 
 ```
 integration/
 ├── ml/
-│   ├── MlClient.java                # RestClient → POST http://ml-service:5000/predict
-│   ├── MlRequest.java               # { texto }
-│   └── MlResponse.java              # { categoria, probabilidad, palabras_clave }
+│   ├── MlClient.java                # RestClient → POST http://ml-service:5000/api/v1/query
+│   ├── QueryRequest.java            # { pregunta }
+│   ├── QueryResponse.java           # { pregunta, respuesta, trazabilidad, tiempo_segundos }
+│   └── TrazabilidadSeccionDto.java  # Fuente recuperada del grafo
 ├── oci/
 │   ├── OciStorageClient.java        # SDK OCI → upload, download, listObjects
 │   └── OciStorageConfig.java        # Configura ObjectStorageClient con credenciales OCI
@@ -220,24 +220,24 @@ integration/
     └── SupabaseAuthResponse.java    # { access_token, refresh_token, user }
 ```
 
-### MlClient — flujo de clasificacion
+### MlClient — flujo de consulta GraphRAG
 
 ```
 ContenidoService.clasificar(texto)
     │
     ▼
-MlClient.predict(texto)
-    │  POST http://ml-service:5000/predict
-    │  Body: { "texto": "..." }
+MlClient.queryGraphRag(texto)
+    │  POST http://ml-service:5000/api/v1/query
+    │  Body: { "pregunta": "..." }
     ▼
-FastAPI ML Service
-    │  TF-IDF + Regresion Logistica / Random Forest
-    │  YAKE keyword extraction
+FastAPI GraphRAG
+    │  Embeddings + recuperación sobre índice de grafo
+    │  Generación de respuesta con el LLM configurado
     ▼
-MlResponse { categoria, probabilidad, palabras_clave }
+QueryResponse { pregunta, respuesta, trazabilidad, tiempo_segundos }
     │
     ▼
-ContenidoService persiste en PostgreSQL y retorna al Controller
+ContenidoService persiste resultado y retorna al Controller
 ```
 
 ### OciStorageClient — flujo de archivos
