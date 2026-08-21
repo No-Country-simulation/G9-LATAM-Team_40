@@ -13,8 +13,6 @@ public record ContenidoResponse(
         @JsonProperty("contenidos_relacionados")
         List<ContenidoRelacionadoResponse> contenidosRelacionados,
         String respuesta,
-        @JsonProperty("grafo_data")
-        Object grafoData,
         @JsonProperty("procesado_en")
         LocalDateTime procesadoEn
 ) {}

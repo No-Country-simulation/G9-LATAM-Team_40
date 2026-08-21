@@ -1,7 +1,5 @@
 package com.techcontent.ai.domain.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techcontent.ai.api.dto.request.ContenidoLoteRequest;
 import com.techcontent.ai.api.dto.request.ContenidoRequest;
 import com.techcontent.ai.api.dto.response.ContenidoResponse;
@@ -25,7 +23,6 @@ public class ContenidoService {
 
     private final ContenidoRepository repository;
     private final MlClient mlClient;
-    private final ObjectMapper objectMapper;
 
     public ContenidoResponse clasificar(ContenidoRequest request, UUID userId) {
         QueryResponse queryResponse = mlClient.queryGraphRag(request.texto());
@@ -38,12 +35,6 @@ public class ContenidoService {
 
         Double score = fuentePrincipal != null ? fuentePrincipal.score() : 0.0;
         List<String> palabrasClave = fuentePrincipal != null ? fuentePrincipal.palabrasClave() : List.of();
-        String trazabilidadJson = "";
-        try {
-            trazabilidadJson = objectMapper.writeValueAsString(queryResponse.trazabilidad());
-        } catch (JsonProcessingException e) {
-            trazabilidadJson = "[]";
-        }
 
         Contenido contenido = Contenido.builder()
                 .userId(userId)
@@ -53,7 +44,6 @@ public class ContenidoService {
                 .probabilidad(score)
                 .palabrasClave(palabrasClave)
                 .respuesta(queryResponse.respuesta())
-                .grafoData(trazabilidadJson)
                 .procesadoEn(LocalDateTime.now())
                 .build();
 
@@ -83,20 +73,6 @@ public class ContenidoService {
     private ContenidoResponse toResponse(Contenido contenido) {
         List<ContenidoRelacionadoResponse> relacionados = List.of();
 
-        Object grafoDataParsed;
-        if (contenido.getGrafoData() != null && !contenido.getGrafoData().isBlank()) {
-            try {
-                grafoDataParsed = objectMapper.readValue(
-                        contenido.getGrafoData(),
-                        new com.fasterxml.jackson.core.type.TypeReference<List<TrazabilidadSeccionDto>>() {}
-                );
-            } catch (JsonProcessingException e) {
-                grafoDataParsed = List.of();
-            }
-        } else {
-            grafoDataParsed = List.of();
-        }
-
         return new ContenidoResponse(
                 contenido.getId().toString(),
                 contenido.getCategoria(),
@@ -104,7 +80,6 @@ public class ContenidoService {
                 contenido.getPalabrasClave(),
                 relacionados,
                 contenido.getRespuesta(),
-                grafoDataParsed,
                 contenido.getProcesadoEn()
         );
     }

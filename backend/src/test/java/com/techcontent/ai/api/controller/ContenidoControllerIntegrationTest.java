@@ -82,7 +82,7 @@ class ContenidoControllerIntegrationTest {
     void POST_conJwtValidoYBodyValido_deberiaRetornar200ConLaRespuestaDeClasificacion() throws Exception {
         ContenidoRequest request = new ContenidoRequest("Titulo de prueba", "Texto de prueba con mas de veinte caracteres para validacion");
 
-        // Se instancian los 8 parámetros correspondientes al nuevo ContenidoResponse
+        // Se instancian los 7 parámetros correspondientes al nuevo ContenidoResponse (sin grafoData)
         ContenidoResponse mockResponse = new ContenidoResponse(
                 UUID.randomUUID().toString(),
                 "Backend",
@@ -90,7 +90,6 @@ class ContenidoControllerIntegrationTest {
                 List.of("Java", "Spring"),
                 List.of(),
                 "Spring Boot simplifica el desarrollo.",
-                List.of(),
                 LocalDateTime.now()
         );
 

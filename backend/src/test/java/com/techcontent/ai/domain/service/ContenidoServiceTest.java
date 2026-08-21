@@ -1,7 +1,5 @@
 package com.techcontent.ai.domain.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techcontent.ai.api.dto.request.ContenidoLoteRequest;
 import com.techcontent.ai.api.dto.request.ContenidoRequest;
 import com.techcontent.ai.api.dto.response.ContenidoResponse;
@@ -22,7 +20,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,9 +30,6 @@ class ContenidoServiceTest {
 
     @Mock
     private MlClient mlClient;
-
-    @Mock
-    private ObjectMapper objectMapper;
 
     @InjectMocks
     private ContenidoService service;
@@ -52,7 +46,6 @@ class ContenidoServiceTest {
                 .probabilidad(probabilidad)
                 .palabrasClave(keywords)
                 .respuesta("Respuesta de prueba del LLM")
-                .grafoData("[]")
                 .procesadoEn(LocalDateTime.now())
                 .build();
     }
@@ -66,13 +59,12 @@ class ContenidoServiceTest {
     }
 
     @Test
-    void clasificar_deberiaLlamarAlMlYPersistirElContenido() throws JsonProcessingException {
+    void clasificar_deberiaLlamarAlMlYPersistirElContenido() {
         ContenidoRequest request = new ContenidoRequest("Titulo", "Texto de prueba para clasificar");
         QueryResponse queryResponse = crearQueryResponseSimulado("Backend", 0.93, List.of("Java", "Spring"));
         UUID savedId = UUID.randomUUID();
 
         when(mlClient.queryGraphRag(request.texto())).thenReturn(queryResponse);
-        when(objectMapper.writeValueAsString(any())).thenReturn("[]");
         when(repository.save(any(Contenido.class))).thenReturn(contenidoGuardado(savedId, "Backend", 0.93, List.of("Java", "Spring")));
 
         ContenidoResponse response = service.clasificar(request, USER_ID);
@@ -87,7 +79,7 @@ class ContenidoServiceTest {
     }
 
     @Test
-    void procesarLote_deberiaClasificarCadaItemDelLote() throws JsonProcessingException {
+    void procesarLote_deberiaClasificarCadaItemDelLote() {
         ContenidoRequest item1 = new ContenidoRequest("Titulo 1", "Texto numero uno para clasificar");
         ContenidoRequest item2 = new ContenidoRequest("Titulo 2", "Texto numero dos para clasificar");
         ContenidoLoteRequest loteRequest = new ContenidoLoteRequest(List.of(item1, item2));
@@ -95,7 +87,6 @@ class ContenidoServiceTest {
         QueryResponse queryResponse = crearQueryResponseSimulado("Frontend", 0.88, List.of("React", "TypeScript"));
 
         when(mlClient.queryGraphRag(any())).thenReturn(queryResponse);
-        when(objectMapper.writeValueAsString(any())).thenReturn("[]");
         when(repository.save(any(Contenido.class))).thenAnswer(inv -> {
             Contenido c = inv.getArgument(0);
             return Contenido.builder()
@@ -107,7 +98,6 @@ class ContenidoServiceTest {
                     .probabilidad(c.getProbabilidad())
                     .palabrasClave(c.getPalabrasClave())
                     .respuesta(c.getRespuesta())
-                    .grafoData(c.getGrafoData())
                     .procesadoEn(c.getProcesadoEn())
                     .build();
         });
