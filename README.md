@@ -344,6 +344,8 @@ cp .env.example .env
 # Editar .env con la clave DeepSeek, credenciales OCI y configuraciones de Supabase
 ```
 
+Todas las ejecuciones, locales y con Docker Compose, parten del `.env` situado en la raíz del repositorio. No crees ni montes un `.env` dentro de `/app`: Compose inyecta al contenedor ML únicamente las variables que necesita.
+
 ### 3. Ejecutar con Docker Compose
 ```bash
 docker compose up -d

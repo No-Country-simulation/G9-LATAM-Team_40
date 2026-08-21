@@ -6,19 +6,21 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, List
-from pydantic import AliasChoices, Field
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# FIX: settings.py vive en proyecto/settings.py. Un solo .parent da "proyecto/",
-# que es donde también vive el .env real (proyecto/.env). Esto funciona igual
-# en local y en Docker: en el contenedor, tras aplanar proyecto/ a /app/,
-# settings.py y .env quedan juntos en /app/ — sigue siendo "un solo .parent".
+# settings.py vive en proyecto/src/. PROJECT_DIR sigue siendo el directorio
+# del proyecto para resolver prompts y datos; ROOT_ENV_FILE es el contrato
+# único de configuración en desarrollo. En la imagen, ese archivo no existe
+# y Pydantic usa únicamente las variables inyectadas por el proceso.
 PROJECT_DIR = Path(__file__).resolve().parent.parent
+REPO_ROOT = PROJECT_DIR.parent.parent
+ROOT_ENV_FILE = REPO_ROOT / ".env"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=str(PROJECT_DIR / ".env"),
+        env_file=str(ROOT_ENV_FILE),
         env_file_encoding="utf-8",
         extra="ignore"
     )
@@ -66,7 +68,7 @@ class Settings(BaseSettings):
     DATA_SOURCE: str = Field(default="local", validation_alias="DATA_SOURCE")
     OCI_BUCKET_NAME: str = Field(
         default="",
-        validation_alias=AliasChoices("OCI_BUCKET_NAME", "OCI_DATASET_BUCKET"),
+        validation_alias="OCI_DATASET_BUCKET",
     )
     OCI_NAMESPACE: str = Field(default="", validation_alias="OCI_NAMESPACE")
     OCI_PREFIX: str = Field(default="prod", validation_alias="OCI_PREFIX")

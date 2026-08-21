@@ -361,7 +361,7 @@ Los errores 4xx de Supabase se mapean a excepciones de dominio (`InvalidCredenti
 
 ```bash
 # 1. Copiá el archivo de ejemplo y completá los valores reales
-cp docs/env.example .env
+cp .env.example .env
 
 # 2. Levantá los servicios necesarios
 docker compose up -d backend db ml-service

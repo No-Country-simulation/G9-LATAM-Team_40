@@ -69,9 +69,9 @@ WORKDIR /app
 # Trae el venv ya armado (dependencias + modelo spaCy) desde la etapa builder.
 COPY --from=builder /opt/venv /opt/venv
 
-# Se copia el CONTENIDO de proyecto/ directo a /app/: src/, .env (excluido
-# por .dockerignore), prompts/, tests/, requirements.txt quedan en la raíz
-# de /app/ — coincidiendo con PYTHONPATH=/app y el CMD de abajo.
+# Se copia el código y los recursos del proyecto sin ningún archivo `.env`.
+# Las variables de configuración llegan únicamente desde el proceso de
+# Docker Compose; el contenedor no crea ni monta un `.env` dentro de `/app`.
 COPY proyecto/ /app/
 
 # db/ se sobreescribe por volumen en docker-compose, pero se crea igual por

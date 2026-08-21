@@ -22,10 +22,15 @@ services:
       OCI_CLI_TENANCY: ${OCI_CLI_TENANCY}
       OCI_CLI_REGION: ${OCI_CLI_REGION}
       OCI_CLI_FINGERPRINT: ${OCI_CLI_FINGERPRINT}
-      OCI_CLI_KEY_FILE: ${OCI_CLI_KEY_FILE}
+      OCI_CLI_KEY_FILE: /run/secrets/oci_api_key.pem
       OCI_MODEL_BUCKET: ${OCI_MODEL_BUCKET}
       OCI_DATASET_BUCKET: ${OCI_DATASET_BUCKET}
       OCI_FILES_BUCKET: ${OCI_FILES_BUCKET}
+    volumes:
+      - type: bind
+        source: ${OCI_CLI_KEY_FILE:?Configura OCI_CLI_KEY_FILE en .env}
+        target: /run/secrets/oci_api_key.pem
+        read_only: true
     depends_on:
       db:
         condition: service_healthy
@@ -64,27 +69,39 @@ services:
     ports:
       - "${ML_SERVICE_PORT:-5000}:5000"
     environment:
-      DATA_SOURCE: ${DATA_SOURCE:-local}
+      DATA_SOURCE: ${DATA_SOURCE:-oci}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL_1: ${GEMINI_MODEL_1:-gemini-3.5-flash-lite}
+      GEMINI_MODEL_2: ${GEMINI_MODEL_2:-gemini-3.1-flash-lite}
       MODELO_EMBEDDINGS: ${MODELO_EMBEDDINGS:-paraphrase-multilingual-mpnet-base-v2}
       SPACY_MODEL: ${SPACY_MODEL:-es_dep_news_trf}
-      OCI_BUCKET_NAME: ${OCI_BUCKET_NAME:-${OCI_DATASET_BUCKET:-}}
+      BATCH_SIZE_EMBEDDINGS: ${BATCH_SIZE_EMBEDDINGS:-32}
+      DOCUMENTOS_POR_LOTE: ${DOCUMENTOS_POR_LOTE:-5}
+      MAX_CATEGORIAS_POR_DOCUMENTO: ${MAX_CATEGORIAS_POR_DOCUMENTO:-10}
+      UMBRAL_CONFIANZA: ${UMBRAL_CONFIANZA:-0.60}
+      CONCEPTOS_TOP_POR_SECCION: ${CONCEPTOS_TOP_POR_SECCION:-5}
+      CONFIANZA_MINIMA_RELACION: ${CONFIANZA_MINIMA_RELACION:-0.75}
+      SCORE_MINIMO_CONCEPTO: ${SCORE_MINIMO_CONCEPTO:-0.65}
+      TOP_K_NODOS: ${TOP_K_NODOS:-5}
+      TOP_K_SECCIONES_FINAL: ${TOP_K_SECCIONES_FINAL:-5}
       OCI_DATASET_BUCKET: ${OCI_DATASET_BUCKET:-}
       OCI_NAMESPACE: ${OCI_NAMESPACE:-}
       OCI_PREFIX: ${OCI_PREFIX:-prod}
       OCI_AUTH_MODE: ${OCI_AUTH_MODE:-api_key}
-      OCI_CONFIG_FILE: ${OCI_CONFIG_FILE:-}
-      OCI_CONFIG_PROFILE: ${OCI_CONFIG_PROFILE:-DEFAULT}
       OCI_SYNC_ON_STARTUP: ${OCI_SYNC_ON_STARTUP:-true}
       OCI_CLI_USER: ${OCI_CLI_USER:-}
       OCI_CLI_TENANCY: ${OCI_CLI_TENANCY:-}
       OCI_CLI_REGION: ${OCI_CLI_REGION:-}
       OCI_CLI_FINGERPRINT: ${OCI_CLI_FINGERPRINT:-}
-      OCI_CLI_KEY_FILE: ${OCI_CLI_KEY_FILE:-}
+      OCI_CLI_KEY_FILE: /run/secrets/oci_api_key.pem
     volumes:
       - ./datascience/db:/app/db
+      - type: bind
+        source: ${OCI_CLI_KEY_FILE:?Configura OCI_CLI_KEY_FILE en .env}
+        target: /run/secrets/oci_api_key.pem
+        read_only: true
       - ml-models-cache:/app/.cache
     networks:
       - techcontent-net

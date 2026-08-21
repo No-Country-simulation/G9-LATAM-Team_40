@@ -155,7 +155,7 @@ def _download_object(
     destination.parent.mkdir(parents=True, exist_ok=True)
     try:
         with temporary.open("wb") as output:
-            for chunk in response.data.stream(1024 * 1024, decode_content=False):
+            for chunk in response.data.iter_content(chunk_size=1024 * 1024):
                 output.write(chunk)
         temporary.replace(destination)
     finally:
@@ -178,7 +178,7 @@ def fetch_document_on_demand(
 
     if not settings.OCI_BUCKET_NAME or not settings.OCI_NAMESPACE:
         raise EnvironmentError(
-            "DATA_SOURCE=oci requiere OCI_BUCKET_NAME (o OCI_DATASET_BUCKET) y OCI_NAMESPACE."
+            "DATA_SOURCE=oci requiere OCI_DATASET_BUCKET y OCI_NAMESPACE."
         )
 
     client = client or _object_storage_client(settings)
@@ -236,7 +236,7 @@ def sync_db_from_oci(settings: Settings) -> dict[str, int]:
     un precache manual completo, pero no se usa por defecto en el arranque."""
     if not settings.OCI_BUCKET_NAME or not settings.OCI_NAMESPACE:
         raise EnvironmentError(
-            "DATA_SOURCE=oci requiere OCI_BUCKET_NAME (o OCI_DATASET_BUCKET) y OCI_NAMESPACE."
+            "DATA_SOURCE=oci requiere OCI_DATASET_BUCKET y OCI_NAMESPACE."
         )
 
     client = _object_storage_client(settings)
