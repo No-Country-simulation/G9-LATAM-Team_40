@@ -45,9 +45,9 @@ No quedan validaciones externas específicas pendientes para completar el códig
 Implementado:
 
 - `MlClient` con Spring `RestClient`.
-- Solicitud `POST /predict` y contratos `MlRequest`/`MlResponse`.
-- Parseo de `palabras_clave` desde JSON snake_case.
-- Prueba real contra FastAPI ejecutado en Docker.
+- Solicitud `POST /api/v1/query` y contratos GraphRAG (`QueryRequest`/`QueryResponse`).
+- Mapeo de `palabras_clave`, respuesta y trazabilidad desde JSON snake_case.
+- Pruebas unitarias del cliente y del contrato GraphRAG.
 - Configuración del SDK oficial de OCI.
 - Subida mediante `putObject`.
 - Generación de URL temporal mediante Pre-Authenticated Request.

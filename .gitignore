@@ -5,6 +5,7 @@ target/
 *.war
 !.mvn/wrapper/maven-wrapper.jar
 
+Private Key OCI.pem
 # Python
 __pycache__/
 *.py[cod]

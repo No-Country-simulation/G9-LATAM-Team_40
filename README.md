@@ -21,15 +21,16 @@ Solución para la organización inteligente de contenido técnico mediante técn
 
 ## Descripción
 
-**TechContent AI** permite organizar, clasificar y enriquecer contenido técnico de forma automática. Recibe textos técnicos (documentación, tutoriales, anotaciones de estudio, artículos) y utiliza modelos de Machine Learning para:
+**TechContent AI** permite organizar, clasificar y enriquecer contenido técnico de forma automática. Recibe textos técnicos (documentación, tutoriales, anotaciones de estudio, artículos) y utiliza un pipeline GraphRAG para:
 
-- **Clasificación temática** del contenido (Backend, Frontend, DevOps, Data Science, etc.)
-- **Extracción de palabras clave** relevantes
-- **Agrupación por temas similares** y **recomendación de contenidos relacionados**
+- **Clasificación temática** del contenido.
+- **Extracción de palabras clave** y metadatos.
+- **Búsqueda semántica** sobre un grafo de conocimiento.
+- **Respuestas generadas con trazabilidad** hacia las secciones fuente.
 
 El resultado se expone en formato JSON para su consumo por otras aplicaciones, plataformas educativas o equipos técnicos que deseen construir repositorios inteligentes de conocimiento.
 
-La plataforma incluye un frontend web construido con **Next.js** que consume la API y expone la clasificación de contenido al usuario final.
+La plataforma incluye un frontend web construido con **Next.js** que consume la API y expone las respuestas y fuentes relevantes al usuario final.
 
 ---
 
@@ -49,12 +50,12 @@ graph TB
             Service -->|HTTP POST| MlClient[ML Client]
         end
 
-        subgraph "Python ML Service"
-            FastAPI[FastAPI<br>Python 3.11<br>:5000]
-            FastAPI -->|Carga modelo| ModelLoader[Model Loader]
-            FastAPI -->|Inferencia| Classifier[Classifier]
-            FastAPI -->|Keywords| YAKE[YAKE Extractor]
-        end
+    subgraph "Python GraphRAG Service"
+        FastAPI[FastAPI<br>Python 3.11<br>:5000]
+        FastAPI -->|Carga pipeline| Pipeline[Pipeline GraphRAG]
+        Pipeline -->|Embeddings y recuperación| Index[Índice del grafo]
+        Pipeline -->|Generación| LLM[LLM configurado]
+    end
 
         subgraph "Supabase Local"
             SupaDB[(PostgreSQL<br>:5432)]
@@ -68,22 +69,22 @@ graph TB
 
     subgraph "Oracle Cloud Infrastructure"
         OCI[OCI Object Storage<br>S3-compatible]
-        Models[Modelos .joblib]
-        Datasets[Datasets entrenamiento]
-        Files[Archivos documentos]
+        Models[Modelos de embeddings]
+        Graph[Grafos y embeddings]
+        Files[Archivos de documentos]
         OCI --- Models
-        OCI --- Datasets
+        OCI --- Graph
         OCI --- Files
     end
 
     Client -->|HTTP POST /api/contenido<br>JSON| SB
     Client -->|POST /api/archivos<br>multipart/form-data| SB
-    MlClient -->|HTTP POST /predict<br>localhost:5000| FastAPI
+    MlClient -->|HTTP POST /api/v1/query<br>localhost:5000| FastAPI
     Service -->|JDBC<br>postgresql://localhost:5432| SupaDB
     Service -->|Auth API<br>localhost:9999| SupaAuth
     Service -->|Upload/Download| OCI
-    FastAPI -->|Download models| OCI
-    FastAPI -->|JSON response| MlClient
+    FastAPI -->|Sincronización opcional| OCI
+    FastAPI -->|JSON con respuesta y trazabilidad| MlClient
     SB -->|JSON response| Client
 
     style SB fill:#6DB33F,stroke:#333,color:#fff
@@ -99,27 +100,27 @@ graph TB
 |---|---|---|---|
 | **Frontend Web** | Next.js 16 + React 19 + TypeScript | host `${FRONTEND_PORT:-3001}` → `:3000` | Aplicación web (App Router, Tailwind CSS 4, shadcn/ui). Corre en Docker Compose (puerto 3001) o en dev local (puerto 3000). |
 | **API Principal** | Java 17 + Spring Boot 3 | `:8080` | Recibe peticiones REST, valida entrada, orquesta el procesamiento y devuelve resultados JSON. |
-| **Motor ML** | Python 3.11 + FastAPI | `:5000` | Servicio interno que carga el modelo serializado y ejecuta inferencia (clasificación, keywords, similitud). |
+| **Motor GraphRAG** | Python 3.11 + FastAPI | `:5000` | Servicio interno que carga el índice del grafo y embeddings, recupera secciones relevantes y genera respuestas con trazabilidad. |
 | **Base de Datos** | PostgreSQL (Supabase) | `:5432` | Persistencia de resultados, metadatos de contenido procesado y usuarios. |
 | **Autenticación** | GoTrue (Supabase Auth) | `:9999` | Gestión de usuarios, JWT tokens, registro y login. |
 | **REST API Auto** | PostgREST | `:3000` | API REST generada automáticamente desde el esquema de PostgreSQL. |
-| **OCI Object Storage** | Bucket S3-compatible | - | Almacenamiento de modelos serializados (`.joblib`), datasets de entrenamiento y documentos/archivos de usuarios. |
+| **OCI Object Storage** | Bucket S3-compatible | - | Almacenamiento de grafos, embeddings, datasets y documentos de usuarios. |
 
 ### Flujo de Procesamiento
 
-**Clasificación de texto:**
+**Consulta GraphRAG:**
 ```
 1. Cliente → POST /api/contenido  (JSON con título y texto + JWT token)
 2. Spring Boot valida JWT con Supabase Auth
 3. Spring Boot valida la entrada
-4. Spring Boot → POST http://localhost:5000/predict  (texto preprocesado)
-5. FastAPI carga modelo desde Object Storage y ejecuta:
-   - TF-IDF + vectorización del texto
-   - Clasificación con Regresión Logística / Random Forest
-   - Extracción de keywords con YAKE / TF-IDF scores
-6. FastAPI → JSON con categoría, keywords, scores  →  Spring Boot
-7. Spring Boot persiste resultado en Supabase PostgreSQL
-8. Spring Boot enriquece respuesta y la retorna al cliente
+4. Spring Boot → POST http://localhost:5000/api/v1/query
+   con {"pregunta": "<texto>"}
+5. FastAPI carga el grafo y embeddings desde `datascience/db` o sincroniza
+   los artefactos configurados en OCI
+6. El pipeline calcula embeddings, recupera nodos y secciones relevantes
+7. El pipeline consulta el LLM configurado y construye la trazabilidad
+8. FastAPI → JSON con respuesta, trazabilidad y tiempo de procesamiento
+9. Spring Boot persiste el resultado y lo retorna al cliente
 ```
 
 **Almacenamiento de archivos:**
@@ -205,8 +206,7 @@ OCI_FILES_BUCKET=techcontent-files
 ## API Endpoints
 
 ### `POST /api/contenido`
-
-Clasifica un texto técnico y extrae palabras clave.
+Procesa una consulta técnica mediante el pipeline GraphRAG, guarda el resultado y devuelve la respuesta junto con su trazabilidad.
 
 **Headers:**
 ```
@@ -226,14 +226,17 @@ Content-Type: application/json
 ```json
 {
   "id": "a1b2c3d4",
-  "categoria": "Backend",
-  "probabilidad": 0.89,
-  "palabras_clave": ["Java", "Spring Boot", "API REST", "Inyección de dependencias"],
-  "contenidos_relacionados": [
+  "categoria": "Seguridad y Backend",
+  "probabilidad": 0.87,
+  "palabras_clave": ["Java", "Spring Boot", "API REST"],
+  "contenidos_relacionados": [],
+  "respuesta": "La respuesta generada por el pipeline GraphRAG.",
+  "grafo_data": [
     {
-      "id": "e5f6g7h8",
-      "titulo": "Spring Boot Avanzado: Seguridad con JWT",
-      "similitud": 0.76
+      "documento_id": "doc-001",
+      "documento_titulo": "Manual técnico",
+      "titulo_seccion": "Configuración",
+      "score": 0.76
     }
   ],
   "procesado_en": "2026-07-23T14:30:00Z"
@@ -317,7 +320,7 @@ Health check del servicio.
 - Python 3.11+
 - pip 23+
 - FastAPI + Uvicorn
-
+- Git LFS para descargar los artefactos GraphRAG almacenados en `datascience/db`
 ### Infraestructura
 - Docker 24+ y Docker Compose v2
 - VPS Linux (Ubuntu 22.04 recomendado)
@@ -332,18 +335,23 @@ Health check del servicio.
 ```bash
 git clone git@github.com:No-Country-simulation/G9-LATAM-Team_40.git
 cd G9-LATAM-Team_40
+git lfs pull
 ```
 
 ### 2. Configurar variables de entorno
 ```bash
 cp .env.example .env
-# Editar .env con credenciales OCI y configuraciones de Supabase
+# Editar .env con la clave DeepSeek, credenciales OCI y configuraciones de Supabase
 ```
+
+Todas las ejecuciones, locales y con Docker Compose, parten del `.env` situado en la raíz del repositorio. No crees ni montes un `.env` dentro de `/app`: Compose inyecta al contenedor ML únicamente las variables que necesita.
 
 ### 3. Ejecutar con Docker Compose
 ```bash
 docker compose up -d
 ```
+> El servicio GraphRAG requiere `DEEPSEEK_API_KEY`. Si falta, `docker compose logs ml-service` mostrará `Missing credentials`.
+> Los artefactos de `datascience/db` requieren Git LFS: ejecuta `git lfs pull` antes de iniciar el stack.
 
 Esto levanta:
 - **Frontend Next.js** en `http://localhost:3001`
@@ -357,9 +365,9 @@ Esto levanta:
 
 **ML Service:**
 ```bash
-cd ml-service
+cd datascience/proyecto
 pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload
+PYTHONPATH=src uvicorn src.api.app:app --host 0.0.0.0 --port 5000 --reload
 ```
 
 **Backend:**

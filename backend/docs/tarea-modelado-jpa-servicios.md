@@ -32,7 +32,7 @@ Modelado de entidades JPA, repositorios y servicios de lógica de negocio princi
 
 - [x] **CUMPLE — Implementar `ContenidoService.clasificar()`: orquestación entre `MlClient`, mapeo al modelo de dominio y persistencia en DB.**
 
-  `clasificar()` envía el texto a `MlClient.predict()`, recibe categoría, probabilidad y palabras clave, construye una entidad `Contenido`, la persiste mediante `ContenidoRepository.save()` y transforma el resultado en `ContenidoResponse`.
+  `clasificar()` envía el texto a `MlClient.queryGraphRag()`, recibe la respuesta, categoría, probabilidad, palabras clave y trazabilidad, construye una entidad `Contenido`, la persiste mediante `ContenidoRepository.save()` y transforma el resultado en `ContenidoResponse`.
 
 - [x] **CUMPLE — Implementar query JPQL personalizada en `ContenidoRepository` para búsqueda por palabras clave (`buscarPorKeyword`).**
 
@@ -261,7 +261,7 @@ ContenidoRequest
     ↓
 ContenidoService.clasificar()
     ↓
-MlClient.predict(texto)
+MlClient.queryGraphRag(texto)
     ↓
 Mapeo a Contenido
     ↓

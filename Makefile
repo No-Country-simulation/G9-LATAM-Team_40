@@ -77,14 +77,14 @@ local-backend: infra ## Run Spring Boot locally (needs infra)
 local-frontend: ## Run Next.js dev server (bun)
 	cd frontend/techisolutions && bun run dev
 
-local-ml: ## Run FastAPI ML service locally (needs Python venv)
-	cd datascience && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 5000
+local-ml: ## Run FastAPI GraphRAG service locally (needs Python venv)
+	cd datascience/proyecto && PYTHONPATH=src python -m uvicorn src.api.app:app --reload --host 0.0.0.0 --port 5000
 
 local-all: infra ## Run all services locally (in parallel, needs tmux)
 	@echo "Iniciando servicios locales..."
 	@tmux new-session -d -s techcontent 'cd backend && ./mvnw spring-boot:run' \; \
 		split-window -h 'cd frontend/techisolutions && bun run dev' \; \
-		split-window -v 'cd datascience && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 5000' \; \
+		split-window -v 'cd datascience/proyecto && PYTHONPATH=src python -m uvicorn src.api.app:app --reload --host 0.0.0.0 --port 5000' \; \
 		select-layout even-horizontal \; \
 		attach
 	@echo "  Si no tenes tmux, abri 3 terminales y ejecutá:"

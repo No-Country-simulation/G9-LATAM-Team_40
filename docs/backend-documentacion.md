@@ -61,9 +61,8 @@ backend/
 │   │   ├── model/             # Contenido, Archivo, Categoria
 │   │   ├── repository/        # ContenidoRepository, ArchivoRepository, CategoriaRepository
 │   │   └── service/           # ContenidoService, ArchivoService, CategoriaService
-│   ├── dto/                   # MlRequest, MlResponse (intercambio con ML)
 │   ├── integration/
-│   │   ├── ml/                # MlClient, MlServiceException
+│   │   ├── ml/                # MlClient, QueryRequest/Response, trazabilidad
 │   │   ├── oci/               # OciStorageClient, OciStorageConfig
 │   │   └── supabase/          # SupabaseAuthClient, SupabaseAuthRequest/Response
 │   └── security/              # JwtService, JwtAuthFilter, SecurityConfig,
@@ -321,9 +320,9 @@ Lista las categorías disponibles con el conteo de contenidos clasificados en ca
 
 Los errores 4xx de Supabase se mapean a excepciones de dominio (`InvalidCredentialsException`) con respuesta HTTP 401.
 
-### Servicio ML (Python/FastAPI)
+### Servicio GraphRAG (Python/FastAPI)
 
-`MlClient` llama a `POST /predict` del servicio ML con el texto a clasificar. Devuelve categoría, probabilidad y palabras clave. Los errores 5xx se mapean a `MlServiceException` → respuesta HTTP 503.
+`MlClient` llama a `POST /api/v1/query` del servicio GraphRAG con `{ "pregunta": "..." }`. Recibe la respuesta generada, el tiempo de procesamiento y la trazabilidad de las secciones recuperadas. Los errores 5xx se mapean a `MlServiceException` → respuesta HTTP 503.
 
 ### OCI Object Storage
 
@@ -362,7 +361,7 @@ Los errores 4xx de Supabase se mapean a excepciones de dominio (`InvalidCredenti
 
 ```bash
 # 1. Copiá el archivo de ejemplo y completá los valores reales
-cp docs/env.example .env
+cp .env.example .env
 
 # 2. Levantá los servicios necesarios
 docker compose up -d backend db ml-service

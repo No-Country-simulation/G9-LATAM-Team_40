@@ -1,0 +1,37 @@
+# --- Secretos y config local ---
+.env
+*.env.local
+
+# --- Datos y artefactos generados (van a data/, no a Git) ---
+data/
+models_cache/
+*.faiss
+*.index
+logs/
+*.log
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# --- SO / editores ---
+.DS_Store
+.vscode/
+.idea/
+
+# --- OCI ---
+.oci/
+proyecto/oci/config
+
+# Claves privadas
+*.pem

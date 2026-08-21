@@ -1,0 +1,26 @@
+# Secretos: NUNCA deben quedar horneados en la imagen (se montan por volumen en runtime)
+.env
+**/*.pem
+oci/
+
+# Datos (se montan por volumen, no deben ir en la imagen)
+db/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Control de versiones / editor
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Tests y misceláneos que no hacen falta en runtime
+tests/
+*.md
+.pytest_cache/
