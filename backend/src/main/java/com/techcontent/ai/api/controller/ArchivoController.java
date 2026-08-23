@@ -5,6 +5,7 @@ import com.techcontent.ai.api.dto.response.PaginaResponse;
 import com.techcontent.ai.domain.service.ArchivoService;
 import com.techcontent.ai.security.SupabaseUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,8 +24,11 @@ public class ArchivoController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ArchivoResponse> subir(
             @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "categoria", required = false) String categoria,
             @AuthenticationPrincipal SupabaseUserDetails userDetails) {
-        return ResponseEntity.ok(archivoService.subir(file, userDetails.getUserId()));
+
+        ArchivoResponse response = archivoService.subir(file, userDetails.getUserId(), categoria);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping

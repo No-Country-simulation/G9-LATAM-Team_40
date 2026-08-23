@@ -6,16 +6,17 @@ import com.techcontent.ai.api.exception.ArchivoNotFoundException;
 import com.techcontent.ai.domain.model.Archivo;
 import com.techcontent.ai.domain.repository.ArchivoRepository;
 import com.techcontent.ai.integration.oci.OciStorageClient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -46,9 +47,11 @@ class ArchivoServiceTest {
     private static final UUID OTRO_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000003");
     private static final UUID ARCHIVO_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
 
-    @org.junit.jupiter.api.BeforeEach
+    @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(service, "filesBucket", "test-bucket");
+        // Se inyectan las propiedades @Value actualizadas en el servicio
+        ReflectionTestUtils.setField(service, "datasetBucket", "test-bucket");
+        ReflectionTestUtils.setField(service, "ociPrefix", "prod");
     }
 
     private Archivo archivoGuardado() {
@@ -56,7 +59,7 @@ class ArchivoServiceTest {
                 .id(ARCHIVO_ID)
                 .userId(USER_ID)
                 .nombre("documento.pdf")
-                .url("https://oci/test-bucket/documento.pdf")
+                .url("https://oci/o/prod/archivos/LEYES/pdf/documento.pdf")
                 .tamano(1024L)
                 .tipo("application/pdf")
                 .subidoEn(LocalDateTime.now())
@@ -70,15 +73,36 @@ class ArchivoServiceTest {
         );
 
         when(ociStorageClient.upload(anyString(), anyString(), any(), anyLong(), anyString()))
-                .thenReturn("https://oci/test-bucket/documento.pdf");
+                .thenReturn("https://oci/o/prod/archivos/LEYES/pdf/documento.pdf");
         when(archivoRepository.save(any(Archivo.class))).thenReturn(archivoGuardado());
 
-        ArchivoResponse response = service.subir(file, USER_ID);
+        ArchivoResponse response = service.subir(file, USER_ID, null);
 
         assertThat(response.nombre()).isEqualTo("documento.pdf");
         assertThat(response.tipo()).isEqualTo("application/pdf");
-        verify(ociStorageClient).upload(eq("test-bucket"), anyString(), any(), anyLong(), eq("application/pdf"));
+        verify(ociStorageClient).upload(eq("test-bucket"), eq("prod/archivos/LEYES/pdf/documento.pdf"), any(), anyLong(), eq("application/pdf"));
         verify(archivoRepository).save(any(Archivo.class));
+    }
+
+    @Test
+    void subir_conCategoriaExplicitaiso_deberiaGuardarEnSubcarpetaIsos() {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "manual.pdf", "application/pdf", "contenido".getBytes()
+        );
+
+        when(ociStorageClient.upload(anyString(), anyString(), any(), anyLong(), anyString()))
+                .thenReturn("https://oci/o/prod/archivos/ISOS/pdf/manual.pdf");
+        when(archivoRepository.save(any(Archivo.class))).thenReturn(archivoGuardado());
+
+        service.subir(file, USER_ID, "ISO");
+
+        verify(ociStorageClient).upload(
+                eq("test-bucket"),
+                eq("prod/archivos/ISOS/pdf/manual.pdf"),
+                any(),
+                anyLong(),
+                eq("application/pdf")
+        );
     }
 
     @Test
@@ -87,7 +111,7 @@ class ArchivoServiceTest {
                 "file", "imagen.png", "image/png", "datos".getBytes()
         );
 
-        assertThatThrownBy(() -> service.subir(file, USER_ID))
+        assertThatThrownBy(() -> service.subir(file, USER_ID, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Tipo de archivo no permitido");
 
@@ -100,7 +124,7 @@ class ArchivoServiceTest {
                 "file", "vacio.pdf", "application/pdf", new byte[0]
         );
 
-        assertThatThrownBy(() -> service.subir(file, USER_ID))
+        assertThatThrownBy(() -> service.subir(file, USER_ID, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("vacio");
     }
@@ -112,7 +136,7 @@ class ArchivoServiceTest {
                 "file", "grande.pdf", "application/pdf", datosGrandes
         );
 
-        assertThatThrownBy(() -> service.subir(file, USER_ID))
+        assertThatThrownBy(() -> service.subir(file, USER_ID, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("tamano maximo");
     }
@@ -177,7 +201,7 @@ class ArchivoServiceTest {
     void listar_conTipoNoPermitido_deberiaLanzarIllegalArgument() {
         assertThatThrownBy(() -> service.listar(USER_ID, 0, 20, "", "xlsx"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("pdf, txt, md, docx");
+                .hasMessageContaining("pdf, txt, md");
 
         verifyNoInteractions(archivoRepository);
     }
@@ -236,8 +260,8 @@ class ArchivoServiceTest {
         service.eliminar(ARCHIVO_ID, USER_ID);
 
         verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, USER_ID);
-        verify(ociStorageClient).delete(eq("test-bucket"), eq("documento.pdf"));
-        verify(archivoRepository).delete((Archivo) archivo); // Corregido tipado explícito
+        verify(ociStorageClient).delete(eq("test-bucket"), eq("prod/archivos/LEYES/pdf/documento.pdf"));
+        verify(archivoRepository).delete(archivo);
     }
 
     @Test
@@ -249,7 +273,7 @@ class ArchivoServiceTest {
                 .isInstanceOf(ArchivoNotFoundException.class);
 
         verifyNoInteractions(ociStorageClient);
-        verify(archivoRepository, never()).delete(any(Archivo.class)); // Corregido tipado explícito
+        verify(archivoRepository, never()).delete(any(Archivo.class));
     }
 
     @Test
@@ -262,7 +286,7 @@ class ArchivoServiceTest {
 
         verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, OTRO_USER_ID);
         verifyNoInteractions(ociStorageClient);
-        verify(archivoRepository, never()).delete(any(Archivo.class)); // Corregido tipado explícito
+        verify(archivoRepository, never()).delete(any(Archivo.class));
     }
 
     @Test
@@ -271,15 +295,14 @@ class ArchivoServiceTest {
         when(archivoRepository.findByIdAndUserId(ARCHIVO_ID, USER_ID))
                 .thenReturn(Optional.of(archivo));
         doThrow(new RuntimeException("Error en eliminación desde OCI"))
-                .when(ociStorageClient).delete("test-bucket", "documento.pdf");
+                .when(ociStorageClient).delete("test-bucket", "prod/archivos/LEYES/pdf/documento.pdf");
 
         assertThatThrownBy(() -> service.eliminar(ARCHIVO_ID, USER_ID))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Error en eliminación desde OCI");
 
         verify(archivoRepository).findByIdAndUserId(ARCHIVO_ID, USER_ID);
-        verify(ociStorageClient).delete("test-bucket", "documento.pdf");
-        verify(archivoRepository, never()).delete(any(Archivo.class)); // Corregido tipado explícito
+        verify(ociStorageClient).delete("test-bucket", "prod/archivos/LEYES/pdf/documento.pdf");
+        verify(archivoRepository, never()).delete(any(Archivo.class));
     }
-
 }

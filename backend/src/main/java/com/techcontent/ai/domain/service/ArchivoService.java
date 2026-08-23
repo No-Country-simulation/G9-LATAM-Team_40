@@ -28,31 +28,40 @@ public class ArchivoService {
     private static final Set<String> TIPOS_PERMITIDOS = Set.of(
             "application/pdf",
             "text/plain",
-            "text/markdown",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            "text/markdown"
     );
     private static final Map<String, String> TIPOS_FILTRO = Map.of(
             "pdf", "application/pdf",
             "txt", "text/plain",
-            "md", "text/markdown",
-            "docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            "md", "text/markdown"
     );
     private static final long MAX_TAMANO_BYTES = 10 * 1024 * 1024; // 10 MB
 
     private final ArchivoRepository archivoRepository;
     private final OciStorageClient ociStorageClient;
 
-    @Value("${oci.files.bucket}")
-    private String filesBucket;
+    @Value("${oci.dataset.bucket}")
+    private String datasetBucket;
 
-    public ArchivoResponse subir(MultipartFile file, UUID userId) {
+    @Value("${oci.prefix:prod}")
+    private String ociPrefix;
+
+    public ArchivoResponse subir(MultipartFile file, UUID userId, String categoria) {
         validarArchivo(file);
 
-        String objectName = userId + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+        String subcarpeta = resolverSubcarpeta(file.getOriginalFilename(), categoria);
+        String subcarpetaFormato = resolverFormato(file);
+
+        String objectName = String.format("%s/archivos/%s/%s/%s",
+                ociPrefix,
+                subcarpeta,
+                subcarpetaFormato,
+                file.getOriginalFilename()
+        );
 
         try {
             String url = ociStorageClient.upload(
-                    filesBucket,
+                    datasetBucket,
                     objectName,
                     file.getInputStream(),
                     file.getSize(),
@@ -108,8 +117,52 @@ public class ArchivoService {
                 .orElseThrow(() -> new ArchivoNotFoundException(id));
 
         String objectName = extraerObjectNameDeUrl(archivo.getUrl());
-        ociStorageClient.delete(filesBucket, objectName);
+        ociStorageClient.delete(datasetBucket, objectName);
         archivoRepository.delete(archivo);
+    }
+
+    private String resolverSubcarpeta(String nombreArchivo, String categoria) {
+        if (categoria != null && !categoria.isBlank()) {
+            String catUpper = categoria.trim().toUpperCase(Locale.ROOT);
+            if ("ISO".equals(catUpper) || "ISOS".equals(catUpper)) {
+                return "ISOS";
+            }
+            if ("LEY".equals(catUpper) || "LEYES".equals(catUpper) || "NORMA".equals(catUpper)) {
+                return "LEYES";
+            }
+        }
+
+        String nombreLower = (nombreArchivo != null) ? nombreArchivo.toLowerCase(Locale.ROOT) : "";
+        if (nombreLower.contains("iso") || nombreLower.contains("9001") || nombreLower.contains("14001") || nombreLower.contains("27001")) {
+            return "ISOS";
+        }
+
+        return "LEYES";
+    }
+
+    private String resolverFormato(MultipartFile file) {
+        String contentType = file.getContentType();
+        String extension = obtenerExtension(file.getOriginalFilename());
+
+        if ("application/pdf".equalsIgnoreCase(contentType) || "pdf".equalsIgnoreCase(extension)) {
+            return "pdf";
+        }
+
+        if ("text/markdown".equalsIgnoreCase(contentType)
+                || "text/plain".equalsIgnoreCase(contentType)
+                || "md".equalsIgnoreCase(extension)
+                || "txt".equalsIgnoreCase(extension)) {
+            return "md";
+        }
+
+        return "pdf";
+    }
+
+    private String obtenerExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return "";
+        }
+        return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
     }
 
     private String extraerObjectNameDeUrl(String url) {
@@ -127,14 +180,14 @@ public class ArchivoService {
     }
 
     private void validarArchivo(MultipartFile file) {
-        if (file.isEmpty()) {
+        if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("El archivo no puede estar vacio");
         }
         if (file.getSize() > MAX_TAMANO_BYTES) {
             throw new IllegalArgumentException("El archivo supera el tamano maximo permitido de 10MB");
         }
         if (!TIPOS_PERMITIDOS.contains(file.getContentType())) {
-            throw new IllegalArgumentException("Tipo de archivo no permitido. Se aceptan: PDF, TXT, MD, DOCX");
+            throw new IllegalArgumentException("Tipo de archivo no permitido. Se aceptan: PDF, TXT, MD");
         }
     }
 
@@ -164,7 +217,7 @@ public class ArchivoService {
         String tipoMime = TIPOS_FILTRO.get(alias);
         if (tipoMime == null) {
             throw new IllegalArgumentException(
-                    "Tipo de archivo no permitido. Valores aceptados: pdf, txt, md, docx"
+                    "Tipo de archivo no permitido. Valores aceptados: pdf, txt, md"
             );
         }
         return tipoMime;

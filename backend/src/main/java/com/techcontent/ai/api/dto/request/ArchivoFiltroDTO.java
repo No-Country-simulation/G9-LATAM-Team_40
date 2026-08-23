@@ -16,8 +16,7 @@ public class ArchivoFiltroDTO {
     private static final Map<String, String> TIPOS_FILTRO = Map.of(
             "pdf", "application/pdf",
             "txt", "text/plain",
-            "md", "text/markdown",
-            "docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            "md", "text/markdown"
     );
 
     @Size(max = 100, message = "El nombre de búsqueda no puede superar los 100 caracteres")

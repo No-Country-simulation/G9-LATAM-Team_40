@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -65,7 +66,7 @@ class ArchivoControllerIntegrationTest {
     }
 
     @Test
-    void POST_conJwtValidoYArchivoValido_deberiaRetornar200() throws Exception {
+    void POST_conJwtValidoYArchivoValido_deberiaRetornar201() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "documento.pdf", "application/pdf", "contenido pdf".getBytes()
         );
@@ -75,14 +76,40 @@ class ArchivoControllerIntegrationTest {
                 "application/pdf", LocalDateTime.now()
         );
 
-        when(archivoService.subir(any(), any(UUID.class))).thenReturn(mockResponse);
+        // Se agrega nullable(String.class) o any() para soportar el 3er parametro (categoria)
+        when(archivoService.subir(any(), any(UUID.class), nullable(String.class))).thenReturn(mockResponse);
 
         mockMvc.perform(multipart("/api/archivos")
                         .file(file)
                         .header("Authorization", "Bearer " + VALID_TOKEN))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated()) // Cambiado de isOk() a isCreated() (201)
                 .andExpect(jsonPath("$.nombre").value("documento.pdf"))
                 .andExpect(jsonPath("$.tipo").value("application/pdf"));
+
+        verify(archivoService).subir(any(), eq(TEST_USER_ID), eq(null));
+    }
+
+    @Test
+    void POST_conCategoria_deberiaDelegarCategoriaAService() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "iso-9001.pdf", "application/pdf", "contenido pdf".getBytes()
+        );
+        ArchivoResponse mockResponse = new ArchivoResponse(
+                UUID.randomUUID().toString(), "iso-9001.pdf",
+                "https://oci/test/iso-9001.pdf", 1024L,
+                "application/pdf", LocalDateTime.now()
+        );
+
+        when(archivoService.subir(any(), any(UUID.class), eq("ISO"))).thenReturn(mockResponse);
+
+        mockMvc.perform(multipart("/api/archivos")
+                        .file(file)
+                        .param("categoria", "ISO")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.nombre").value("iso-9001.pdf"));
+
+        verify(archivoService).subir(any(), eq(TEST_USER_ID), eq("ISO"));
     }
 
     @Test
