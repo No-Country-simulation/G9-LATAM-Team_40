@@ -8,13 +8,18 @@ import com.techcontent.ai.integration.oci.OciStorageClient;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,13 +32,17 @@ public class GrafoService {
     @Value("${oci.dataset.bucket}")
     private String datasetBucket;
 
-    private static final String DEFAULT_OBJECT_NAME = "grafo_nodos_subnodos_graphrag.json";
+    @Value("${oci.prefix:prod}")
+    private String ociPrefix;
+
+    private static final String DEFAULT_FILE_NAME = "grafo_nodos_subnodos_graphrag.json";
 
     @Transactional
     public GrafoResponse sincronizarDesdeOci(String objectName) {
-        String nameToFetch = (objectName != null && !objectName.isBlank()) ? objectName : DEFAULT_OBJECT_NAME;
 
-        try (InputStream inputStream = ociStorageClient.download(datasetBucket, nameToFetch)) {
+        String objectPath = resolverRutaOci(objectName);
+
+        try (InputStream inputStream = ociStorageClient.download(datasetBucket, objectPath)) {
             String jsonContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
             Grafo nuevoGrafo = Grafo.builder()
@@ -45,7 +54,7 @@ public class GrafoService {
             return toResponse(guardado);
 
         } catch (Exception e) {
-            throw new RuntimeException("Error al descargar y procesar el grafo desde OCI Dataset Bucket: " + nameToFetch, e);
+            throw new RuntimeException("Error al descargar y procesar el grafo desde OCI (" + datasetBucket + " -> " + objectPath + ")", e);
         }
     }
 
@@ -57,18 +66,40 @@ public class GrafoService {
     }
 
     @Transactional(readOnly = true)
-    public List<GrafoResponse> buscarPorRangoFechas(LocalDateTime desde, LocalDateTime hasta) {
-        return repository.findByFechaCreacionBetweenOrderByFechaCreacionDesc(desde, hasta)
+    public GrafoResponse obtenerPorId(UUID id) {
+        Grafo grafo = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró el grafo con ID: " + id));
+        return toResponse(grafo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GrafoResponse> buscarPorRangoFechas(LocalDate desde, LocalDate hasta) {
+        LocalDateTime desdeDateTime = desde.atStartOfDay();
+        LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
+
+        return repository.findByFechaCreacionBetweenOrderByFechaCreacionDesc(desdeDateTime, hastaDateTime)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<GrafoResponse> obtenerHistorial() {
-        return repository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<GrafoResponse> obtenerHistorial(Pageable pageable) {
+        return repository.findAllResumen(pageable)
+                .map(p -> GrafoResponse.deResumen(
+                        p.getId().toString(),
+                        p.getFechaCreacion()
+                ));
+    }
+
+    private String resolverRutaOci(String objectName) {
+        if (objectName != null && !objectName.isBlank()) {
+            if (objectName.contains("/")) {
+                return objectName;
+            }
+            return String.format("%s/output_json/%s", ociPrefix, objectName);
+        }
+        return String.format("%s/output_json/%s", ociPrefix, DEFAULT_FILE_NAME);
     }
 
     private GrafoResponse toResponse(Grafo grafo) {

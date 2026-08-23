@@ -27,4 +27,8 @@ public record GrafoResponse(
                 grafo.getFechaCreacion()
         );
     }
+
+    public static GrafoResponse deResumen(String id, LocalDateTime fechaCreacion) {
+        return new GrafoResponse(id, null, fechaCreacion);
+    }
 }
