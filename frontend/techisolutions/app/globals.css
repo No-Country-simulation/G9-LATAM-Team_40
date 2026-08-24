@@ -1,0 +1,171 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: var(--font-sans);
+    --font-mono: var(--font-mono);
+    --color-paper: var(--paper);
+    --color-paper-ink: var(--paper-ink);
+    --color-institutional: var(--institutional);
+    --color-sst-yellow: var(--sst-yellow);
+    --color-stamp-red: var(--stamp-red);
+    --color-carbon: var(--carbon);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    --paper: #f4f0e6;
+    --paper-ink: #2a2520;
+    --institutional: #1a3a5c;
+    --sst-yellow: #f0c419;
+    --stamp-red: #c0392b;
+    --carbon: #2c5282;
+    --background: var(--paper);
+    --foreground: var(--paper-ink);
+    --card: #faf8f3;
+    --card-foreground: var(--paper-ink);
+    --popover: #faf8f3;
+    --popover-foreground: var(--paper-ink);
+    --primary: var(--institutional);
+    --primary-foreground: #f8f6f0;
+    --secondary: #e8e2d6;
+    --secondary-foreground: var(--institutional);
+    --muted: #ebe6dc;
+    --muted-foreground: #5c5348;
+    --accent: var(--sst-yellow);
+    --accent-foreground: var(--institutional);
+    --destructive: var(--stamp-red);
+    --border: #c9c0b4;
+    --input: #d8d0c4;
+    --ring: var(--carbon);
+    --chart-1: var(--institutional);
+    --chart-2: var(--carbon);
+    --chart-3: var(--sst-yellow);
+    --chart-4: var(--stamp-red);
+    --chart-5: #5c5348;
+    --radius: 0.25rem;
+    --sidebar: #ebe6dc;
+    --sidebar-foreground: var(--paper-ink);
+    --sidebar-primary: var(--institutional);
+    --sidebar-primary-foreground: #f8f6f0;
+    --sidebar-accent: #e0d9ce;
+    --sidebar-accent-foreground: var(--institutional);
+    --sidebar-border: #c9c0b4;
+    --sidebar-ring: var(--carbon);
+}
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .ruled-paper {
+    background-color: var(--card);
+    background-image:
+      linear-gradient(
+        color-mix(in srgb, var(--border) 15%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 100% 2.25rem;
+    background-position: 0 1.125rem;
+  }
+
+  .form-field-lines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent calc(1.75rem - 1px),
+      var(--border) calc(1.75rem - 1px),
+      var(--border) 1.75rem
+    );
+  }
+
+  .tape-strip {
+    background: color-mix(in srgb, var(--sst-yellow) 85%, #e8b800);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+  }
+
+  .stamp-shadow {
+    box-shadow: 2px 3px 0 color-mix(in srgb, var(--institutional) 35%, transparent);
+  }
+
+  .stamp-slam {
+    animation: stamp-slam 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stamp-slam {
+      animation: none;
+      opacity: 0.9;
+      transform: rotate(12deg);
+    }
+  }
+}
+
+@keyframes stamp-slam {
+  0% {
+    opacity: 0;
+    transform: rotate(-8deg) scale(1.6);
+  }
+  70% {
+    opacity: 1;
+    transform: rotate(14deg) scale(0.94);
+  }
+  100% {
+    opacity: 0.9;
+    transform: rotate(12deg) scale(1);
+  }
+}
