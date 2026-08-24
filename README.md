@@ -1,8 +1,10 @@
-# ISContent AI — Organización Inteligente de Contenido Técnico
+# TechISOlutions — Documentación ISO 45001 clasificada y trazable
 
-**Hackathon ONE – Proyectos G9 | Alura + Oracle**
+**Hackathon ONE – Proyectos G9 | Alura + Oracle | G9-LATAM-Team_40**
 
-Solución para la organización inteligente de contenido técnico mediante técnicas de Ciencia de Datos, expuesta a través de una API REST en Java/Spring Boot con integración a OCI Object Storage y Supabase para persistencia y autenticación.
+Repositorio de políticas, matrices y registros de Seguridad y Salud en el Trabajo (SST). Clasifica documentos según categorías normativas ISO 45001, extrae palabras clave y responde consultas sobre el corpus con un pipeline GraphRAG y trazabilidad a las secciones fuente.
+
+Los artefactos internos (paquetes Java, contenedores Docker, base de datos) siguen el identificador técnico `techcontent`. El producto se llama **TechISOlutions**.
 
 ---
 
@@ -11,7 +13,7 @@ Solución para la organización inteligente de contenido técnico mediante técn
 - [Descripción](#descripción)
 - [Arquitectura](#arquitectura)
 - [Tecnologías](#tecnologías)
-- [CI/CD y Despliegue](#ci-y-despliegue)
+- [Despliegue](#despliegue)
 - [API Endpoints](#api-endpoints)
 - [Requisitos](#requisitos)
 - [Instalación y Ejecución](#instalación-y-ejecución)
@@ -21,16 +23,15 @@ Solución para la organización inteligente de contenido técnico mediante técn
 
 ## Descripción
 
-**TechContent AI** permite organizar, clasificar y enriquecer contenido técnico de forma automática. Recibe textos técnicos (documentación, tutoriales, anotaciones de estudio, artículos) y utiliza un pipeline GraphRAG para:
+**TechISOlutions** recibe texto o archivos (PDF, TXT, MD) de documentación SST y:
 
-- **Clasificación temática** del contenido.
-- **Extracción de palabras clave** y metadatos.
-- **Búsqueda semántica** sobre un grafo de conocimiento.
-- **Respuestas generadas con trazabilidad** hacia las secciones fuente.
+- Asigna una **categoría normativa** (Política SST, Procedimientos, Matrices de Riesgo, Registros, Auditorías).
+- Extrae **palabras clave** para búsqueda.
+- Genera una **respuesta GraphRAG** con trazabilidad hacia las secciones recuperadas del grafo de conocimiento.
+- Guarda archivos en **OCI Object Storage** y metadatos en PostgreSQL.
+- Expone un **grafo de relaciones** en la API (`/api/grafos`) y una vista de grafo en el frontend.
 
-El resultado se expone en formato JSON para su consumo por otras aplicaciones, plataformas educativas o equipos técnicos que deseen construir repositorios inteligentes de conocimiento.
-
-La plataforma incluye un frontend web construido con **Next.js** que consume la API y expone las respuestas y fuentes relevantes al usuario final.
+La interfaz web está en `frontend/techisolutions/` (Next.js) y consume exclusivamente el backend Spring Boot. El landing muestra una demo estática; las rutas autenticadas no tienen modo mock.
 
 ---
 
@@ -42,50 +43,47 @@ graph TB
         Client[Frontend Web<br>Next.js 16 + React 19<br>App Router + Tailwind CSS]
     end
 
-    subgraph "VPS - Docker Compose"
+    subgraph "Docker Compose"
         subgraph "Spring Boot API"
-            SB[Spring Boot 3<br>Java 17<br>:8080]
+            SB[Spring Boot 3.2<br>Java 17<br>:8080]
             SB -->|Validación| Controller[Controllers]
             Controller -->|Orquestación| Service[Services]
             Service -->|HTTP POST| MlClient[ML Client]
         end
 
-    subgraph "Python GraphRAG Service"
-        FastAPI[FastAPI<br>Python 3.11<br>:5000]
-        FastAPI -->|Carga pipeline| Pipeline[Pipeline GraphRAG]
-        Pipeline -->|Embeddings y recuperación| Index[Índice del grafo]
-        Pipeline -->|Generación| LLM[LLM configurado]
-    end
+        subgraph "Python GraphRAG Service"
+            FastAPI[FastAPI<br>Python 3.11<br>:5000]
+            FastAPI -->|Carga pipeline| Pipeline[Pipeline GraphRAG]
+            Pipeline -->|Embeddings y recuperación| Index[Índice del grafo]
+            Pipeline -->|Generación| LLM[DeepSeek / Gemini]
+        end
 
         subgraph "Supabase Local"
-            SupaDB[(PostgreSQL<br>:5432)]
+            SupaDB[(PostgreSQL<br>host :5433 → :5432)]
             SupaAuth[GoTrue Auth<br>:9999]
             SupaREST[PostgREST<br>:3000]
-            SupaMeta[Supabase Meta<br>:8000]
+            SupaMeta[Supabase Studio<br>:8000]
             SupaREST -->|Query| SupaDB
             SupaAuth -->|Users| SupaDB
         end
     end
 
     subgraph "Oracle Cloud Infrastructure"
-        OCI[OCI Object Storage<br>S3-compatible]
-        Models[Modelos de embeddings]
-        Graph[Grafos y embeddings]
+        OCI[OCI Object Storage]
+        Graph[Grafo y embeddings]
         Files[Archivos de documentos]
-        OCI --- Models
         OCI --- Graph
         OCI --- Files
     end
 
-    Client -->|HTTP POST /api/contenido<br>JSON| SB
-    Client -->|POST /api/archivos<br>multipart/form-data| SB
-    MlClient -->|HTTP POST /api/v1/query<br>localhost:5000| FastAPI
-    Service -->|JDBC<br>postgresql://localhost:5432| SupaDB
-    Service -->|Auth API<br>localhost:9999| SupaAuth
-    Service -->|Upload/Download| OCI
+    Client -->|HTTP /api/* + JWT| SB
+    MlClient -->|POST /api/v1/query<br>:5000| FastAPI
+    Service -->|JDBC| SupaDB
+    Service -->|Auth API<br>:9999| SupaAuth
+    Service -->|Upload / download| OCI
     FastAPI -->|Sincronización opcional| OCI
-    FastAPI -->|JSON con respuesta y trazabilidad| MlClient
-    SB -->|JSON response| Client
+    FastAPI -->|respuesta + trazabilidad| MlClient
+    SB -->|JSON| Client
 
     style SB fill:#6DB33F,stroke:#333,color:#fff
     style FastAPI fill:#3776AB,stroke:#333,color:#fff
@@ -98,240 +96,250 @@ graph TB
 
 | Componente | Tecnología | Puerto | Descripción |
 |---|---|---|---|
-| **Frontend Web** | Next.js 16 + React 19 + TypeScript | host `${FRONTEND_PORT:-3001}` → `:3000` | Aplicación web (App Router, Tailwind CSS 4, shadcn/ui). Corre en Docker Compose (puerto 3001) o en dev local (puerto 3000). |
-| **API Principal** | Java 17 + Spring Boot 3 | `:8080` | Recibe peticiones REST, valida entrada, orquesta el procesamiento y devuelve resultados JSON. |
-| **Motor GraphRAG** | Python 3.11 + FastAPI | `:5000` | Servicio interno que carga el índice del grafo y embeddings, recupera secciones relevantes y genera respuestas con trazabilidad. |
-| **Base de Datos** | PostgreSQL (Supabase) | `:5432` | Persistencia de resultados, metadatos de contenido procesado y usuarios. |
-| **Autenticación** | GoTrue (Supabase Auth) | `:9999` | Gestión de usuarios, JWT tokens, registro y login. |
-| **REST API Auto** | PostgREST | `:3000` | API REST generada automáticamente desde el esquema de PostgreSQL. |
-| **OCI Object Storage** | Bucket S3-compatible | - | Almacenamiento de grafos, embeddings, datasets y documentos de usuarios. |
+| **Frontend Web** | Next.js 16 + React 19 + TypeScript | host `${FRONTEND_PORT:-3001}` → `:3000` | App Router, Tailwind CSS 4, shadcn/ui. Compose en 3001; `bun run dev` en 3000. |
+| **API principal** | Java 17 + Spring Boot 3.2.12 | `:8080` | Auth, consultas, archivos, índices, categorías y grafos. |
+| **Motor GraphRAG** | Python 3.11 + FastAPI | red interna `:5000` | Recupera corpus base + overlay privado y genera trazabilidad. |
+| **Base de datos** | PostgreSQL (Supabase) | host `:5433` → `:5432` | Persistencia de consultas, archivos, grafos y usuarios. |
+| **Autenticación** | GoTrue (Supabase Auth) | `:9999` | Registro, login y JWT. |
+| **REST auto** | PostgREST | `:3000` | API REST generada desde PostgreSQL. |
+| **OCI Object Storage** | Bucket S3-compatible | — | Grafos, embeddings y documentos. |
 
-### Flujo de Procesamiento
+### Flujos
 
-**Consulta GraphRAG:**
+**Consulta GraphRAG (`POST /api/consultas`):**
+
 ```
-1. Cliente → POST /api/contenido  (JSON con título y texto + JWT token)
-2. Spring Boot valida JWT con Supabase Auth
-3. Spring Boot valida la entrada
-4. Spring Boot → POST http://localhost:5000/api/v1/query
-   con {"pregunta": "<texto>"}
-5. FastAPI carga el grafo y embeddings desde `datascience/db` o sincroniza
-   los artefactos configurados en OCI
-6. El pipeline calcula embeddings, recupera nodos y secciones relevantes
-7. El pipeline consulta el LLM configurado y construye la trazabilidad
-8. FastAPI → JSON con respuesta, trazabilidad y tiempo de procesamiento
-9. Spring Boot persiste el resultado y lo retorna al cliente
+1. Cliente → { pregunta } + Bearer JWT
+2. Spring obtiene el user_id desde el JWT y envía pregunta + UUID al ML interno.
+3. FastAPI recupera siempre BASE y solo el release PRIVADO de ese UUID.
+4. Spring persiste pregunta, respuesta, relevancia, tiempo y trazabilidad completa.
+5. Cliente recibe fuentes con corpus BASE/PRIVADO; nunca source_path ni URLs OCI.
 ```
 
-**Almacenamiento de archivos:**
+**Archivos privados (`POST /api/archivos`):**
+
 ```
-1. Cliente → POST /api/archivos  (multipart/form-data + JWT token)
-2. Spring Boot valida JWT y tipo de archivo
-3. Spring Boot sube archivo a OCI Object Storage
-4. Spring Boot guarda metadata (URL, tamaño, tipo) en Supabase PostgreSQL
-5. Spring Boot retorna URL de acceso al cliente
+1. Cliente → multipart `file` + `dominio` (`ISOS` o `LEYES`) + Bearer JWT.
+2. Spring valida nombre, extensión, MIME y tamaño (PDF/TXT/MD, máximo 10 MB).
+3. El objeto se guarda bajo `${OCI_PREFIX}/users/<uuid>/input/<dominio>/` (`OCI_PREFIX=prod` por defecto) y la API devuelve solo metadata.
+4. El índice privado se reconstruye en segundo plano con generaciones coalescidas.
+5. Las descargas pasan por `GET /api/archivos/{id}/descarga`; el navegador nunca recibe una URL OCI.
+6. DELETE marca el archivo como pendiente; el job siguiente elimina el objeto y la fila cuando publica el release.
 ```
+
+**Índice privado:**
+
+```
+1. Una carga o eliminación incrementa la generación solicitada del usuario.
+2. El backend envía un snapshot de documentos al servicio GraphRAG mediante un job idempotente.
+3. El estado se consulta en GET /api/indice y se puede reintentar con POST /api/indice/reintentar.
+4. El release publicado queda asociado al usuario y se expone en GET /api/grafos/privado.
+```
+
+**Grafo:**
+
+```
+GET /api/grafos/actual          → último snapshot BASE persistido
+GET /api/grafos/privado         → último release PRIVADO del usuario autenticado
+```
+
+Object Storage permanece inaccesible desde el navegador.
 
 ---
 
 ## Tecnologías
 
 ### Backend
-- **Java 17** / **Spring Boot 3.2**
-- **Spring Web** (REST API)
-- **Spring Boot Actuator** (health checks, métricas)
-- **Spring Validation** (validación de entrada)
-- **Spring Security** (integración con Supabase Auth)
-- **Lombok** (reducción de boilerplate)
-- **Maven** (gestión de dependencias y build)
-- **JUnit 5 + Mockito** (pruebas)
+- Java 17 / Spring Boot 3.2.12
+- Spring Web, Security, Data JPA, Validation, Actuator
+- JWT (HS256 con `SUPABASE_JWT_SECRET` y ES256 vía JWKS)
+- Lombok, Maven, JUnit 5 + Mockito
+- Paquete: `com.techcontent.ai`
 
 ### Frontend
-- **Next.js 16** (App Router) — SSR/SSG y routing por convención
-- **React 19** + **TypeScript 5**
-- **Tailwind CSS 4** — estilizado utilitario
-- **shadcn/ui** (Base UI) — componentes accesibles
-- **lucide-react** — iconografía · **next-themes** — dark/light mode
-- **Bun** — package manager (`bun.lock`)
+- Next.js 16 (App Router), React 19, TypeScript 5
+- Tailwind CSS 4, shadcn/ui, lucide-react, next-themes
+- Bun (`bun.lock`)
 - Ubicación: `frontend/techisolutions/`
 
-### Ciencia de Datos
-- **Python 3.11**
-- **Pandas** — manipulación de datos
-- **Scikit-learn** — TF-IDF, Regresión Logística, métricas
-- **NLTK / spaCy** — procesamiento de lenguaje natural (tokenización, stopwords, lematización)
-- **YAKE** — extracción de palabras clave
-- **Joblib** — serialización del modelo
+### Ciencia de datos (servicio en `:5000`)
+- Python 3.11, FastAPI, Uvicorn
+- Pipeline GraphRAG: sentence-transformers (`paraphrase-multilingual-mpnet-base-v2`), spaCy, NetworkX
+- LLMs: DeepSeek y Gemini
+- Artefactos en `datascience/db` u OCI (`DATA_SOURCE=oci`)
 
 ### Infraestructura
-- **Supabase Local** (Docker) — PostgreSQL + Auth + PostgREST
-- **Oracle Cloud Infrastructure (OCI)** — Object Storage
-- **Docker / Docker Compose** — containerización
-- **Nginx** (opcional) — reverse proxy
+- Docker Compose (VPS Linux)
+- Supabase local: PostgreSQL + GoTrue + PostgREST + Studio
+- OCI Object Storage
 
 ---
 
-## CI/CD y Despliegue
+## Despliegue
 
-### Integración OCI
+La infraestructura de aplicación corre en **VPS (Linux)** con Docker Compose. **OCI Object Storage** guarda grafos, embeddings y archivos de usuarios.
 
-El proyecto utiliza **OCI Object Storage** como servicio obligatorio de Oracle Cloud:
+No hay pipeline de GitHub Actions en el repositorio. La configuración se toma del `.env` de la raíz; `.env.example` documenta nombres y valores de referencia.
 
-| Servicio | Uso |
-|---|---|
-| **OCI Object Storage** | Bucket para almacenar modelos serializados (`.joblib`), datasets de entrenamiento y documentos/archivos de usuarios. |
+`ML_INTERNAL_TOKEN` es obligatorio y debe tener el mismo valor en `backend` y `ml-service`. Compose monta `OCI_CLI_KEY_FILE` como secreto de solo lectura y exige que la ruta exista en el host. Con `DATA_SOURCE=oci`, el servicio GraphRAG necesita además `OCI_DATASET_BUCKET`, `OCI_NAMESPACE` y las credenciales OCI.
 
-El resto de la infraestructura corre en **VPS (Linux)** con Docker Compose.
-
-### Pipeline CI/CD (GitHub Actions)
-
-```
-push → Run Tests (JUnit + Pytest) → Build Docker images →
-  → Deploy to VPS via SSH
-```
-
-### Variables de Entorno OCI
+Ejemplo mínimo de variables OCI:
 
 ```bash
 OCI_CLI_USER=ocid1.user.oc1...
 OCI_CLI_TENANCY=ocid1.tenancy.oc1...
 OCI_CLI_REGION=sa-santiago-1
-OCI_MODEL_BUCKET=techcontent-models
-OCI_DATASET_BUCKET=techcontent-datasets
-OCI_FILES_BUCKET=techcontent-files
+OCI_DATASET_BUCKET=your-graphrag-dataset-bucket
+OCI_NAMESPACE=your-oci-namespace
+OCI_PREFIX=prod
 ```
 
 ---
 
 ## API Endpoints
 
-### `POST /api/contenido`
-Procesa una consulta técnica mediante el pipeline GraphRAG, guarda el resultado y devuelve la respuesta junto con su trazabilidad.
+Base: `http://localhost:8080`. Salvo auth y actuator, todos requieren `Authorization: Bearer <jwt>`. Los identificadores de archivos, consultas y grafos son UUID cuando la respuesta los incluye.
 
-**Headers:**
-```
-Authorization: Bearer <supabase-jwt-token>
-Content-Type: application/json
+Colección Postman: [`docs/TechISOlutions.postman_collection.json`](docs/TechISOlutions.postman_collection.json).
+
+### Auth (público)
+
+#### `POST /auth/register` · `POST /auth/login`
+
+```json
+{ "email": "sst@example.com", "password": "password123" }
 ```
 
-**Request Body:**
 ```json
 {
-  "titulo": "Introducción a Spring Boot",
-  "texto": "En este contenido se presentan los conceptos básicos para la creación de APIs REST utilizando Java y Spring Boot. Se abordan temas como controladores, servicios, inyección de dependencias y configuración de proyectos."
+  "access_token": "eyJ...",
+  "refresh_token": "...",
+  "token_type": "bearer",
+  "expires_in": 3600
 }
 ```
 
-**Response (200 OK):**
+El `access_token` se envía como Bearer en los endpoints protegidos. El rol `ADMIN` del JWT es necesario para sincronizar el grafo base.
+
+### Consultas GraphRAG
+
+#### `POST /api/consultas`
+
+Analiza una pregunta y persiste el resultado para el usuario autenticado. `pregunta` es obligatorio y debe tener al menos 20 caracteres.
+
 ```json
 {
-  "id": "a1b2c3d4",
-  "categoria": "Seguridad y Backend",
-  "probabilidad": 0.87,
-  "palabras_clave": ["Java", "Spring Boot", "API REST"],
-  "contenidos_relacionados": [],
-  "respuesta": "La respuesta generada por el pipeline GraphRAG.",
-  "grafo_data": [
+  "pregunta": "¿Qué obligaciones de seguridad contiene el corpus normativo?"
+}
+```
+
+La respuesta incluye `id`, `pregunta`, `respuesta`, `categoria_fuente_principal`, `relevancia`, `palabras_clave`, `trazabilidad`, `tiempo_segundos` y `procesado_en`. Cada elemento de `trazabilidad` incluye `documento_id`, `documento_titulo`, `categoria`, `palabras_clave`, `titulo_seccion`, `ruta_jerarquica`, `nivel`, `dominio`, `relevancia`, `corpus` (`BASE` o `PRIVADO`) y `archivo_id` nullable.
+
+```json
+{
+  "id": "7f1d5b22-2f1e-4a73-9af4-7df0b2b4f1e5",
+  "pregunta": "¿Qué obligaciones de seguridad contiene el corpus normativo?",
+  "respuesta": "Respuesta generada con evidencia...",
+  "categoria_fuente_principal": "Seguridad",
+  "relevancia": 0.92,
+  "palabras_clave": ["seguridad", "obligaciones"],
+  "trazabilidad": [
     {
       "documento_id": "doc-001",
-      "documento_titulo": "Manual técnico",
-      "titulo_seccion": "Configuración",
-      "score": 0.76
+      "documento_titulo": "Manual SST",
+      "titulo_seccion": "Obligaciones",
+      "ruta_jerarquica": ["Capítulo 1"],
+      "nivel": 1,
+      "dominio": "ISOS",
+      "relevancia": 0.92,
+      "corpus": "BASE",
+      "archivo_id": null
     }
   ],
-  "procesado_en": "2026-07-23T14:30:00Z"
+  "tiempo_segundos": 1.1,
+  "procesado_en": "2026-08-24T12:00:00"
 }
 ```
 
-### `POST /api/archivos`
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST | `/api/consultas` | Analizar y persistir una pregunta |
+| GET | `/api/consultas` | Historial de consultas del usuario |
+| GET | `/api/consultas/buscar?q=` | Buscar consultas del usuario por keywords |
 
-Sube un archivo a OCI Object Storage y guarda su metadata.
+### Archivos privados
 
-**Headers:**
-```
-Authorization: Bearer <supabase-jwt-token>
-Content-Type: multipart/form-data
-```
+`POST /api/archivos` usa `multipart/form-data` con `file` y `dominio` obligatorios. `dominio` acepta `ISOS` o `LEYES`; se admiten PDF, TXT y Markdown de hasta 10 MB.
 
-**Request Body:**
-```
-file: <archivo>
-```
+`GET /api/archivos` devuelve `{ "items": [], "page", "size", "totalElements", "totalPages" }`. Admite `page` (por defecto `0`), `size` (por defecto `20`, máximo `100`), `q` (máximo 100 caracteres) y `tipo` (`pdf`, `txt` o `md`).
 
-**Response (200 OK):**
-```json
-{
-  "id": "f1g2h3i4",
-  "nombre": "documentacion-spring.pdf",
-  "url": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/.../documentacion-spring.pdf",
-  "tamano": 1048576,
-  "tipo": "application/pdf",
-  "subido_en": "2026-07-23T14:30:00Z"
-}
-```
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST | `/api/archivos` | Subir un archivo privado y marcar el índice como pendiente |
+| GET | `/api/archivos` | Listar archivos privados paginados |
+| GET | `/api/archivos/{id}` | Obtener metadata del archivo; nunca expone URL OCI |
+| GET | `/api/archivos/{id}/descarga` | Descargar el binario mediante streaming autenticado |
+| DELETE | `/api/archivos/{id}` | Marcar para eliminación; devuelve `202 Accepted` |
 
-### `GET /api/archivos`
+La respuesta de archivo incluye `id`, `nombre`, `documento_id`, `dominio`, `tamano`, `tipo`, `subido_en`, `indexado_en` y `pendiente_eliminacion`. El archivo se elimina físicamente de OCI y PostgreSQL al finalizar correctamente la reconstrucción correspondiente.
 
-Lista todos los archivos del usuario autenticado.
+### Índice privado
 
-### `GET /api/archivos/{id}`
+El índice se actualiza de forma asíncrona. `GET /api/indice` devuelve `estado`, `etapa`, `mensaje`, `release_id`, `generation`, `rebuild_pendiente` y `actualizado_en`.
 
-Obtiene la URL de descarga de un archivo específico.
+| Estado | Significado |
+|---|---|
+| `IDLE` | Sin cambios pendientes |
+| `DIRTY` | Hay cambios que requieren una reconstrucción |
+| `QUEUED` | Job enviado al servicio GraphRAG |
+| `RUNNING` | Job en ejecución |
+| `SUCCEEDED` | Release publicado |
+| `FAILED` | Falló la reconstrucción; se puede usar retry |
 
-### `POST /api/contenido/lote`
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/api/indice` | Consultar el estado persistido del índice del usuario |
+| POST | `/api/indice/reintentar` | Solicitar una nueva reconstrucción; devuelve `202 Accepted` |
 
-Procesa múltiples documentos en una sola petición.
+### Categorías
 
-### `GET /api/contenido/buscar?q=spring+boot`
+`GET /api/categorias` devuelve una lista con `{ "nombre", "total_consultas" }` para el usuario autenticado.
 
-Búsqueda semántica por palabras clave entre contenidos previamente procesados.
+### Grafos
 
-### `GET /api/categorias`
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/api/grafos/privado` | Último release privado del usuario autenticado |
+| POST | `/api/grafos/sincronizar` | Sincronizar el snapshot BASE desde OCI; requiere `ROLE_ADMIN`, devuelve `201 Created` |
+| GET | `/api/grafos/actual` | Último snapshot BASE persistido |
+| GET | `/api/grafos/historial` | Historial BASE paginado (`page`, `size`) |
+| GET | `/api/grafos/buscarfecha?desde=&hasta=` | Snapshots BASE dentro del rango ISO `yyyy-MM-dd` |
+| GET | `/api/grafos/id/{id}` | Snapshot BASE por UUID |
 
-Lista todas las categorías disponibles con la cantidad de documentos por categoría.
+`POST /api/grafos/sincronizar` acepta `objectName` opcional. Las respuestas incluyen `json_data`, `fecha_creacion`, `scope` (`BASE` o `PRIVATE`), `release_id` y `generation`; los releases privados no se duplican en PostgreSQL.
 
-### `POST /auth/register`
+### Health
 
-Registro de nuevos usuarios (delegado a Supabase Auth).
+`GET /actuator/health` → `{ "status": "UP" }` (público). `GET /actuator/info` también es público.
 
-### `POST /auth/login`
-
-Inicio de sesión y obtención de JWT token (delegado a Supabase Auth).
-
-### `GET /actuator/health`
-
-Health check del servicio.
+Los errores usan `{ "error": "...", "mensaje": "..." }`. Según el caso se devuelven `400` (validación), `401`/`403` (auth), `404` (recurso), `503` (servicio externo) o `500` (error interno).
 
 ---
 
 ## Requisitos
 
-### Backend (Java)
-- Java 17+
-- Maven 3.8+
-- Spring Boot 3.2
-
-### Frontend (Next.js)
-- Node.js 20.9+ (requerido por Next.js 16)
-- Bun 1.x (package manager; `bun.lock` en el repo)
-- Proyecto: `frontend/techisolutions/`
-
-### ML Service (Python)
-- Python 3.11+
-- pip 23+
-- FastAPI + Uvicorn
-- Git LFS para descargar los artefactos GraphRAG almacenados en `datascience/db`
-### Infraestructura
+- Java 17+ y Maven 3.8+
+- Node.js 20.9+ y Bun 1.x
+- Python 3.11+, pip 23+, Git LFS (artefactos en `datascience/db`)
 - Docker 24+ y Docker Compose v2
-- VPS Linux (Ubuntu 22.04 recomendado)
-- Cuenta OCI con acceso a Object Storage
-- OCI CLI configurado (para acceso a buckets)
+- Cuenta OCI con Object Storage (archivos y, si `DATA_SOURCE=oci`, el grafo)
 
 ---
 
 ## Instalación y Ejecución
 
 ### 1. Clonar el repositorio
+
 ```bash
 git clone git@github.com:No-Country-simulation/G9-LATAM-Team_40.git
 cd G9-LATAM-Team_40
@@ -339,71 +347,98 @@ git lfs pull
 ```
 
 ### 2. Configurar variables de entorno
+
 ```bash
 cp .env.example .env
-# Editar .env con la clave DeepSeek, credenciales OCI y configuraciones de Supabase
 ```
 
-Todas las ejecuciones, locales y con Docker Compose, parten del `.env` situado en la raíz del repositorio. No crees ni montes un `.env` dentro de `/app`: Compose inyecta al contenedor ML únicamente las variables que necesita.
+Completar al menos: `ML_INTERNAL_TOKEN` (el mismo valor para `backend` y `ml-service`), `DEEPSEEK_API_KEY` (obligatoria para arrancar la API GraphRAG; `GEMINI_API_KEY` puede usarse en tareas auxiliares), credenciales OCI (`OCI_CLI_*`, bucket, namespace y ruta de clave), y claves de Supabase. Todas las ejecuciones parten del `.env` de la raíz; el archivo no se carga automáticamente en procesos del host.
+
+Para desarrollo local, exportar las variables antes de usar Maven, Uvicorn o Bun:
+
+```bash
+set -a
+. ./.env
+set +a
+```
 
 ### 3. Ejecutar con Docker Compose
+
 ```bash
 docker compose up -d
+# equivalente: make up
 ```
-> El servicio GraphRAG requiere `DEEPSEEK_API_KEY`. Si falta, `docker compose logs ml-service` mostrará `Missing credentials`.
-> Los artefactos de `datascience/db` requieren Git LFS: ejecuta `git lfs pull` antes de iniciar el stack.
 
-Esto levanta:
-- **Frontend Next.js** en `http://localhost:3001`
-- **Spring Boot API** en `http://localhost:8080`
-- **ML Service Python** en `http://localhost:5000`
-- **Supabase PostgreSQL** en `http://localhost:5432`
-- **Supabase Auth** en `http://localhost:9999`
-- **Supabase REST** en `http://localhost:3000`
+- GraphRAG exige `DEEPSEEK_API_KEY` (si falta: `docker compose logs ml-service` → `Missing credentials`).
+- `git lfs pull` antes de levantar el stack si los artefactos van en local.
+
+| Servicio | URL |
+|---|---|
+| Frontend Next.js | http://localhost:3001 |
+| Spring Boot API | http://localhost:8080 |
+| ML GraphRAG | red interna `ml-service:5000` (sin publicación host) |
+| PostgreSQL (host) | localhost:5433 |
+| Supabase Auth | http://localhost:9999 |
+| PostgREST | http://localhost:3000 |
+| Supabase Studio | http://localhost:8000 |
 
 ### 4. Ejecutar sin Docker (desarrollo local)
 
-**ML Service:**
+Infraestructura (DB + Auth) en Docker, apps en el host. Ejecutar cada proceso en una terminal separada:
+
 ```bash
-cd datascience/proyecto
-pip install -r requirements.txt
-PYTHONPATH=src uvicorn src.api.app:app --host 0.0.0.0 --port 5000 --reload
+make infra          # Postgres :5433, GoTrue :9999, PostgREST :3000, Studio :8000
+make local-ml       # FastAPI :5000
+make local-backend  # Spring Boot :8080
 ```
 
-**Backend:**
+`make local-frontend` usa el puerto `3000`; con `make infra`, PostgREST ya ocupa ese puerto. En ese caso iniciar el frontend manualmente en `3002` como se muestra abajo.
+
+O a mano, después de exportar `.env`:
+
 ```bash
-cd backend
-./mvnw spring-boot:run
+# ML
+(
+  cd datascience/proyecto
+  pip install -r requirements.txt
+  PYTHONPATH=src uvicorn src.api.app:app --host 0.0.0.0 --port 5000 --reload
+)
+
+# Backend
+(
+  cd backend
+  ./mvnw spring-boot:run
+)
+
+# Frontend
+(
+  cd frontend/techisolutions
+  bun install
+  bun run dev -- --port 3002
+)
 ```
 
-**Frontend (Next.js):**
-```bash
-cd frontend/techisolutions
-bun install
-bun run dev
-```
+Con infra en Docker, `SPRING_DATASOURCE_URL` debe apuntar a `jdbc:postgresql://localhost:5433/techcontent` y `NEXT_PUBLIC_API_URL` a `http://localhost:8080`.
 
-> **Nota:** el dev server de Next.js usa el puerto `3000` por defecto. Si el stack de Docker está levantado, PostgREST ocupa el `3000` y el frontend de Compose el `3001` — usa `bun run dev -- --port 3002`.
 
-### 6. Probar la API
+### 5. Probar la API
+
 ```bash
-# Registrar usuario
-curl -X POST http://localhost:9999/auth/v1/signup \
+# Registro
+curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
-  -H "apikey: <anon-key>" \
-  -d '{"email":"test@example.com","password":"password123"}'
+  -d '{"email":"sst@example.com","password":"password123"}'
 
-# Login (obtener token)
-curl -X POST http://localhost:9999/auth/v1/token?grant_type=password \
+# Login
+curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
-  -H "apikey: <anon-key>" \
-  -d '{"email":"test@example.com","password":"password123"}'
+  -d '{"email":"sst@example.com","password":"password123"}'
 
-# Clasificar contenido
-curl -X POST http://localhost:8080/api/contenido \
+# Consulta GraphRAG (sustituir <token>)
+curl -X POST http://localhost:8080/api/consultas \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
-  -d '{"titulo":"Test","texto":"Spring Boot y Java para APIs REST"}'
+  -d '{"pregunta":"¿Qué obligaciones de seguridad contiene el corpus normativo?"}'
 ```
 
 ---
@@ -414,9 +449,9 @@ curl -X POST http://localhost:8080/api/contenido \
 
 | Rol | Stack |
 |---|---|
-| Data Science | Python, Pandas, Scikit-learn, NLTK |
-| Backend | Java 17, Spring Boot 3, Maven, Supabase |
-| Infraestructura / DevOps | OCI, Docker, Supabase Local, CI/CD |
+| Data Science | Python 3.11, FastAPI, GraphRAG, embeddings, spaCy |
+| Backend | Java 17, Spring Boot 3.2, Maven, Supabase, OCI |
+| Infraestructura / DevOps | OCI, Docker Compose, Supabase local |
 | Frontend | Next.js 16, React 19, TypeScript, Tailwind CSS 4, shadcn/ui |
 
 ---

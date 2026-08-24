@@ -1,0 +1,585 @@
+{
+  "info": {
+    "name": "TechISOlutions",
+    "description": "Colección de endpoints del backend TechISOlutions (ISO 45001 / SST).\n\nFlujo recomendado:\n1. Ejecutar Register o Login.\n2. El access_token se guarda automáticamente en la variable token.\n3. Los endpoints protegidos lo envían como Bearer.\n4. Para sincronizar el grafo BASE se necesita un JWT con ROLE_ADMIN.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.access_token) {",
+                  "    pm.collectionVariables.set('token', json.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sst@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.access_token) {",
+                  "    pm.collectionVariables.set('token', json.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sst@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consultas GraphRAG",
+      "item": [
+        {
+          "name": "Analizar consulta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pregunta\": \"¿Qué obligaciones de seguridad contiene el corpus normativo?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/consultas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "consultas"
+              ]
+            },
+            "description": "La pregunta es obligatoria y debe tener al menos 20 caracteres. Persiste la respuesta, relevancia y trazabilidad para el usuario autenticado."
+          }
+        },
+        {
+          "name": "Listar historial",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/consultas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "consultas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar consultas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/consultas/buscar?q=seguridad",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "consultas",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "seguridad"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Archivos privados",
+      "item": [
+        {
+          "name": "Subir archivo",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "dominio",
+                  "value": "ISOS",
+                  "type": "text",
+                  "description": "Obligatorio: ISOS o LEYES. Se aceptan PDF, TXT y MD de hasta 10 MB."
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/archivos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "archivos"
+              ]
+            },
+            "description": "Guarda el objeto en OCI, devuelve metadata y marca el índice privado del usuario para reconstrucción asíncrona."
+          }
+        },
+        {
+          "name": "Listar archivos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/archivos?page=0&size=20&q=&tipo=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "archivos"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "tipo",
+                  "value": "",
+                  "description": "Opcional: pdf, txt o md"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener metadata",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/archivos/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "archivos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Descargar archivo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/archivos/:id/descarga",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "archivos",
+                ":id",
+                "descarga"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Devuelve el binario mediante streaming autenticado; no expone una URL de OCI."
+          }
+        },
+        {
+          "name": "Eliminar archivo",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/archivos/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "archivos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Devuelve 202 Accepted y marca el archivo para eliminarlo cuando termine el siguiente release."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Índice privado",
+      "item": [
+        {
+          "name": "Estado del índice",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/indice",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "indice"
+              ]
+            },
+            "description": "Consulta estado, etapa, release, generación y si existe una reconstrucción pendiente."
+          }
+        },
+        {
+          "name": "Reintentar reconstrucción",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/indice/reintentar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "indice",
+                "reintentar"
+              ]
+            },
+            "description": "Solicita una nueva generación y devuelve 202 Accepted."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorías",
+      "item": [
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/categorias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "categorias"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Grafos",
+      "item": [
+        {
+          "name": "Grafo privado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/grafos/privado",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "grafos",
+                "privado"
+              ]
+            },
+            "description": "Devuelve el último release PRIVATE del usuario autenticado."
+          }
+        },
+        {
+          "name": "Sincronizar grafo BASE",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/grafos/sincronizar?objectName=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "grafos",
+                "sincronizar"
+              ],
+              "query": [
+                {
+                  "key": "objectName",
+                  "value": "",
+                  "description": "Opcional; si se omite usa el objeto base configurado."
+                }
+              ]
+            },
+            "description": "Requiere un JWT con ROLE_ADMIN y devuelve 201 Created."
+          }
+        },
+        {
+          "name": "Grafo BASE actual",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/grafos/actual",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "grafos",
+                "actual"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Historial BASE",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/grafos/historial?page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "grafos",
+                "historial"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar por fecha",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/grafos/buscarfecha?desde=2026-01-01&hasta=2026-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "grafos",
+                "buscarfecha"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener grafo por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/grafos/id/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "grafos",
+                "id",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/actuator/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Info",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/actuator/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "actuator",
+                "info"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
