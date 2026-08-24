@@ -1,208 +1,175 @@
-# AGENTS.md — Frontend
-**Stack:** React 18 | Vite | TypeScript | React Router v6
+# AGENTS.md — Frontend (TechISOlutions)
+**Stack:** Next.js 16 (App Router) | React 19 | TypeScript | Tailwind CSS 4 | shadcn/ui | Bun
 
-Todo agente de IA y todo desarrollador debe leer este archivo antes de generar o modificar codigo en `frontend/`.
+Todo agente de IA y todo desarrollador debe leer este archivo antes de generar o modificar codigo en `frontend/`. El codigo vive en `frontend/techisolutions/`.
+
+Antes de escribir codigo Next.js, leer las guias en `frontend/techisolutions/node_modules/next/dist/docs/` si existen (APIs de esta version pueden diferir del entrenamiento).
 
 ---
 
 ## Estructura de Carpetas
 
 ```
-frontend/src/
-├── main.tsx                  # Entry point
-├── App.tsx                   # Router principal
-├── components/               # Componentes reutilizables (sin logica de negocio)
-│   ├── ui/                   # Atomicos: Button, Input, Card, Spinner, Badge, Alert
-│   └── layout/               # Navbar, Sidebar, PageLayout
-├── pages/                    # Una carpeta por pagina/ruta
-│   ├── auth/                 # Login, Register
-│   ├── dashboard/            # Dashboard principal
-│   ├── content/              # Clasificar contenido (individual y lote)
-│   └── files/                # Mis Archivos, Upload
-├── services/                 # Llamadas HTTP a la API backend
-│   ├── http.ts               # Instancia base con interceptor JWT
+frontend/techisolutions/
+├── app/                          # App Router
+│   ├── layout.tsx                # Root layout, fuentes, ThemeProvider
+│   ├── page.tsx                  # Landing publica ISO 45001
+│   ├── globals.css
+│   ├── login/page.tsx
+│   ├── register/page.tsx
+│   ├── dashboard/page.tsx
+│   ├── clasificar/page.tsx
+│   ├── clasificar/lote/page.tsx
+│   ├── archivos/page.tsx
+│   └── grafo/page.tsx            # Snapshot GraphRAG (/api/grafos)
+├── components/
+│   ├── ui/                       # shadcn (p. ej. button)
+│   ├── auth/                     # AuthGate, formularios, logout
+│   ├── clipboard/                # Shell, nav, header, busqueda, sellos
+│   ├── contenido/
+│   ├── archivos/
+│   ├── dashboard/
+│   └── grafo/
+├── services/                     # Llamadas HTTP al backend
+│   ├── auth.service.ts
 │   ├── contenido.service.ts
 │   ├── archivo.service.ts
-│   └── auth.service.ts
-├── types/                    # Tipos TypeScript de la API
+│   ├── categoria.service.ts
+│   ├── grafo.service.ts
+│   └── document.service.ts
+├── types/
 │   ├── contenido.types.ts
 │   ├── archivo.types.ts
 │   └── auth.types.ts
-├── hooks/                    # Custom hooks
-│   └── useAuth.ts
-├── store/                    # Estado global (Context API o Zustand)
-│   └── auth.store.ts
-└── utils/                    # Helpers puros sin efectos
-    └── token.utils.ts
+├── lib/
+│   ├── api.ts                    # fetch + Bearer + 401 → /login
+│   ├── token.ts                  # localStorage access_token
+│   ├── mock-config.ts            # USE_MOCK_API
+│   └── ...
+└── hooks/
 ```
 
 ---
 
 ## Convenciones de Codigo
 
-### Componentes — siempre functional components con TypeScript
+### Componentes — functional components con TypeScript
 ```tsx
-// Correcto
 interface Props {
-  titulo: string;
-  onSubmit: (data: ContenidoRequest) => void;
+  titulo: string
+  onSubmit: (data: ContenidoRequest) => void
 }
 
 export function ClasificarForm({ titulo, onSubmit }: Props) {
-  return <form>...</form>;
+  return <form>...</form>
 }
-
-// Incorrecto — no usar default export anonimo ni class components
-export default function() { ... }
 ```
+
+No usar class components. Paginas de `app/` pueden usar default export (convencion App Router).
 
 ### Nomenclatura
 | Elemento | Convencion | Ejemplo |
 |----------|------------|---------|
 | Componente | PascalCase | `ClasificarForm`, `ArchivoCard` |
-| Archivo de componente | PascalCase.tsx | `ClasificarForm.tsx` |
+| Archivo de componente | kebab-case.tsx | `import-document-form.tsx` |
 | Servicio HTTP | camelCase.service.ts | `contenido.service.ts` |
-| Tipo / Interface | PascalCase | `ContenidoResponse`, `ArchivoRequest` |
-| Hook | use + PascalCase | `useAuth`, `useContenido` |
-| Carpeta de pagina | kebab-case | `pages/content/`, `pages/auth/` |
+| Tipo / Interface | PascalCase | `ContenidoResponse` |
+| Hook | use + PascalCase | `useAuth` |
+| Carpeta de ruta | kebab-case | `app/clasificar/` |
 
-### Tipos TypeScript — siempre definir los contratos de la API
-
+### Tipos TypeScript — contratos de la API
 ```typescript
-// types/contenido.types.ts
 export interface ContenidoRequest {
-  titulo: string;
-  texto: string;
+  titulo: string
+  texto: string
 }
 
 export interface ContenidoResponse {
-  id: string;
-  categoria: string;
-  probabilidad: number;
-  palabras_clave: string[];
-  contenidos_relacionados: ContenidoRelacionado[];
-  procesado_en: string;
-}
-
-export interface ContenidoRelacionado {
-  id: string;
-  titulo: string;
-  similitud: number;
+  id: string
+  categoria: string
+  probabilidad: number
+  palabrasClave: string[]
+  contenidosRelacionados: ContenidoRelacionado[]
+  procesadoEn: string
 }
 ```
 
-### Servicios HTTP — centralizar en `services/`
+El backend serializa varios campos de contenido en snake_case (`palabras_clave`, `procesado_en`, `respuesta`). Al cablear el API real, mapear o alinear nombres; no asumir que el JSON coincide 1:1 con estos tipos.
+
+### Servicios HTTP — `lib/api.ts` + `services/`
 ```typescript
-// services/http.ts — instancia base con interceptor
-import axios from 'axios';
+import { apiFetch } from "@/lib/api"
 
-export const http = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
-
-http.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-http.interceptors.response.use(
-  (res) => res,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('access_token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+export async function clasificar(data: ContenidoRequest) {
+  return apiFetch<ContenidoResponse>("/api/contenido", {
+    method: "POST",
+    body: JSON.stringify(data),
+  })
+}
 ```
 
-```typescript
-// services/contenido.service.ts
-import { http } from './http';
-import type { ContenidoRequest, ContenidoResponse } from '../types/contenido.types';
-
-export const contenidoService = {
-  clasificar: (data: ContenidoRequest) =>
-    http.post<ContenidoResponse>('/api/contenido', data).then(r => r.data),
-};
-```
+`apiFetch` adjunta `Authorization: Bearer` desde `lib/token.ts` y en 401 limpia el token y redirige a `/login`.
 
 ### Reglas de capas
-- Los **componentes UI** (`components/ui/`) no hacen llamadas HTTP. Reciben datos por props.
-- Las **paginas** (`pages/`) llaman a los services o usan custom hooks. Manejan el estado local de la pagina.
-- Los **services** solo manejan HTTP. Sin logica de presentacion.
-- No llamar a `localStorage` directamente en componentes — usar `token.utils.ts` o `auth.store.ts`.
+- `components/ui/` no hace HTTP; recibe datos por props.
+- Paginas en `app/` componen vistas; la logica de datos va a `services/` o a vistas cliente.
+- No llamar a `localStorage` en componentes: usar `lib/token.ts`.
+- Rutas de la app autenticada van envueltas en `AuthGate`.
 
 ### Manejo de errores HTTP
-- Error 400 → mostrar mensaje de validacion en el formulario correspondiente
-- Error 401 → el interceptor redirige a `/login` automaticamente
-- Error 500 → mostrar componente `Alert` con mensaje generico
+- 400 → mensaje de validacion en el formulario
+- 401 → `apiFetch` redirige a `/login`
+- 500 → mensaje generico en UI
 
 ---
 
 ## Variables de entorno
 
-Prefijo obligatorio `VITE_` para que Vite las exponga al cliente:
+Prefijo `NEXT_PUBLIC_` (build-time en el bundle):
 
 ```
-VITE_API_URL=http://localhost:8080
+NEXT_PUBLIC_API_URL=http://localhost:8080
+NEXT_PUBLIC_USE_MOCK_API=true
 ```
 
-No commitear `.env.local`. El archivo `.env.example` en `/frontend` documenta las variables necesarias.
+`USE_MOCK_API` es **false** salvo que `NEXT_PUBLIC_USE_MOCK_API` sea exactamente `"true"` (`lib/mock-config.ts`). Extraer PDF en el cliente (`pdfjs-dist`); tipos de archivo: PDF, TXT, MD. No commitear `.env.local`.
 
 ---
 
 ## Autenticacion
 
-- El JWT se obtiene desde Supabase Auth (el backend lo valida, no lo emite directamente en la mayoria de los casos).
-- Almacenar el `access_token` en `localStorage` bajo la clave `access_token`.
-- Adjuntar en cada request via el interceptor de `http.ts`.
-- Rutas protegidas: si no hay token, redirigir a `/login` con React Router.
-
----
-
-## Componentes Base (responsabilidad de FE-3)
-
-Antes de que FE-1 y FE-2 implementen sus pantallas, estos componentes deben existir:
-
-| Componente | Uso |
-|------------|-----|
-| `Button` | props: `variant` (primary/secondary/danger), `loading`, `disabled` |
-| `Input` | props: `label`, `error`, `type` |
-| `Card` | contenedor con sombra y padding estandar |
-| `Spinner` | indicador de carga |
-| `Badge` | etiqueta de categoria con color |
-| `Alert` | mensajes de error/exito/info |
+- Login/register contra `POST /auth/login` y `POST /auth/register` (el backend proxifica Supabase).
+- Guardar `access_token` en `localStorage` (`lib/token.ts`).
+- Rutas protegidas: sin token, `AuthGate` redirige a `/login`.
 
 ---
 
 ## Rutas de la aplicacion
 
-| Path | Componente | Protegida |
-|------|------------|-----------|
-| `/login` | `pages/auth/Login` | No |
-| `/register` | `pages/auth/Register` | No |
-| `/` | `pages/dashboard/Dashboard` | Si |
-| `/clasificar` | `pages/content/ClasificarContent` | Si |
-| `/clasificar/lote` | `pages/content/ClasificarLote` | Si |
-| `/archivos` | `pages/files/Archivos` | Si |
+| Path | Protegida | Notas |
+|------|-----------|--------|
+| `/` | No | Landing ISO 45001 |
+| `/login` | No | |
+| `/register` | No | |
+| `/dashboard` | Si | Panel |
+| `/clasificar` | Si | Importar documento |
+| `/clasificar/lote` | Si | Lote |
+| `/archivos` | Si | Repositorio |
+| `/grafo` | Si | Snapshot GraphRAG (`/api/grafos`) |
+
+Nav autenticada: Panel, Importar, Grafo, Repositorio.
 
 ---
 
 ## Comandos
 
 ```bash
-# Instalar dependencias
-npm install
-
-# Desarrollo
-npm run dev
-
-# Build de produccion
-npm run build
-
-# Preview del build
-npm run preview
+cd frontend/techisolutions
+bun install
+bun run dev          # puerto 3000; con Compose usar --port 3002
+bun run build
+bun run start
+bun run lint
+bun run typecheck
+bun run format
 ```

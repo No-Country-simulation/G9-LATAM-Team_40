@@ -53,6 +53,8 @@ class GraphRAGBuilder:
         """Usa el cluster_id original o genera uno a partir de la categoría."""
         if cluster_id:
             return normalizar_key(cluster_id)
+        if normalizar_key(categoria) in {"SIN_CATEGORIA", "SINCATEGORIA"}:
+            return "CAT_SINCATEGORIA"
         return f"CAT_{normalizar_key(categoria)}"
 
     def _generar_descripcion_categoria(

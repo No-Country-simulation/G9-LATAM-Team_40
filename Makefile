@@ -1,5 +1,5 @@
 # ╔══════════════════════════════════════════════════════════════════╗
-# ║  TechContent AI — Makefile                                       ║
+# ║  TechISOlutions — Makefile                                       ║
 # ║  Docker + Local development shortcuts                            ║
 # ╚══════════════════════════════════════════════════════════════════╝
 

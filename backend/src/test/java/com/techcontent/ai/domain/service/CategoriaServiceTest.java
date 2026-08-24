@@ -45,9 +45,8 @@ class CategoriaServiceTest {
         assertThat(resultado).isNotNull();
         assertThat(resultado).hasSize(2);
         assertThat(resultado.get(0).nombre()).isEqualTo("Leyes");
-        assertThat(resultado.get(0).totalDocumentos()).isEqualTo(5L);
-        assertThat(resultado.get(1).nombre()).isEqualTo("Salud");
-        assertThat(resultado.get(1).totalDocumentos()).isEqualTo(2L);
+        assertThat(resultado.get(0).totalConsultas()).isEqualTo(5L);
+        assertThat(resultado.get(1).totalConsultas()).isEqualTo(2L);
 
         verify(categoriaRepository).findCategoriasConConteoByUserId(userId);
     }

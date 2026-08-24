@@ -23,7 +23,7 @@ from .txt_processor import extraer_lineas_txt
 
 logger = logging.getLogger("clean.pipeline")
 
-EXTENSIONES_SOPORTADAS = {".pdf", ".docx", ".txt", ".xlsx", ".xls"}
+EXTENSIONES_SOPORTADAS = {".pdf", ".docx", ".txt", ".md", ".xlsx", ".xls"}
 
 # Dominios/expresiones que NUNCA se descartan como "ruido repetido" en leyes
 # chilenas, aunque aparezcan en cada página (son parte del contenido oficial).
@@ -59,7 +59,7 @@ def _extraer_lineas(ruta: Path) -> list[LineaFuente]:
         return extraer_lineas_pdf(ruta)
     if ext == ".docx":
         return extraer_lineas_docx(ruta)
-    if ext == ".txt":
+    if ext in (".txt", ".md"):
         return extraer_lineas_txt(ruta)
     if ext in (".xlsx", ".xls"):
         return extraer_lineas_excel(ruta)

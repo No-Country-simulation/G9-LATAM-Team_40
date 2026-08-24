@@ -1,4 +1,4 @@
-# AGENTS.md — TechContent AI
+# AGENTS.md — TechISOlutions
 **Hackathon ONE | Alura + Oracle | G9-LATAM-Team_40**
 
 Este archivo define las convenciones globales del proyecto. Todo agente de IA y todo desarrollador debe leerlo antes de tocar cualquier archivo.
@@ -36,7 +36,7 @@ feat: agregar JwtAuthFilter para validacion de tokens Supabase
 fix: corregir manejo de JWT expirado en JwtService
 chore: actualizar application.properties con nueva variable ML_SERVICE_URL
 test: agregar ContenidoServiceTest con mock de MlClient
-docs: actualizar sprint-plan con tareas del dia 3
+docs: actualizar README con endpoints de grafos
 ```
 
 ### Pull Requests

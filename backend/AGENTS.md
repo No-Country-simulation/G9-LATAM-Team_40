@@ -1,5 +1,5 @@
-# AGENTS.md — Backend
-**Stack:** Java 17 | Spring Boot 3.2.5 | Maven | PostgreSQL | Spring Security | Spring Data JPA | Lombok
+# AGENTS.md — Backend (TechISOlutions)
+**Stack:** Java 17 | Spring Boot 3.2.12 | Maven | PostgreSQL | Spring Security | Spring Data JPA | Lombok
 
 Todo agente de IA y todo desarrollador debe leer este archivo antes de generar o modificar codigo en `backend/`.
 
@@ -19,20 +19,23 @@ src/main/java/com/techcontent/ai/
 ├── security/                       # Capa de seguridad
 │   ├── SecurityConfig.java
 │   ├── JwtAuthFilter.java
-│   ├── JwtService.java
+│   ├── JwtService.java             # HS256 + ES256/JWKS
+│   ├── JwtAuthenticationEntryPoint.java
+│   ├── JwtAccessDeniedHandler.java
 │   └── SupabaseUserDetails.java
 ├── domain/                         # Nucleo del negocio
-│   ├── model/                      # @Entity con Lombok
+│   ├── model/                      # Contenido, Archivo, Grafo
 │   ├── repository/                 # interfaces JpaRepository
-│   └── service/                    # @Service — logica de negocio
+│   └── service/                    # ContenidoService, ArchivoService, CategoriaService, GrafoService
 └── integration/                    # Adaptadores a servicios externos
-    ├── ml/                         # Cliente HTTP al ML Service (FastAPI :5000)
+    ├── ml/                         # MlClient → POST /api/v1/query (GraphRAG :5000)
     ├── oci/                        # Cliente OCI Object Storage
     └── supabase/                   # Cliente Supabase Auth (GoTrue :9999)
 
 src/test/java/com/techcontent/ai/
 ├── security/
 ├── domain/service/
+├── domain/repository/
 ├── integration/
 └── api/controller/
 ```
@@ -187,6 +190,19 @@ metodoProbado_condicion_resultadoEsperado()
 - Controllers: 70% (con @WebMvcTest)
 - Security filters: 90%
 
+### Tests existentes (no inventar rutas; ampliar estos)
+
+```
+TechContentAiApplicationTests
+api/controller/   Auth, Contenido, Archivo, Categoria, Grafo
+api/exception/    GlobalExceptionHandlerTest
+domain/service/   Contenido, Archivo, Categoria, Grafo
+domain/repository/ ArchivoSpecification, Categoria, Grafo
+integration/ml/   MlClientTest, MlClientDockerIntegrationTest
+integration/oci/  OciStorageClientTest
+security/         JwtService, JwtAuthFilter, JwtAccessDeniedHandler, SupabaseUserDetails
+```
+
 ---
 
 ## Comandos Maven
@@ -209,15 +225,25 @@ mvn compile
 
 ## Endpoints ya definidos (no inventar nuevos sin aprobacion del equipo)
 
+Clasificacion llama a GraphRAG `POST {ml.service.url}/api/v1/query` con `{ "pregunta": texto }`. No existe `/predict`.
+
 | Metodo | Path | Descripcion |
 |--------|------|-------------|
-| POST | `/api/contenido` | Clasificar texto |
-| POST | `/api/contenido/lote` | Clasificar multiples textos |
-| GET | `/api/contenido/buscar` | Busqueda por keywords (`?q=`) |
-| POST | `/api/archivos` | Subir archivo a OCI |
-| GET | `/api/archivos` | Listar archivos del usuario |
-| GET | `/api/archivos/{id}` | Obtener URL de descarga |
-| GET | `/api/categorias` | Listar categorias con conteo |
 | POST | `/auth/register` | Registro (proxy a Supabase) |
 | POST | `/auth/login` | Login (proxy a Supabase) |
-| GET | `/actuator/health` | Health check |
+| GET | `/actuator/health` | Health check (publico) |
+| GET | `/actuator/info` | Info (publico) |
+| POST | `/api/contenido` | Clasificar texto via GraphRAG |
+| POST | `/api/contenido/lote` | Hasta 20 textos, transaccional |
+| GET | `/api/contenido` | Listar contenidos del usuario |
+| GET | `/api/contenido/buscar` | Busqueda por keywords (`?q=`) |
+| POST | `/api/archivos` | Subir PDF/TXT/MD a OCI (`file` + `categoria` opcional) |
+| GET | `/api/archivos` | Listar paginado (`page`, `size`, `q`, `tipo`) |
+| GET | `/api/archivos/{id}` | Metadata / URL de un archivo |
+| DELETE | `/api/archivos/{id}` | Borrar en OCI y DB |
+| GET | `/api/categorias` | Categorias con `totalDocumentos` |
+| POST | `/api/grafos/sincronizar` | Descargar JSON GraphRAG desde OCI |
+| GET | `/api/grafos/actual` | Ultimo grafo persistido |
+| GET | `/api/grafos/historial` | Historial paginado |
+| GET | `/api/grafos/buscarfecha` | Rango `desde` / `hasta` |
+| GET | `/api/grafos/id/{id}` | Grafo por UUID |

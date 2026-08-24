@@ -14,7 +14,10 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       ML_SERVICE_URL: http://ml-service:5000
-      SUPABASE_AUTH_URL: ${SUPABASE_AUTH_URL:-https://bftvhnxtbahabwykqwni.supabase.co}
+      ML_INTERNAL_TOKEN: ${ML_INTERNAL_TOKEN:?Configura ML_INTERNAL_TOKEN en .env}
+      INDEX_RECONCILE_DELAY_MS: ${INDEX_RECONCILE_DELAY_MS:-5000}
+      # Dentro de Compose siempre el GoTrue local. El .env hosted no resuelve en este stack.
+      SUPABASE_AUTH_URL: http://supabase-auth:9999
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
       SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
@@ -23,14 +26,16 @@ services:
       OCI_CLI_REGION: ${OCI_CLI_REGION}
       OCI_CLI_FINGERPRINT: ${OCI_CLI_FINGERPRINT}
       OCI_CLI_KEY_FILE: /run/secrets/oci_api_key.pem
-      OCI_MODEL_BUCKET: ${OCI_MODEL_BUCKET}
       OCI_DATASET_BUCKET: ${OCI_DATASET_BUCKET}
-      OCI_FILES_BUCKET: ${OCI_FILES_BUCKET}
+      OCI_NAMESPACE: ${OCI_NAMESPACE}
+      OCI_PREFIX: ${OCI_PREFIX:-prod}
+      GRAFO_LOCAL_PATH: /app/db/output_json/grafo_nodos_subnodos_graphrag.json
     volumes:
       - type: bind
         source: ${OCI_CLI_KEY_FILE:?Configura OCI_CLI_KEY_FILE en .env}
         target: /run/secrets/oci_api_key.pem
         read_only: true
+      - ./datascience/db:/app/db:ro
     depends_on:
       db:
         condition: service_healthy
@@ -66,10 +71,12 @@ services:
       args:
         SPACY_MODEL: ${SPACY_MODEL:-es_dep_news_trf}
     container_name: techcontent-ml-service
-    ports:
-      - "${ML_SERVICE_PORT:-5000}:5000"
+    expose:
+      - "5000"
     environment:
       DATA_SOURCE: ${DATA_SOURCE:-oci}
+      ML_INTERNAL_TOKEN: ${ML_INTERNAL_TOKEN:?Configura ML_INTERNAL_TOKEN en .env}
+      MAX_USER_INDEX_CACHE: ${MAX_USER_INDEX_CACHE:-8}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
@@ -121,6 +128,7 @@ services:
       PGPORT: 5432
     volumes:
       - supabase-db-data:/var/lib/postgresql/data
+      - ./docker/gotrue-stamp-migrations.sql:/docker-entrypoint-initdb.d/99-gotrue-stamp.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-techcontent}"]
       interval: 10s

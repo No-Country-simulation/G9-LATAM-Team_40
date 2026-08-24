@@ -2,6 +2,7 @@ package com.techcontent.ai.api.controller;
 
 import com.techcontent.ai.api.dto.response.GrafoResponse;
 import com.techcontent.ai.domain.service.GrafoService;
+import com.techcontent.ai.security.SupabaseUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,7 +10,14 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,11 +31,16 @@ public class GrafoController {
     private final GrafoService grafoService;
 
     @PostMapping("/sincronizar")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GrafoResponse> sincronizar(
-            @RequestParam(required = false) String objectName
-    ) {
-        GrafoResponse response = grafoService.sincronizarDesdeOci(objectName);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            @RequestParam(required = false) String objectName) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(grafoService.sincronizarDesdeOci(objectName));
+    }
+
+    @GetMapping("/privado")
+    public ResponseEntity<GrafoResponse> obtenerPrivado(
+            @AuthenticationPrincipal SupabaseUserDetails userDetails) {
+        return ResponseEntity.ok(grafoService.obtenerPrivado(userDetails.getUserId()));
     }
 
     @GetMapping("/actual")
@@ -37,8 +50,7 @@ public class GrafoController {
 
     @GetMapping("/historial")
     public ResponseEntity<Page<GrafoResponse>> obtenerHistorial(
-            @PageableDefault(size = 10) Pageable pageable
-    ) {
+            @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(grafoService.obtenerHistorial(pageable));
     }
 

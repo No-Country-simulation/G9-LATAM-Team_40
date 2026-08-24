@@ -47,12 +47,15 @@ class GrafoControllerTest {
         return new GrafoResponse(
                 UUID.randomUUID().toString(),
                 Collections.emptyMap(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                "BASE",
+                null,
+                null
         );
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /api/grafos/sincronizar - Debería retornar 201 Created cuando sincroniza exitosamente")
     void sincronizar_DeberiaRetornar201Created() throws Exception {
         GrafoResponse mockResponse = crearGrafoResponseDummy();

@@ -14,8 +14,8 @@
     <groupId>com.techcontent</groupId>
     <artifactId>ai</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>TechContent AI</name>
-    <description>API REST para organización inteligente de contenido técnico</description>
+    <name>TechISOlutions</name>
+    <description>API REST para clasificación y consulta GraphRAG de documentación ISO 45001 / SST</description>
 
     <properties>
         <java.version>17</java.version>

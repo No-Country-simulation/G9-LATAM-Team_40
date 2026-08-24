@@ -275,3 +275,165 @@ def sync_db_from_oci(settings: Settings) -> dict[str, int]:
     _write_manifest(manifest_path, remote_manifest)
     logger.info("Sincronización OCI completada: %d descargados, %d sin cambios.", downloaded, skipped)
     return {"downloaded": downloaded, "skipped": skipped}
+
+
+def _put_bytes(
+    client: oci.object_storage.ObjectStorageClient,
+    settings: Settings,
+    object_name: str,
+    payload: bytes,
+    content_type: str = "application/octet-stream",
+) -> None:
+    client.put_object(
+        settings.OCI_NAMESPACE,
+        settings.OCI_BUCKET_NAME,
+        object_name,
+        payload,
+        content_type=content_type,
+    )
+
+
+def upload_file(
+    settings: Settings,
+    local_path: Path,
+    object_name: str,
+    client: oci.object_storage.ObjectStorageClient | None = None,
+) -> None:
+    """Upload one local artifact without buffering the whole file."""
+    if not local_path.resolve().is_relative_to(settings.DB_DIR.resolve()):
+        raise ValueError(f"Ruta local fuera de DB_DIR: {local_path}")
+    client = client or _object_storage_client(settings)
+    with local_path.open("rb") as source:
+        client.put_object(
+            settings.OCI_NAMESPACE,
+            settings.OCI_BUCKET_NAME,
+            object_name,
+            source,
+            content_length=local_path.stat().st_size,
+            content_type="application/octet-stream",
+        )
+
+
+def read_current_release(
+    settings: Settings,
+    user_id: str,
+    client: oci.object_storage.ObjectStorageClient | None = None,
+) -> dict[str, Any] | None:
+    """Read current.json, returning None when a tenant has no published release."""
+    client = client or _object_storage_client(settings)
+    object_name = f"{settings.OCI_PREFIX.strip('/')}/users/{user_id}/current.json"
+    try:
+        response = client.get_object(settings.OCI_NAMESPACE, settings.OCI_BUCKET_NAME, object_name)
+        data = response.data.content if hasattr(response.data, "content") else response.data.read()
+        parsed = json.loads(data.decode("utf-8") if isinstance(data, bytes) else data)
+        return parsed if isinstance(parsed, dict) else None
+    except oci.exceptions.ServiceError as exc:
+        if exc.status == 404:
+            return None
+        raise
+
+
+def download_object(
+    settings: Settings,
+    object_name: str,
+    destination: Path,
+    client: oci.object_storage.ObjectStorageClient | None = None,
+) -> None:
+    """Download exactly one validated object to a temporary local file."""
+    prefix = settings.OCI_PREFIX.strip("/")
+    if not object_name.startswith(f"{prefix}/"):
+        raise ValueError(f"Objeto fuera de OCI_PREFIX: {object_name}")
+    client = client or _object_storage_client(settings)
+    _download_object(client, settings.OCI_NAMESPACE, settings.OCI_BUCKET_NAME, object_name, destination)
+
+
+def list_release_prefixes(
+    settings: Settings,
+    user_id: str,
+    client: oci.object_storage.ObjectStorageClient | None = None,
+) -> list[str]:
+    base = f"{settings.OCI_PREFIX.strip('/')}/users/{user_id}/releases/"
+    client = client or _object_storage_client(settings)
+    response = oci.pagination.list_call_get_all_results(
+        client.list_objects,
+        settings.OCI_NAMESPACE,
+        settings.OCI_BUCKET_NAME,
+        prefix=base,
+    )
+    prefixes = set()
+    for item in response.data.objects:
+        suffix = item.name[len(base):]
+        release = suffix.split("/", 1)[0]
+        if release:
+            prefixes.add(base + release)
+    return sorted(prefixes)
+
+
+def write_current_release(
+    settings: Settings,
+    user_id: str,
+    manifest: dict[str, Any],
+    client: oci.object_storage.ObjectStorageClient | None = None,
+) -> None:
+    """Write the release commit point as one complete object."""
+    client = client or _object_storage_client(settings)
+    object_name = f"{settings.OCI_PREFIX.strip('/')}/users/{user_id}/current.json"
+    _put_bytes(
+        client,
+        settings,
+        object_name,
+        json.dumps(manifest, ensure_ascii=False).encode("utf-8"),
+        "application/json",
+    )
+
+
+def sync_release(
+    settings: Settings,
+    user_id: str,
+    release: dict[str, Any],
+    destination_root: Path | None = None,
+    client: oci.object_storage.ObjectStorageClient | None = None,
+) -> Path:
+    """Synchronize release metadata; sections remain lazy."""
+    client = client or _object_storage_client(settings)
+    prefix = str(release.get("prefix") or "").strip("/")
+    if not prefix or not prefix.startswith(f"{settings.OCI_PREFIX.strip('/')}/users/{user_id}/releases/"):
+        raise ValueError("El release no pertenece al usuario solicitado")
+    destination_root = (destination_root or settings.DB_DIR).resolve()
+    destination_root.mkdir(parents=True, exist_ok=True)
+    listed = oci.pagination.list_call_get_all_results(
+        client.list_objects,
+        settings.OCI_NAMESPACE,
+        settings.OCI_BUCKET_NAME,
+        prefix=prefix,
+    )
+    for item in listed.data.objects:
+        relative = item.name[len(prefix):].lstrip("/")
+        if not relative or relative.endswith(".secciones.json"):
+            continue
+        destination = _safe_local_path(destination_root, f"release/{relative}", "release")
+        if destination is None:
+            continue
+        _download_object(client, settings.OCI_NAMESPACE, settings.OCI_BUCKET_NAME, item.name, destination)
+    return destination_root
+
+
+def delete_prefix(
+    settings: Settings,
+    prefix: str,
+    client: oci.object_storage.ObjectStorageClient | None = None,
+) -> None:
+    """Delete every object below a validated release prefix."""
+    normalized = prefix.strip("/")
+    required = f"{settings.OCI_PREFIX.strip('/')}/users/"
+    if not normalized.startswith(required) or "/releases/" not in normalized:
+        raise ValueError("Solo se pueden purgar releases privados")
+    client = client or _object_storage_client(settings)
+    listed = oci.pagination.list_call_get_all_results(
+        client.list_objects,
+        settings.OCI_NAMESPACE,
+        settings.OCI_BUCKET_NAME,
+        prefix=normalized,
+    )
+    for item in listed.data.objects:
+        client.delete_object(settings.OCI_NAMESPACE, settings.OCI_BUCKET_NAME, item.name)

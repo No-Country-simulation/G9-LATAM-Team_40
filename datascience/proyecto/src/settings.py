@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     # 2. MODELOS E INTEGRACIONES API (LLMs & NLP)
     # ==========================================================================
     DEEPSEEK_API_KEY: str = Field(default="", validation_alias="DEEPSEEK_API_KEY")
+    ML_INTERNAL_TOKEN: str = Field(default="", validation_alias="ML_INTERNAL_TOKEN")
     DEEPSEEK_MODEL: str = Field(default="deepseek-chat", validation_alias="DEEPSEEK_MODEL")
     DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
     DEEPSEEK_MAX_RETRIES: int = 2
@@ -76,6 +77,7 @@ class Settings(BaseSettings):
     OCI_CONFIG_FILE: str = Field(default="", validation_alias="OCI_CONFIG_FILE")
     OCI_CONFIG_PROFILE: str = Field(default="DEFAULT", validation_alias="OCI_CONFIG_PROFILE")
     OCI_SYNC_ON_STARTUP: bool = Field(default=True, validation_alias="OCI_SYNC_ON_STARTUP")
+    MAX_USER_INDEX_CACHE: int = Field(default=8, validation_alias="MAX_USER_INDEX_CACHE")
 
     # ==========================================================================
     # 3. REGLAS Y PROMPTS
@@ -232,6 +234,9 @@ class Settings(BaseSettings):
                 "DEEPSEEK_API_KEY es obligatoria para iniciar el servicio GraphRAG. "
                 "Configúrala en el archivo .env."
             )
+    def validate_internal_token(self) -> None:
+        if not self.ML_INTERNAL_TOKEN.strip():
+            raise EnvironmentError("ML_INTERNAL_TOKEN es obligatorio para la API interna.")
 
 
 settings = Settings()

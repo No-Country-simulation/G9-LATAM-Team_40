@@ -6,6 +6,7 @@ import com.techcontent.ai.api.dto.response.GrafoResponse;
 import com.techcontent.ai.domain.model.Grafo;
 import com.techcontent.ai.domain.repository.GrafoRepository;
 import com.techcontent.ai.integration.oci.OciStorageClient;
+import com.techcontent.ai.integration.ml.MlClient;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +24,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -44,6 +47,8 @@ class GrafoServiceTest {
 
     @Mock
     private OciStorageClient ociStorageClient;
+    @Mock
+    private MlClient mlClient;
 
     private ObjectMapper objectMapper;
     private GrafoService grafoService;
@@ -54,10 +59,11 @@ class GrafoServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        grafoService = new GrafoService(repository, objectMapper, ociStorageClient);
+        grafoService = new GrafoService(repository, objectMapper, ociStorageClient, mlClient);
 
         ReflectionTestUtils.setField(grafoService, "datasetBucket", testBucket);
         ReflectionTestUtils.setField(grafoService, "ociPrefix", testPrefix);
+        ReflectionTestUtils.setField(grafoService, "localPath", "");
     }
 
     @Test
@@ -88,6 +94,30 @@ class GrafoServiceTest {
         ArgumentCaptor<Grafo> grafoCaptor = ArgumentCaptor.forClass(Grafo.class);
         verify(repository).save(grafoCaptor.capture());
         assertThat(grafoCaptor.getValue().getJsonData()).isEqualTo(jsonMock);
+    }
+
+    @Test
+    @DisplayName("Si OCI falla, sincroniza desde el archivo local")
+    void sincronizarDesdeOci_FallbackLocal() throws Exception {
+        Path temp = Files.createTempFile("grafo", ".json");
+        String jsonLocal = "{\"grafo_conceptual\":{\"nivel_1_categorias\":[]}}";
+        Files.writeString(temp, jsonLocal, StandardCharsets.UTF_8);
+        ReflectionTestUtils.setField(grafoService, "localPath", temp.toString());
+
+        when(ociStorageClient.download(eq(testBucket), any()))
+                .thenThrow(new RuntimeException("OCI caido"));
+        UUID generatedId = UUID.randomUUID();
+        when(repository.save(any(Grafo.class))).thenAnswer(inv -> {
+            Grafo g = inv.getArgument(0);
+            g.setId(generatedId);
+            return g;
+        });
+
+        GrafoResponse response = grafoService.sincronizarDesdeOci(null);
+
+        assertThat(response.id()).isEqualTo(generatedId.toString());
+        verify(repository).save(any(Grafo.class));
+        Files.deleteIfExists(temp);
     }
 
     @Test

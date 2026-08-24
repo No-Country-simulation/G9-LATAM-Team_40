@@ -35,6 +35,7 @@ class ArchivoSpecificationTest {
 
         // Archivo 1: PDF de usuario 1
         Archivo archivo1 = Archivo.builder()
+                .id(UUID.randomUUID())
                 .userId(userId1)
                 .nombre("Manual Técnico de Java.pdf")
                 .url("https://oci/bucket/manual.pdf")
@@ -45,6 +46,7 @@ class ArchivoSpecificationTest {
 
         // Archivo 2: TXT de usuario 1
         Archivo archivo2 = Archivo.builder()
+                .id(UUID.randomUUID())
                 .userId(userId1)
                 .nombre("Notas de Arquitectura.txt")
                 .url("https://oci/bucket/notas.txt")
@@ -55,6 +57,7 @@ class ArchivoSpecificationTest {
 
         // Archivo 3: PDF de usuario 2
         Archivo archivo3 = Archivo.builder()
+                .id(UUID.randomUUID())
                 .userId(userId2)
                 .nombre("Manual de Spring Boot.pdf")
                 .url("https://oci/bucket/spring.pdf")

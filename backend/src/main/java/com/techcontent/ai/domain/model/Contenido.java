@@ -32,7 +32,8 @@ public class Contenido {
 
     private String categoria;
 
-    private Double probabilidad;
+    @Column(name = "probabilidad")
+    private Double relevancia;
 
     @ElementCollection
     @CollectionTable(
@@ -42,6 +43,12 @@ public class Contenido {
     @Column(name = "palabra_clave", nullable = false)
     @Builder.Default
     private List<String> palabrasClave = new ArrayList<>();
+
+    @Column(name = "trazabilidad_json", columnDefinition = "TEXT")
+    private String trazabilidadJson;
+
+    @Column(name = "tiempo_segundos")
+    private Double tiempoSegundos;
 
     @Column(name = "procesado_en")
     private LocalDateTime procesadoEn;

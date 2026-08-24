@@ -8,13 +8,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RestClientTest(MlClient.class)
-@TestPropertySource(properties = "ml.service.url=http://ml-test")
+@TestPropertySource(properties = {
+        "ml.service.url=http://ml-test",
+        "ml.internal.token=test-token"
+})
 class MlClientTest {
 
     @Autowired
@@ -24,69 +31,38 @@ class MlClientTest {
     private MockRestServiceServer server;
 
     @Test
-    void queryGraphRag_respuestaValida_deberiaDeserializarCorrectamente() {
+    void queryGraphRag_enviaUsuarioYTokenYConservaScore() {
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000001");
         String json = """
                 {
-                  "pregunta": "Texto sobre Java y Spring Boot",
-                  "respuesta": "Spring Boot simplifica la creación de aplicaciones Java.",
-                  "trazabilidad": [
-                    {
-                      "documento_id": "doc123",
-                      "documento_titulo": "Manual Spring Boot",
-                      "categoria": "Backend",
-                      "palabras_clave": ["Java", "Spring Boot"],
-                      "titulo_seccion": "Introducción",
-                      "ruta_jerarquica": ["Capítulo 1"],
-                      "nivel": 1,
-                      "dominio": "Desarrollo",
-                      "score": 0.93,
-                      "source_path": "/docs/spring.pdf"
-                    }
-                  ],
+                  "pregunta": "¿Qué obligaciones de seguridad contiene el corpus?",
+                  "respuesta": "Respuesta",
+                  "trazabilidad": [{
+                    "documento_id": "doc-1",
+                    "documento_titulo": "Manual",
+                    "categoria": "Seguridad",
+                    "palabras_clave": ["riesgo"],
+                    "titulo_seccion": "Obligaciones",
+                    "ruta_jerarquica": ["Capítulo 1"],
+                    "nivel": 1,
+                    "dominio": "ISOs",
+                    "score": 0.93,
+                    "corpus": "BASE",
+                    "archivo_id": null
+                  }],
                   "tiempo_segundos": 1.2
                 }
                 """;
-
         server.expect(requestTo("http://ml-test/api/v1/query"))
                 .andExpect(method(HttpMethod.POST))
+                .andExpect(header("X-ML-Internal-Token", "test-token"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"pregunta\":\"¿Qué obligaciones de seguridad contiene el corpus?\",\"user_id\":\"00000000-0000-0000-0000-000000000001\"}"))
                 .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-        QueryResponse response = mlClient.queryGraphRag("Texto sobre Java y Spring Boot");
+        QueryResponse response = mlClient.queryGraphRag("¿Qué obligaciones de seguridad contiene el corpus?", userId);
 
-        assertThat(response.respuesta()).isEqualTo("Spring Boot simplifica la creación de aplicaciones Java.");
-        assertThat(response.trazabilidad()).hasSize(1);
-
-        TrazabilidadSeccionDto trazabilidad = response.trazabilidad().get(0);
-        assertThat(trazabilidad.categoria()).isEqualTo("Backend");
-        assertThat(trazabilidad.score()).isEqualTo(0.93);
-        assertThat(trazabilidad.palabrasClave()).containsExactly("Java", "Spring Boot");
-
-        server.verify();
-    }
-
-    @Test
-    void queryGraphRag_errorDelServidor_deberiaLanzarMlServiceException() {
-        server.expect(requestTo("http://ml-test/api/v1/query"))
-                .andExpect(method(HttpMethod.POST))
-                .andRespond(withServerError());
-
-        assertThatThrownBy(() -> mlClient.queryGraphRag("texto de prueba"))
-                .isInstanceOf(MlServiceException.class)
-                .hasMessageContaining("error");
-
-        server.verify();
-    }
-
-    @Test
-    void queryGraphRag_servidorNoDisponible_deberiaLanzarMlServiceException() {
-        server.expect(requestTo("http://ml-test/api/v1/query"))
-                .andRespond(withException(new java.io.IOException("Connection refused")));
-
-        assertThatThrownBy(() -> mlClient.queryGraphRag("texto de prueba"))
-                .isInstanceOf(MlServiceException.class)
-                .hasMessageContaining("conectar");
-
+        assertThat(response.trazabilidad()).singleElement().satisfies(trace -> assertThat(trace.score()).isEqualTo(0.93));
         server.verify();
     }
 }

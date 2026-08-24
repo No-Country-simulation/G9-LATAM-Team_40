@@ -63,6 +63,6 @@ class CategoriaRepositoryTest {
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).nombre()).isEqualTo("Leyes");
-        assertThat(resultado.get(0).totalDocumentos()).isEqualTo(2L);
+        assertThat(resultado.get(0).totalConsultas()).isEqualTo(2L);
     }
 }

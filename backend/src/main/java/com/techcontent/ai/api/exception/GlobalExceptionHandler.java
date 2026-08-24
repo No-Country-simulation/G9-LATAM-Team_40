@@ -1,6 +1,7 @@
 package com.techcontent.ai.api.exception;
 
 import com.techcontent.ai.integration.ml.MlServiceException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,19 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("NOT_FOUND", ex.getMessage()));
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(GrafoSyncException.class)
+    public ResponseEntity<ErrorResponse> handleGrafoSync(GrafoSyncException ex) {
+        log.error("Error al sincronizar grafo: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse("SERVICE_UNAVAILABLE", ex.getMessage()));
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -51,6 +65,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MlServiceException.class)
     public ResponseEntity<ErrorResponse> handleMlService(MlServiceException ex) {
         log.error("Error en servicio ML: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse("SERVICE_UNAVAILABLE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AuthProviderException.class)
+    public ResponseEntity<ErrorResponse> handleAuthProvider(AuthProviderException ex) {
+        log.error("Error en servicio de autenticacion: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(new ErrorResponse("SERVICE_UNAVAILABLE", ex.getMessage()));
     }

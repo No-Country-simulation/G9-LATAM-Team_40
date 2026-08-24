@@ -19,7 +19,7 @@ public class Grafo {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "json_data", columnDefinition = "LONGTEXT", nullable = false)
+    @Column(name = "json_data", columnDefinition = "TEXT", nullable = false)
     private String jsonData;
 
     @Column(name = "fecha_creacion")

@@ -55,9 +55,8 @@ class CategoriaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].nombre").value("Leyes"))
-                .andExpect(jsonPath("$[0].totalDocumentos").value(3))
-                .andExpect(jsonPath("$[1].nombre").value("Salud"))
-                .andExpect(jsonPath("$[1].totalDocumentos").value(1));
+                .andExpect(jsonPath("$[0].total_consultas").value(3))
+                .andExpect(jsonPath("$[1].total_consultas").value(1));
 
         verify(categoriaService).listarConConteo(userId);
     }

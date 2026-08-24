@@ -8,10 +8,11 @@ import java.time.LocalDateTime;
 
 public record GrafoResponse(
         String id,
-        @JsonProperty("json_data")
-        Object jsonData,
-        @JsonProperty("fecha_creacion")
-        LocalDateTime fechaCreacion
+        @JsonProperty("json_data") Object jsonData,
+        @JsonProperty("fecha_creacion") LocalDateTime fechaCreacion,
+        String scope,
+        @JsonProperty("release_id") String releaseId,
+        Long generation
 ) {
     public static GrafoResponse fromEntity(Grafo grafo, ObjectMapper objectMapper) {
         Object parsedJson;
@@ -20,15 +21,30 @@ public record GrafoResponse(
         } catch (Exception e) {
             parsedJson = grafo.getJsonData();
         }
-
         return new GrafoResponse(
-                grafo.getId() != null ? grafo.getId().toString() : null,
+                grafo.getId() == null ? null : grafo.getId().toString(),
                 parsedJson,
-                grafo.getFechaCreacion()
+                grafo.getFechaCreacion(),
+                "BASE",
+                null,
+                null
         );
     }
 
+    public static GrafoResponse dePrivado(Object jsonData, String releaseId, Long generation,
+                                          LocalDateTime createdAt, ObjectMapper objectMapper) {
+        Object parsedJson = jsonData;
+        if (jsonData instanceof String json) {
+            try {
+                parsedJson = objectMapper.readTree(json);
+            } catch (Exception ignored) {
+                // The raw string remains available for a malformed private snapshot.
+            }
+        }
+        return new GrafoResponse(null, parsedJson, createdAt, "PRIVATE", releaseId, generation);
+    }
+
     public static GrafoResponse deResumen(String id, LocalDateTime fechaCreacion) {
-        return new GrafoResponse(id, null, fechaCreacion);
+        return new GrafoResponse(id, null, fechaCreacion, "BASE", null, null);
     }
 }
