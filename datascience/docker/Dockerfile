@@ -25,13 +25,18 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # requirements.txt está dentro de proyecto/, no en la raíz del contexto.
 COPY proyecto/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+
+ARG TORCH_VERSION=2.13.0
+RUN --mount=type=cache,id=techcontent-pip-cp311-cpu,target=/root/.cache/pip,sharing=locked \
+    pip install --upgrade pip \
+    && pip install --index-url https://download.pytorch.org/whl/cpu "torch==${TORCH_VERSION}+cpu" \
+    && pip install --prefer-binary --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 
 # Modelo transformer de spaCy en español (el más pesado/preciso). Si el
 # contenedor corre sin GPU, es_core_news_lg es una alternativa más liviana.
 ARG SPACY_MODEL=es_dep_news_trf
-RUN python -m spacy download ${SPACY_MODEL}
+RUN --mount=type=cache,id=techcontent-pip-cp311-cpu,target=/root/.cache/pip,sharing=locked \
+    python -m spacy download ${SPACY_MODEL}
 
 # --------------------------------------------------------------------------
 # Etapa 2: Runtime (Imagen final limpia y liviana)
