@@ -40,6 +40,12 @@ ml-service/models/*.pkl
 data/
 datasets/
 
+# GraphRAG runtime data is synchronized from OCI and stored in named volumes
+/datascience/db/.tenant-indexes/
+/datascience/db/.tenant-workspaces/
+/datascience/db/archivos/
+/datascience/db/output_json/
+/datascience/db/salida_json/
 # OCI
 oci_config
 *.pem
