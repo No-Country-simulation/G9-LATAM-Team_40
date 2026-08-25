@@ -3,19 +3,16 @@
 import type {
   GraphExplorerCategory,
   GraphExplorerChild,
-  GraphStats,
 } from "@/lib/graph-data"
 import styles from "@/components/grafo/graph-observatory.module.css"
 
 export interface GraphInspectorProps {
-  stats: GraphStats
   category: GraphExplorerCategory | null
   child: GraphExplorerChild | null
-  onSelectChild: (childId: string) => void
 }
 
 function confidenceLabel(confidence: number): string {
-  return `${Math.round(confidence * 100)}% confianza`
+  return `${Math.round(confidence * 100)}%`
 }
 
 function MetricRow({ label, value }: { label: string; value: number }) {
@@ -29,92 +26,106 @@ function MetricRow({ label, value }: { label: string; value: number }) {
   )
 }
 
-function Summary({ stats }: { stats: GraphStats }) {
+function EmptyInspector() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <p className="text-sm leading-relaxed text-foreground">
-        Selecciona una categoría para abrir sus subnodos. El canvas muestra el
-        mapa relacional y este inspector conserva el contexto completo.
+        Selecciona una categoría o un tema en el índice o en el plano.
       </p>
-      <div className="border-y border-border/70 py-2">
-        <MetricRow label="Categorías N1" value={stats.categories} />
-        <MetricRow label="Subnodos N2" value={stats.subcategories} />
-        <MetricRow label="Relaciones N3" value={stats.relations} />
-        <MetricRow label="Documentos únicos" value={stats.documents} />
-      </div>
-      <div>
-        <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-institutional">
-          Lectura del plano
-        </p>
-        <div className="space-y-2 text-xs text-muted-foreground">
-          <p>
-            <span className="font-semibold text-institutional">N1</span> ·
-            baliza de categoría y punto de expansión.
-          </p>
-          <p>
-            <span className="font-semibold text-stamp-red">N2</span> · subnodo
-            seleccionado dentro de la categoría activa.
-          </p>
-          <p>Las relaciones N3 se leen aquí, sin saturar el campo cartográfico.</p>
-        </div>
-      </div>
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        La ficha muestra la descripción, las fuentes y las conexiones del
+        elemento elegido.
+      </p>
     </div>
   )
 }
 
-function CategoryInspector({
-  category,
-  onSelectChild,
-}: {
-  category: GraphExplorerCategory
-  onSelectChild: (childId: string) => void
-}) {
+function CategoryInspector({ category }: { category: GraphExplorerCategory }) {
   return (
     <div className="space-y-4">
-      <div>
-        <p className={styles.workspaceKicker}>Categoría N1</p>
-        <h3 className="mt-1 text-xl font-bold leading-tight text-institutional">
-          {category.title}
-        </h3>
-        <p className="mt-2 font-mono text-xs text-stamp-red">
-          {confidenceLabel(category.confidence)}
-        </p>
-      </div>
       <p className="text-sm leading-relaxed text-foreground">
         {category.description || "Esta categoría no tiene una descripción registrada."}
       </p>
+      <p className="font-mono text-xs text-stamp-red">
+        Confianza de clasificación: {confidenceLabel(category.confidence)}
+      </p>
       <div className="border-y border-border/70 py-2">
-        <MetricRow label="Subnodos N2" value={category.childCount} />
+        <MetricRow label="Temas" value={category.childCount} />
         <MetricRow label="Secciones" value={category.sectionCount} />
-        <MetricRow label="Documentos únicos" value={category.documentCount} />
-        <MetricRow label="Relaciones N3" value={category.relationCount} />
+        <MetricRow label="Documentos" value={category.documentCount} />
+        <MetricRow label="Conexiones" value={category.relationCount} />
       </div>
-      <div>
-        <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-institutional">
-          Abrir subnodo
-        </p>
-        {category.children.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Sin subnodos registrados.</p>
-        ) : (
-          <ul className="space-y-1">
-            {category.children.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelectChild(item.id)}
-                  className="w-full border border-border px-3 py-2 text-left text-sm font-semibold text-institutional transition-colors hover:border-institutional hover:bg-sst-yellow/15 focus-visible:bg-sst-yellow/15"
-                >
-                  <span className="block leading-tight">{item.title}</span>
-                  <span className="mt-1 block font-mono text-[10px] font-normal text-muted-foreground">
-                    {item.documentCount} docs. · {item.relationCount} rel.
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        Elige un tema en el índice o en el plano para revisar sus fuentes.
+      </p>
     </div>
+  )
+}
+
+type DocumentSections = {
+  documentId: string
+  titles: string[]
+}
+
+function groupSectionsByDocument(
+  child: GraphExplorerChild
+): DocumentSections[] {
+  const grouped = new Map<string, string[]>()
+
+  for (const section of child.sections) {
+    const documentId = section.documento_id || "—"
+    const titles = grouped.get(documentId) ?? []
+    const title = section.titulo || "—"
+    if (!titles.includes(title)) titles.push(title)
+    grouped.set(documentId, titles)
+  }
+
+  for (const documentId of child.documentIds) {
+    if (!grouped.has(documentId)) grouped.set(documentId, [])
+  }
+
+  return [...grouped.entries()].map(([documentId, titles]) => ({
+    documentId,
+    titles,
+  }))
+}
+
+function SourcesSection({ child }: { child: GraphExplorerChild }) {
+  const grouped = groupSectionsByDocument(child)
+
+  return (
+    <section>
+      <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-institutional">
+        Fuentes
+      </p>
+      {child.documentIds.length === 0 ? (
+        <p className="text-xs text-muted-foreground">
+          No hay documentos asociados a este tema.
+        </p>
+      ) : (
+        <ul className="space-y-3">
+          {grouped.map((document) => (
+            <li key={document.documentId}>
+              <p className="border-l-2 border-sst-yellow px-2 font-mono text-[10px] text-foreground">
+                {document.documentId}
+              </p>
+              {document.titles.length > 0 ? (
+                <ul className="mt-1 space-y-1 pl-4 text-xs text-muted-foreground">
+                  {document.titles.map((title) => (
+                    <li key={`${document.documentId}-${title}`}>{title}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+      {child.sections.length === 0 ? (
+        <p className="mt-3 text-xs text-muted-foreground">
+          No hay secciones asociadas a este tema.
+        </p>
+      ) : null}
+    </section>
   )
 }
 
@@ -133,11 +144,9 @@ function RelationRow({
         <span className="text-foreground">{relation.objeto}</span>
       </p>
       <p className="mt-1 font-mono text-[10px] leading-relaxed text-muted-foreground">
-        Documento: {relation.documento_id || "—"}
+        Fuente: {relation.titulo_seccion || "—"} · {relation.documento_id || "—"}
         <br />
-        Sección: {relation.titulo_seccion || "—"}
-        <br />
-        Grupo: {relation.groupTitle || relation.groupId}
+        Agrupación: {relation.groupTitle || relation.groupId}
       </p>
     </li>
   )
@@ -147,54 +156,26 @@ function ChildInspector({
   category,
   child,
 }: {
-  category: GraphExplorerCategory | null
+  category: GraphExplorerCategory
   child: GraphExplorerChild
 }) {
   return (
     <div className="space-y-4">
-      <div>
-        <p className={styles.workspaceKicker}>Subnodo N2</p>
-        <h3 className="mt-1 text-xl font-bold leading-tight text-institutional">
-          {child.title}
-        </h3>
-        <p className="mt-2 font-mono text-[10px] text-muted-foreground">
-          ID {child.id}
-        </p>
-      </div>
-      <div className="border-y border-border/70 py-2 text-sm">
-        <p>
-          Padre: <strong className="text-institutional">{category?.title ?? child.parentId}</strong>
-        </p>
-        <p className="mt-1 font-mono text-xs text-muted-foreground">
-          {child.documentCount} documentos únicos · {child.sectionCount} secciones · {child.relationCount} relaciones
-        </p>
-      </div>
-      <div>
+      <p className="text-sm">
+        Categoría: <strong className="text-institutional">{category.title}</strong>
+      </p>
+      <p className="font-mono text-xs text-muted-foreground">
+        {child.documentCount} documentos · {child.sectionCount} secciones ·{" "}
+        {child.relationCount} conexiones
+      </p>
+      <SourcesSection child={child} />
+      <section>
         <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-institutional">
-          Documentos únicos
-        </p>
-        {child.documentIds.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Sin documentos asociados.</p>
-        ) : (
-          <ul className="space-y-1">
-            {child.documentIds.map((documentId) => (
-              <li
-                key={documentId}
-                className="border-l-2 border-sst-yellow px-2 font-mono text-[10px] text-foreground"
-              >
-                {documentId}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div>
-        <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-institutional">
-          Relaciones N3 ({child.relationCount})
+          Conexiones encontradas ({child.relationCount})
         </p>
         {child.relations.length === 0 ? (
           <p className="text-xs text-muted-foreground">
-            Sin relaciones semánticas registradas para este subnodo.
+            No se encontraron conexiones semánticas para este tema.
           </p>
         ) : (
           <ul className="space-y-3">
@@ -206,35 +187,50 @@ function ChildInspector({
             ))}
           </ul>
         )}
-      </div>
+      </section>
     </div>
   )
 }
 
 export function GraphInspector({
-  stats,
   category,
   child,
-  onSelectChild,
 }: GraphInspectorProps) {
+  const heading = child?.title ?? category?.title ?? "Sin selección"
+
   return (
-    <aside className={styles.panel} aria-labelledby="graph-inspector-heading">
+    <aside className={styles.ficha} aria-labelledby="graph-inspector-heading">
       <div className={styles.panelHeader}>
-        <p className={styles.workspaceKicker}>Registro de evidencia</p>
+        <p className={styles.kicker}>Ficha</p>
         <h2
           id="graph-inspector-heading"
           className="mt-1 text-base font-bold text-institutional"
         >
-          Inspector
+          {heading}
         </h2>
+        {category ? (
+          <p className={styles.route}>
+            <span>{category.title}</span>
+            {child ? (
+              <>
+                <span aria-hidden> / </span>
+                <span className={styles.routeCurrent}>{child.title}</span>
+              </>
+            ) : null}
+          </p>
+        ) : (
+          <p className={`${styles.route} ${styles.routeCurrent}`}>
+            Esperando selección
+          </p>
+        )}
       </div>
       <div className={`${styles.panelBody} overflow-y-auto`}>
-        {child ? (
+        {child && category ? (
           <ChildInspector category={category} child={child} />
         ) : category ? (
-          <CategoryInspector category={category} onSelectChild={onSelectChild} />
+          <CategoryInspector category={category} />
         ) : (
-          <Summary stats={stats} />
+          <EmptyInspector />
         )}
       </div>
     </aside>

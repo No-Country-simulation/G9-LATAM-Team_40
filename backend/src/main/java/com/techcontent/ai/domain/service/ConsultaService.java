@@ -3,6 +3,7 @@ package com.techcontent.ai.domain.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.techcontent.ai.api.exception.ContenidoNotFoundException;
 import com.techcontent.ai.api.dto.request.ConsultaRequest;
 import com.techcontent.ai.api.dto.response.ConsultaResponse;
 import com.techcontent.ai.api.dto.response.TrazabilidadSeccionResponse;
@@ -63,6 +64,13 @@ public class ConsultaService {
                 .build();
 
         return toResponse(repository.save(contenido));
+    }
+
+    @Transactional(readOnly = true)
+    public ConsultaResponse obtenerPorId(UUID id, UUID userId) {
+        return repository.findByIdAndUserId(id, userId)
+                .map(this::toResponse)
+                .orElseThrow(() -> new ContenidoNotFoundException(id));
     }
 
     public List<ConsultaResponse> buscar(String query, UUID userId) {

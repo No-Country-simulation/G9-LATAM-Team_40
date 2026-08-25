@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { analizarConsulta } from "@/services/consulta.service"
+import { analizarConsulta, obtenerConsulta } from "@/services/consulta.service"
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -26,5 +26,34 @@ describe("consulta service", () => {
       method: "POST",
       body: JSON.stringify({ pregunta: "¿Qué obligaciones contiene el corpus normativo?" }),
     }))
+  })
+
+  it("gets a persisted query by encoded id and maps its response", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      id: "query/1",
+      pregunta: "Pregunta persistida",
+      respuesta: "Respuesta persistida",
+      categoria_fuente_principal: "Seguridad",
+      relevancia: 0.9,
+      palabras_clave: ["riesgo"],
+      trazabilidad: [],
+      tiempo_segundos: 1.25,
+      procesado_en: "2026-08-24T10:00:00Z",
+    }), { status: 200, headers: { "Content-Type": "application/json" } }))
+    vi.stubGlobal("fetch", fetchMock)
+
+    const response = await obtenerConsulta("query/1")
+
+    expect(response).toMatchObject({
+      id: "query/1",
+      pregunta: "Pregunta persistida",
+      respuesta: "Respuesta persistida",
+      categoriaFuentePrincipal: "Seguridad",
+      palabrasClave: ["riesgo"],
+    })
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("/api/consultas/query%2F1"),
+      expect.objectContaining({ method: "GET" }),
+    )
   })
 })

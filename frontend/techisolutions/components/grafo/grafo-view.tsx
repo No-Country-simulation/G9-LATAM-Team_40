@@ -11,7 +11,6 @@ import { GraphCategoryNavigator } from "@/components/grafo/graph-category-naviga
 import { GraphInspector } from "@/components/grafo/graph-inspector"
 import { GraphObservatoryCanvas } from "@/components/grafo/graph-observatory-canvas"
 import { GraphSnapshotDrawer } from "@/components/grafo/graph-snapshot-drawer"
-import { GraphDrawer } from "@/components/grafo/graph-drawer"
 import styles from "@/components/grafo/graph-observatory.module.css"
 import { ApiError } from "@/lib/api"
 import {
@@ -33,6 +32,7 @@ import type { GrafoResponse } from "@/types/grafo.types"
 import type { IndiceEstado } from "@/types/indice.types"
 
 type GraphScope = "BASE" | "PRIVATE"
+type DeskPane = "index" | "map" | "ficha"
 
 function isMissingGrafo(err: unknown): boolean {
   if (!(err instanceof ApiError)) return false
@@ -53,16 +53,13 @@ function formatSnapshotDate(snapshot: GrafoResponse | null): string {
   return new Date(snapshot.fechaCreacion).toLocaleString("es-CL")
 }
 
-function ObservatorySkeleton() {
+function DeskSkeleton() {
   return (
-    <div className="space-y-3" aria-label="Cargando observatorio" role="status">
-      <div className="h-12 border border-border bg-muted" />
-      <div className="grid gap-3 xl:grid-cols-[18rem_minmax(0,1fr)_21rem]">
-        <div className="hidden h-[calc(100svh-13rem)] min-h-[620px] border border-border bg-muted xl:block" />
-        <div className="h-[58svh] min-h-[420px] border border-border bg-muted xl:h-[calc(100svh-13rem)] xl:min-h-[620px]" />
-        <div className="hidden h-[calc(100svh-13rem)] min-h-[620px] border border-border bg-muted xl:block" />
-      </div>
-      <p className="font-mono text-xs text-muted-foreground">Cargando snapshot…</p>
+    <div className={styles.deskSkeleton} aria-label="Cargando mapa" role="status">
+      <div className={styles.deskSkeletonPane} />
+      <div className={`${styles.deskSkeletonPane} min-h-[360px]`} />
+      <div className={styles.deskSkeletonPane} />
+      <p className="font-mono text-xs text-muted-foreground">Cargando mapa…</p>
     </div>
   )
 }
@@ -79,13 +76,13 @@ function EmptyGraphState({
       <Network className="mx-auto mb-4 size-10 text-institutional" aria-hidden />
       <h2 className="text-lg font-bold text-institutional">
         {scope === "PRIVATE"
-          ? "Tu corpus aún no tiene un grafo publicado."
-          : "El corpus base todavía no tiene un snapshot disponible."}
+          ? "Tu biblioteca todavía no tiene un mapa publicado."
+          : "Cuando exista una publicación base podrás explorar categorías, temas y sus fuentes aquí."}
       </h2>
       <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
         {scope === "PRIVATE"
-          ? "Sube documentos para construir y publicar tu índice privado."
-          : "Cuando exista una publicación base podrás explorar categorías, subnodos y relaciones aquí."}
+          ? "Sube documentos para construir y publicar tu mapa privado."
+          : "La biblioteca general aún no tiene una versión publicada para explorar."}
       </p>
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <button
@@ -125,7 +122,6 @@ function Stat({
 }
 
 export function GrafoView() {
-  const exploreTriggerRef = useRef<HTMLButtonElement>(null)
   const snapshotTriggerRef = useRef<HTMLButtonElement>(null)
   const [scope, setScope] = useState<GraphScope>("BASE")
   const [snapshot, setSnapshot] = useState<GrafoResponse | null>(null)
@@ -137,9 +133,9 @@ export function GrafoView() {
   )
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [query, setQuery] = useState("")
-  const [categoriesOpen, setCategoriesOpen] = useState(false)
   const [snapshotsOpen, setSnapshotsOpen] = useState(false)
   const [reduceMotion, setReduceMotion] = useState(false)
+  const [deskPane, setDeskPane] = useState<DeskPane>("map")
 
   const [historial, setHistorial] = useState<GrafoResponse[]>([])
   const [histPage, setHistPage] = useState(0)
@@ -149,6 +145,7 @@ export function GrafoView() {
   const [hasta, setHasta] = useState("")
   const [dateResults, setDateResults] = useState<GrafoResponse[] | null>(null)
   const [indexStatus, setIndexStatus] = useState<IndiceEstado | null>(null)
+  const previousIndexStatusRef = useRef<IndiceEstado | null>(null)
 
   const json = snapshot?.jsonData ?? null
   const index = useMemo(() => buildGraphExplorerIndex(json), [json])
@@ -198,7 +195,7 @@ export function GrafoView() {
         setError(
           err instanceof Error
             ? err.message
-            : "No se pudo cargar el snapshot actual."
+            : "No se pudo cargar el mapa actual."
         )
       }
     } finally {
@@ -219,7 +216,7 @@ export function GrafoView() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo cargar el historial de snapshots."
+          : "No se pudo cargar el historial de versiones."
       )
     } finally {
       setHistLoading(false)
@@ -262,6 +259,17 @@ export function GrafoView() {
     const timer = window.setInterval(() => void loadIndexStatus(), 5000)
     return () => window.clearInterval(timer)
   }, [indexStatus, loadIndexStatus, scope])
+  useEffect(() => {
+    if (scope !== "PRIVATE") {
+      previousIndexStatusRef.current = null
+      return
+    }
+
+    const previousStatus = previousIndexStatusRef.current
+    previousIndexStatusRef.current = indexStatus
+    if (indexStatus?.estado !== "SUCCEEDED" || !isActiveIndex(previousStatus)) return
+    void loadActual("PRIVATE")
+  }, [indexStatus, loadActual, scope])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -273,17 +281,13 @@ export function GrafoView() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (
-        event.key === "Escape" &&
-        !categoriesOpen &&
-        !snapshotsOpen
-      ) {
+      if (event.key === "Escape" && !snapshotsOpen) {
         setSelectedNodeId(null)
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [categoriesOpen, snapshotsOpen])
+  }, [snapshotsOpen])
 
   const handleScopeChange = useCallback(
     (nextScope: GraphScope) => {
@@ -295,20 +299,19 @@ export function GrafoView() {
       setQuery("")
       setSelectedCategoryId(null)
       setSelectedNodeId(null)
-      setCategoriesOpen(false)
       setSnapshotsOpen(false)
       setDesde("")
       setHasta("")
       setDateResults(null)
       setIndexStatus(null)
+      setDeskPane("map")
     },
     [scope]
   )
 
   const handleSelectCategory = useCallback((categoryId: string) => {
     setSelectedCategoryId(categoryId)
-    setSelectedNodeId(categoryId)
-    setCategoriesOpen(false)
+    setSelectedNodeId(null)
   }, [])
 
   const handleSelectChild = useCallback(
@@ -319,34 +322,37 @@ export function GrafoView() {
       if (!parent) return
       setSelectedCategoryId(parent.id)
       setSelectedNodeId(childId)
-      setCategoriesOpen(false)
+      setDeskPane("ficha")
     },
     [index]
   )
 
-  const handleSelectNode = useCallback(
-    (node: GraphNode) => {
-      if (node.kind === "n1") {
-        const isSameCategory = selectedCategoryId === node.id
-        setSelectedCategoryId(isSameCategory ? null : node.id)
-        setSelectedNodeId(isSameCategory ? null : node.id)
-        return
-      }
-      setSelectedCategoryId(node.categoryId)
-      setSelectedNodeId(node.id)
-    },
-    [selectedCategoryId]
-  )
+  const handleSelectNode = useCallback((node: GraphNode) => {
+    if (node.kind === "n1") {
+      setSelectedCategoryId(node.id)
+      setSelectedNodeId(null)
+      setDeskPane("ficha")
+      return
+    }
+    setSelectedCategoryId(node.categoryId)
+    setSelectedNodeId(node.id)
+    setDeskPane("ficha")
+  }, [])
 
   const handleClearNode = useCallback(() => {
     setSelectedNodeId(null)
   }, [])
 
   const handleShowCategories = useCallback(() => {
+    setSelectedCategoryId(null)
     setSelectedNodeId(null)
-    if (window.matchMedia("(max-width: 1279px)").matches) {
-      setCategoriesOpen(true)
-    }
+    setQuery("")
+    setDeskPane("map")
+  }, [])
+
+  const handleQueryChange = useCallback((nextQuery: string) => {
+    setQuery(nextQuery)
+    setSelectedNodeId(null)
   }, [])
 
   const handleSelectSnapshot = useCallback(
@@ -361,11 +367,11 @@ export function GrafoView() {
         setSelectedNodeId(null)
         return true
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "No se pudo abrir ese snapshot."
-        )
+          setError(
+            err instanceof Error
+              ? err.message
+              : "No se pudo abrir esa versión."
+          )
         return false
       } finally {
         setHistLoading(false)
@@ -385,7 +391,7 @@ export function GrafoView() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo buscar snapshots por fecha."
+          : "No se pudo buscar versiones por fecha."
       )
     } finally {
       setHistLoading(false)
@@ -402,107 +408,83 @@ export function GrafoView() {
         currentPath="/grafo"
         contentClassName="max-w-[1600px] px-3 py-4 sm:px-5 xl:px-6"
       >
-        <div className={styles.observatory}>
-          <header className={styles.workspaceHeader}>
-            <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className={styles.workspace}>
+          <header className={styles.header}>
+            <div className={styles.headerRow}>
               <div>
-                <p className={styles.workspaceKicker}>Observatorio · GRF-01</p>
+                <p className={styles.kicker}>Expediente de conocimiento</p>
                 <h1 className="mt-1 text-2xl font-bold text-institutional sm:text-3xl">
-                  Observatorio GraphRAG
+                  Mapa de conocimiento
                 </h1>
                 <p className="mt-1 max-w-3xl text-sm leading-relaxed text-foreground">
-                  Explora categorías, subnodos y relaciones del conocimiento
-                  institucional sin perder el documento que las respalda.
+                  Índice, plano y ficha juntos: categorías, temas y las fuentes
+                  que respaldan cada idea.
                 </p>
               </div>
-              <p className="max-w-xs font-mono text-[10px] leading-relaxed text-muted-foreground">
-                Campo cartográfico · N1/N2 visibles · relaciones N3 en
-                inspector
-              </p>
-            </div>
-          </header>
-
-          <section className={styles.scopeBar} aria-label="Estado del observatorio">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div
-                className="flex border-2 border-institutional"
-                role="group"
-                aria-label="Ámbito del grafo"
-              >
-                <button
-                  type="button"
-                  aria-pressed={scope === "BASE"}
-                  onClick={() => handleScopeChange("BASE")}
-                  className={`px-3 py-2 text-xs font-bold ${scope === "BASE" ? "bg-institutional text-primary-foreground" : "bg-card text-institutional"}`}
+              <div className={styles.scopeBar} aria-label="Ámbito del mapa">
+                <div
+                  className={styles.scopeGroup}
+                  role="group"
+                  aria-label="Ámbito del mapa"
                 >
-                  Corpus base
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={scope === "PRIVATE"}
-                  onClick={() => handleScopeChange("PRIVATE")}
-                  className={`border-l-2 border-institutional px-3 py-2 text-xs font-bold ${scope === "PRIVATE" ? "bg-institutional text-primary-foreground" : "bg-card text-institutional"}`}
-                >
-                  Mi corpus
-                </button>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                {snapshot ? (
-                  <span className="font-mono text-[10px] text-muted-foreground">
-                    {scope === "PRIVATE"
-                      ? `Release ${snapshot.releaseId?.slice(0, 8) ?? "privado"}`
-                      : `Snapshot ${snapshot.id.slice(0, 8)}`}{" "}
-                    · {formatSnapshotDate(snapshot)}
-                  </span>
-                ) : (
-                  <span className="font-mono text-[10px] text-muted-foreground">
-                    Sin publicación visible
-                  </span>
-                )}
-                {scope === "BASE" ? (
                   <button
-                    ref={snapshotTriggerRef}
                     type="button"
-                    onClick={() => setSnapshotsOpen(true)}
-                    className="border-2 border-institutional bg-card px-3 py-2 text-xs font-bold text-institutional"
+                    aria-pressed={scope === "BASE"}
+                    onClick={() => handleScopeChange("BASE")}
+                    className={`px-3 py-2 text-xs font-bold ${scope === "BASE" ? "bg-institutional text-primary-foreground" : "bg-card text-institutional"}`}
                   >
-                    Snapshots
+                    Biblioteca general
                   </button>
-                ) : null}
-                <button
-                  ref={exploreTriggerRef}
-                  type="button"
-                  onClick={() => setCategoriesOpen(true)}
-                  className="border-2 border-sst-yellow bg-sst-yellow px-3 py-2 text-xs font-bold text-institutional xl:hidden"
-                >
-                  Explorar
-                </button>
+                  <button
+                    type="button"
+                    aria-pressed={scope === "PRIVATE"}
+                    onClick={() => handleScopeChange("PRIVATE")}
+                    className={`border-l-2 border-institutional px-3 py-2 text-xs font-bold ${scope === "PRIVATE" ? "bg-institutional text-primary-foreground" : "bg-card text-institutional"}`}
+                  >
+                    Mis documentos
+                  </button>
+                </div>
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  {snapshot ? (
+                    <span className="font-mono text-[10px] text-muted-foreground">
+                      Actualizado {formatSnapshotDate(snapshot)}
+                    </span>
+                  ) : (
+                    <span className="font-mono text-[10px] text-muted-foreground">
+                      Sin publicación visible
+                    </span>
+                  )}
+                  {scope === "BASE" ? (
+                    <button
+                      ref={snapshotTriggerRef}
+                      type="button"
+                      onClick={() => setSnapshotsOpen(true)}
+                      className="border-2 border-institutional bg-card px-3 py-2 text-xs font-bold text-institutional"
+                    >
+                      Ver versiones
+                    </button>
+                  ) : null}
+                </div>
               </div>
             </div>
 
-            <div className={`${styles.statsStrip} mt-4`}>
-              <Stat label="Categorías N1" value={stats.categories} />
-              <Stat label="Subnodos N2" value={stats.subcategories} />
-              <Stat label="Relaciones N3" value={stats.relations} />
-              <Stat label="Documentos únicos" value={stats.documents} />
+            <div className={styles.statsInline}>
+              <Stat label="Categorías" value={stats.categories} />
+              <Stat label="Temas" value={stats.subcategories} />
+              <Stat label="Conexiones" value={stats.relations} />
+              <Stat label="Documentos" value={stats.documents} />
             </div>
 
             {scope === "PRIVATE" && indexStatus ? (
               <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border/70 pt-3">
                 {isActiveIndex(indexStatus) ? (
                   <span className="font-mono text-[10px] font-bold text-institutional">
-                    Actualizando · {indexStatus.etapa ?? "reconstrucción"}
+                    Actualizando tus documentos
                   </span>
-                ) : (
-                  <span className="font-mono text-[10px] font-bold text-institutional">
-                    Índice · {indexStatus.estado}
-                  </span>
-                )}
-                {indexStatus.estado === "FAILED" ? (
+                ) : indexStatus.estado === "FAILED" ? (
                   <>
                     <span className="text-xs text-stamp-red">
-                      {indexStatus.mensaje ?? "La actualización del índice falló."}
+                      {indexStatus.mensaje ?? "La actualización de tus documentos falló."}
                     </span>
                     <Link
                       href="/archivos"
@@ -511,15 +493,14 @@ export function GrafoView() {
                       Gestionar archivos
                     </Link>
                   </>
-                ) : null}
-                {snapshot?.generation != null ? (
-                  <span className="font-mono text-[10px] text-muted-foreground">
-                    Generación {snapshot.generation}
+                ) : (
+                  <span className="font-mono text-[10px] font-bold text-institutional">
+                    Tus documentos están actualizados
                   </span>
-                ) : null}
+                )}
               </div>
             ) : null}
-          </section>
+          </header>
 
           {showTopError ? (
             <FormAlert variant="error" className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -536,90 +517,105 @@ export function GrafoView() {
 
           <div className="mt-4">
             {loading && !snapshot ? (
-              <ObservatorySkeleton />
+              <DeskSkeleton />
             ) : empty ? (
               <EmptyGraphState scope={scope} onRetry={() => void loadActual(scope)} />
             ) : (
-              <div className="grid min-w-0 gap-3 xl:grid-cols-[18rem_minmax(0,1fr)_21rem]">
-                <div className="hidden min-w-0 xl:block">
+              <div className={styles.desk}>
+                <div className={styles.mobileTabs} role="group" aria-label="Vista de la mesa">
+                  {(
+                    [
+                      ["index", "Índice"],
+                      ["map", "Plano"],
+                      ["ficha", "Ficha"],
+                    ] as const
+                  ).map(([pane, label]) => (
+                    <button
+                      key={pane}
+                      type="button"
+                      aria-pressed={deskPane === pane}
+                      className={`${styles.mobileTab} ${deskPane === pane ? styles.mobileTabActive : ""}`}
+                      onClick={() => setDeskPane(pane)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                <div
+                  className={styles.deskPane}
+                  data-pane="index"
+                  data-active={deskPane === "index" ? "true" : "false"}
+                >
                   <GraphCategoryNavigator
                     index={index}
                     filteredIndex={filteredIndex}
                     query={query}
                     selectedCategoryId={selectedCategoryId}
                     selectedNodeId={selectedNodeId}
-                    onQueryChange={setQuery}
+                    onQueryChange={handleQueryChange}
+                    onReset={handleShowCategories}
                     onSelectCategory={handleSelectCategory}
                     onSelectChild={handleSelectChild}
                   />
                 </div>
 
-                <section className="min-w-0" aria-labelledby="graph-canvas-heading">
-                  <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-                    <div>
-                      <p className={styles.workspaceKicker}>Campo cartográfico</p>
-                      <h2 id="graph-canvas-heading" className="mt-1 text-base font-bold text-institutional">
-                        Relaciones de pertenencia
+                <section
+                  className={styles.deskPane}
+                  data-pane="map"
+                  data-active={deskPane === "map" ? "true" : "false"}
+                  aria-labelledby="graph-canvas-heading"
+                >
+                  <div className={styles.canvasSheet}>
+                    <span className={`${styles.clip} ${styles.clipTopLeft}`} aria-hidden />
+                    <span className={`${styles.clip} ${styles.clipTopRight}`} aria-hidden />
+                    <span className={`${styles.clip} ${styles.clipBottomLeft}`} aria-hidden />
+                    <span className={`${styles.clip} ${styles.clipBottomRight}`} aria-hidden />
+                    <div className={styles.panelHeader}>
+                      <p className={styles.kicker}>Plano</p>
+                      <h2
+                        id="graph-canvas-heading"
+                        className="mt-1 text-base font-bold text-institutional"
+                      >
+                        {selectedCategory
+                          ? `Temas de ${selectedCategory.title}`
+                          : "Todas las categorías"}
                       </h2>
+                      {selectedCategory && selectedCategory.childCount > 24 ? (
+                        <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                          Mostrando 24 de {selectedCategory.childCount} temas en
+                          el mapa; la lista conserva todos.
+                        </p>
+                      ) : null}
                     </div>
-                    <p className="font-mono text-[10px] text-muted-foreground">
-                      {selectedCategory
-                        ? `${selectedCategory.title} · ${selectedCategory.childCount} N2`
-                        : "Selecciona una baliza N1"}
-                    </p>
-                  </div>
-                  <div className="h-[58svh] min-h-[420px] xl:h-[calc(100svh-13rem)] xl:min-h-[620px]">
-                    <GraphObservatoryCanvas
-                      data={graph}
-                      selectedNodeId={selectedNodeId}
-                      selectedCategoryId={selectedCategoryId}
-                      reduceMotion={reduceMotion}
-                      onSelectNode={handleSelectNode}
-                      onClearNode={handleClearNode}
-                      onShowCategories={handleShowCategories}
-                    />
+                    <div className={styles.canvasViewport}>
+                      <GraphObservatoryCanvas
+                        data={graph}
+                        selectedNodeId={selectedNodeId}
+                        selectedCategoryId={selectedCategoryId}
+                        reduceMotion={reduceMotion}
+                        onSelectNode={handleSelectNode}
+                        onClearNode={handleClearNode}
+                        onShowCategories={handleShowCategories}
+                      />
+                    </div>
                   </div>
                 </section>
 
-                <div className="hidden min-w-0 xl:block">
+                <div
+                  className={styles.deskPane}
+                  data-pane="ficha"
+                  data-active={deskPane === "ficha" ? "true" : "false"}
+                >
                   <GraphInspector
-                    stats={stats}
                     category={selectedCategory}
                     child={selectedChild}
-                    onSelectChild={handleSelectChild}
-                  />
-                </div>
-
-                <div className="min-w-0 xl:hidden">
-                  <GraphInspector
-                    stats={stats}
-                    category={selectedCategory}
-                    child={selectedChild}
-                    onSelectChild={handleSelectChild}
                   />
                 </div>
               </div>
             )}
           </div>
 
-          <GraphDrawer
-            open={categoriesOpen}
-            side="left"
-            title="Explorar categorías"
-            triggerRef={exploreTriggerRef}
-            onClose={() => setCategoriesOpen(false)}
-          >
-            <GraphCategoryNavigator
-              index={index}
-              filteredIndex={filteredIndex}
-              query={query}
-              selectedCategoryId={selectedCategoryId}
-              selectedNodeId={selectedNodeId}
-              onQueryChange={setQuery}
-              onSelectCategory={handleSelectCategory}
-              onSelectChild={handleSelectChild}
-            />
-          </GraphDrawer>
 
           {scope === "BASE" ? (
             <GraphSnapshotDrawer

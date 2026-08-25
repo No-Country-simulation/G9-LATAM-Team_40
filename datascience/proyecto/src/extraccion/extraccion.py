@@ -251,11 +251,20 @@ def extraer_bibliografia(lineas: list[str]) -> list[str]:
 
 def parsear_markdown_a_secciones(filepath: Path) -> dict:
     lineas = filepath.read_text(encoding="utf-8").splitlines()
+    titulo_raiz = filepath.stem.split("__", 1)[-1].replace("_", " ").strip()
+    if lineas and lineas[0].strip() == "---":
+        cierre_frontmatter = next(
+            (indice for indice, linea in enumerate(lineas[1:], start=1) if linea.strip() == "---"),
+            None,
+        )
+        if cierre_frontmatter is not None:
+            lineas = lineas[cierre_frontmatter + 1:]
+
     indice = extraer_indice(lineas)
     bibliografia = extraer_bibliografia(lineas)
 
     secciones: list[dict] = []
-    stack: list[tuple[int, str]] = []
+    stack: list[tuple[int, str]] = [(1, titulo_raiz or "Documento")]
     buffer: list[str] = []
 
     def guardar():

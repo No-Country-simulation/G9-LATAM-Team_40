@@ -5,6 +5,7 @@ import {
   buildGraphRagView,
   filterGraphExplorer,
   getGraphStats,
+  stripMarkdown,
 } from "@/lib/graph-data"
 import type { GrafoJsonData } from "@/types/grafo.types"
 
@@ -81,6 +82,43 @@ const json: GrafoJsonData = {
   },
 }
 
+const markdownJson: GrafoJsonData = {
+  grafo_conceptual: {
+    nivel_1_categorias: [
+      {
+        id: "cat-markdown",
+        titulo: "## **Seguridad** _operacional_",
+        confianza: 0.9,
+        descripcion: "Descripción **con evidencia** y [fuente](https://example.com).",
+      },
+    ],
+    nivel_2_subcategorias: [
+      {
+        id: "child-markdown",
+        parent_id: "cat-markdown",
+        titulo_nodo_2: "**Controles** ## 1. Propósito",
+        secciones: [{ documento_id: "doc-1", titulo: "_Sección_ **crítica**" }],
+      },
+    ],
+    nivel_3_relaciones: [
+      {
+        id: "group-markdown",
+        parent_id: "child-markdown",
+        titulonodo_nivel_3: "**Control de riesgo**",
+        relaciones: [
+          {
+            documento_id: "doc-1",
+            titulo_seccion: "**Sección crítica**",
+            sujeto: "**Riesgo**",
+            relacion: "requiere",
+            objeto: "_control_",
+          },
+        ],
+      },
+    ],
+  },
+}
+
 describe("graph exploration index", () => {
   it("derives ordered hierarchy, unique documents, and real relations", () => {
     const index = buildGraphExplorerIndex(json)
@@ -106,6 +144,31 @@ describe("graph exploration index", () => {
     expect(firstChild?.relationCount).toBe(1)
   })
 
+  it("removes markdown syntax from graph labels and evidence", () => {
+    expect(
+      stripMarkdown("## **Seguridad** _operacional_ [SST](https://example.com)")
+    ).toBe("Seguridad operacional SST")
+
+    const [category] = buildGraphExplorerIndex(markdownJson)
+    const child = category?.children[0]
+    const relation = child?.relations[0]
+
+    expect(category).toMatchObject({
+      title: "Seguridad operacional",
+      description: "Descripción con evidencia y fuente.",
+    })
+    expect(child).toMatchObject({
+      title: "Controles 1. Propósito",
+      sections: [{ titulo: "Sección crítica" }],
+    })
+    expect(relation).toMatchObject({
+      groupTitle: "Control de riesgo",
+      titulo_seccion: "Sección crítica",
+      sujeto: "Riesgo",
+      objeto: "control",
+    })
+  })
+
   it("matches accents, deep relation fields, and document identifiers", () => {
     const index = buildGraphExplorerIndex(json)
 
@@ -120,13 +183,22 @@ describe("graph exploration index", () => {
     expect(filterGraphExplorer(index, "   ")).toBe(index)
   })
 
+  it("shows categories first and caps topics after selection", () => {
+    const initialGraph = buildGraphRagView(json, null)
+    expect(initialGraph.nodes.filter((node) => node.kind === "n1")).toHaveLength(2)
+    expect(initialGraph.nodes.filter((node) => node.kind === "n2")).toHaveLength(0)
+    const selectedGraph = buildGraphRagView(json, "cat-seguridad")
+    expect(selectedGraph.nodes.filter((node) => node.kind === "n1")).toHaveLength(1)
+    expect(selectedGraph.nodes.filter((node) => node.kind === "n2")).toHaveLength(24)
+  })
+
   it("preserves a focused child outside the canvas cap", () => {
     const graph = buildGraphRagView(json, "cat-seguridad", "child-80")
     const childNodes = graph.nodes.filter((node) => node.kind === "n2")
 
-    expect(childNodes).toHaveLength(80)
+    expect(childNodes).toHaveLength(24)
     expect(childNodes.some((node) => node.id === "child-80")).toBe(true)
-    expect(childNodes.some((node) => node.id === "child-79")).toBe(false)
+    expect(childNodes.some((node) => node.id === "child-23")).toBe(false)
     expect(childNodes.find((node) => node.id === "child-80")).toMatchObject({
       categoryId: "cat-seguridad",
       relationCount: 1,

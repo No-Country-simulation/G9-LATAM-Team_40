@@ -2,6 +2,8 @@
 
 Aplicación web de **TechISOlutions** (Hackathon ONE — G9-LATAM-Team_40), construida con **Next.js 16 (App Router) + React 19 + TypeScript**. Las pantallas autenticadas consumen el backend Spring Boot; no incluyen datos mock.
 
+Arquitectura, capacidades y flujos: [`docs/frontend-arquitectura.md`](../../docs/frontend-arquitectura.md).
+
 ## Stack
 
 - **Next.js 16** — App Router y routing por convención (`app/`)

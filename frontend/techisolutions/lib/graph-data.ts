@@ -5,7 +5,7 @@ import type {
   GrafoSeccionRef,
 } from "@/types/grafo.types"
 
-export const N2_CAP = 80
+export const N2_CAP = 24
 
 export type GraphNodeKind = "n1" | "n2"
 
@@ -94,8 +94,32 @@ export function hashColor(id: string): string {
   return PALETTE[h % PALETTE.length] ?? "#1a3a5c"
 }
 
+export function stripMarkdown(text: string): string {
+  return text
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1")
+    .replace(/^\s{0,3}#{1,6}\s*/gm, "")
+    .replace(/(^|\s)#{1,6}\s+/g, "$1")
+    .replace(/^\s*(?:[-*+]|\d+\.)\s+/gm, "")
+    .replace(/(^|\s)>\s+/g, "$1")
+    .replace(/(^|\s)(?:-{3,}|\*{3,}|_{3,})(?=\s|$)/g, "$1")
+    .replace(/(\*\*|__|~~|`)/g, "")
+    .replace(
+      /(^|[\s([{])\*([^*]+?)\*(?=$|[\s)\]}.,!?])/g,
+      "$1$2"
+    )
+    .replace(
+      /(^|[\s([{])_([^_]+?)_(?=$|[\s)\]}.,!?])/g,
+      "$1$2"
+    )
+    .replace(/\|/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
 export function shortLabel(text: string, max = 42): string {
-  const clean = text.replace(/\s+/g, " ").replace(/\*+/g, "").trim()
+  const clean = stripMarkdown(text)
   return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean
 }
 
@@ -165,20 +189,27 @@ function createGraphExplorerContext(
   const childById = new Map<string, GraphExplorerChild>()
 
   for (const subcategory of subcategories) {
-    const sections = subcategory.secciones ?? []
+    const sections = (subcategory.secciones ?? []).map((section) => ({
+      ...section,
+      titulo: stripMarkdown(section.titulo),
+    }))
     const groups = groupsByParent.get(subcategory.id) ?? []
     const relations = groups.flatMap((group) =>
       (group.relaciones ?? []).map((relation) => ({
         ...relation,
+        titulo_seccion: stripMarkdown(relation.titulo_seccion),
+        sujeto: stripMarkdown(relation.sujeto),
+        relacion: stripMarkdown(relation.relacion),
+        objeto: stripMarkdown(relation.objeto),
         groupId: group.id,
-        groupTitle: group.titulonodo_nivel_3,
+        groupTitle: stripMarkdown(group.titulonodo_nivel_3),
       }))
     )
     const documentIds = uniqueDocumentIds(sections)
     const child: GraphExplorerChild = {
       id: subcategory.id,
       parentId: subcategory.parent_id,
-      title: subcategory.titulo_nodo_2,
+      title: stripMarkdown(subcategory.titulo_nodo_2),
       sections,
       relations,
       documentIds,
@@ -196,8 +227,8 @@ function createGraphExplorerContext(
     categoryFromChildren(
       {
         id: category.id,
-        title: category.titulo,
-        description: category.descripcion,
+        title: stripMarkdown(category.titulo),
+        description: stripMarkdown(category.descripcion ?? ""),
         confidence: category.confianza,
       },
       childrenByCategory.get(category.id) ?? []
@@ -299,7 +330,10 @@ export function buildGraphRagView(
   focusedNodeId: string | null = null
 ): GraphData {
   const context = createGraphExplorerContext(json)
-  const nodes: GraphNode[] = context.index.map((category) => ({
+  const visibleCategories = selectedCategoryId
+    ? context.index.filter((category) => category.id === selectedCategoryId)
+    : context.index
+  const nodes: GraphNode[] = visibleCategories.map((category) => ({
     id: category.id,
     name: category.title,
     kind: "n1",

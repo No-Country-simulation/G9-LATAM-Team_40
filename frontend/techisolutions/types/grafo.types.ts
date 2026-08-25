@@ -7,7 +7,7 @@ export interface GrafoCategoriaN1 {
   id: string
   titulo: string
   confianza: number
-  descripcion: string
+  descripcion?: string
 }
 
 export interface GrafoSubcategoriaN2 {

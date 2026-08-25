@@ -12,6 +12,7 @@ Los artefactos internos (paquetes Java, contenedores Docker, base de datos) sigu
 
 - [Descripción](#descripción)
 - [Arquitectura](#arquitectura)
+- [Frontend](docs/frontend-arquitectura.md)
 - [Tecnologías](#tecnologías)
 - [Despliegue](#despliegue)
 - [API Endpoints](#api-endpoints)

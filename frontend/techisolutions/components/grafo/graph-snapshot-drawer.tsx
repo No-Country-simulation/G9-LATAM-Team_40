@@ -26,7 +26,11 @@ export interface GraphSnapshotDrawerProps {
 
 function snapshotDate(snapshot: GrafoResponse): string {
   return snapshot.fechaCreacion
-    ? new Date(snapshot.fechaCreacion).toLocaleString("es-CL")
+    ? new Date(snapshot.fechaCreacion).toLocaleDateString("es-CL", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
     : "Sin fecha registrada"
 }
 
@@ -47,12 +51,14 @@ function SnapshotButton({
         onClick={onSelect}
         className={`w-full border px-3 py-2 text-left transition-colors hover:border-institutional hover:bg-sst-yellow/15 focus-visible:bg-sst-yellow/15 ${current ? "border-institutional bg-sst-yellow/20" : "border-border"}`}
       >
-        <span className="block font-mono text-[10px] text-muted-foreground">
-          {snapshot.id}
-        </span>
-        <span className="mt-1 block text-xs font-semibold text-institutional">
+        <span className="block text-xs font-semibold text-institutional">
           {snapshotDate(snapshot)}
         </span>
+        {current ? (
+          <span className="mt-1 block font-mono text-[10px] text-stamp-red">
+            Versión actual
+          </span>
+        ) : null}
       </button>
     </li>
   )
@@ -97,7 +103,7 @@ export function GraphSnapshotDrawer({
     <GraphDrawer
       open={open}
       side="right"
-      title="Snapshots base"
+      title="Versiones de la biblioteca general"
       triggerRef={triggerRef}
       onClose={onClose}
     >
@@ -112,7 +118,7 @@ export function GraphSnapshotDrawer({
           <div className="flex items-end justify-between gap-2">
             <div>
               <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-institutional">
-                Historial base
+                Historial de versiones
               </p>
               <h3 id="snapshot-history-heading" className="mt-1 text-sm font-bold text-institutional">
                 Versiones publicadas
@@ -125,7 +131,7 @@ export function GraphSnapshotDrawer({
 
           {snapshots.length === 0 && !loading ? (
             <p className="mt-3 border border-dashed border-border p-3 text-xs text-muted-foreground">
-              Sin snapshots persistidos.
+              Sin versiones publicadas
             </p>
           ) : (
             <ul className="mt-3 space-y-2">
@@ -203,7 +209,7 @@ export function GraphSnapshotDrawer({
           {dateResults ? (
             dateResults.length === 0 ? (
               <p className="mt-3 border border-dashed border-border p-3 text-xs text-muted-foreground">
-                No hay snapshots en ese rango.
+                No hay versiones en ese rango
               </p>
             ) : (
               <ul className="mt-3 space-y-2">

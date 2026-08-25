@@ -10,6 +10,10 @@ export async function analizarConsulta(data: ConsultaRequest): Promise<ConsultaR
   return mapConsulta(raw)
 }
 
+export async function obtenerConsulta(id: string): Promise<ConsultaResponse> {
+  return mapConsulta(await apiFetch<unknown>(`/api/consultas/${encodeURIComponent(id)}`, { method: "GET" }))
+}
+
 export async function listarConsultas(): Promise<ConsultaResponse[]> {
   return mapConsultaList(await apiFetch<unknown>("/api/consultas"))
 }
