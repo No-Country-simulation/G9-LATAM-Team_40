@@ -1,0 +1,193 @@
+services:
+  # ── Persistent GraphRAG seed ─────────────────────────────────────
+  seed-data:
+    image: alpine:3.22.5
+    volumes:
+      - ./datascience/db/input_json:/seed/input_json:ro
+      - graphrag-db:/data
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        if [ ! -d /data/input_json ]; then
+          cp -a /seed/input_json /data/input_json;
+        fi;
+        chown -R 1000:1000 /data
+    restart: "no"
+    exclude_from_hc: true
+
+  # ── Supabase PostgreSQL ──────────────────────────────────────────
+  db:
+    image: supabase/postgres:15.1.0.147
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: 5432
+    volumes:
+      - supabase-db-data:/var/lib/postgresql/data
+      - ./docker/gotrue-stamp-migrations.sql:/docker-entrypoint-initdb.d/99-gotrue-stamp.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?} -d ${POSTGRES_DB:?}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  # ── Supabase Auth (GoTrue) ───────────────────────────────────────
+  supabase-auth:
+    image: supabase/gotrue:v2.143.0
+    expose:
+      - "9999"
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${GOTRUE_SITE_URL:?}
+      GOTRUE_DB_NAMESPACE: auth
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@db:5432/${POSTGRES_DB:?}?sslmode=disable&search_path=auth
+      GOTRUE_SITE_URL: ${GOTRUE_SITE_URL:?}
+      GOTRUE_URI_ALLOW_LIST: ""
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: ${SUPABASE_JWT_SECRET:?}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: ${GOTRUE_MAILER_AUTOCONFIRM:?}
+      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Python ML Service (FastAPI) ──────────────────────────────────
+  ml-service:
+    build:
+      context: ./datascience
+      dockerfile: docker/Dockerfile
+      args:
+        SPACY_MODEL: ${SPACY_MODEL:?}
+    expose:
+      - "5000"
+    environment:
+      DATA_SOURCE: oci
+      OCI_AUTH_MODE: api_key
+      OCI_SYNC_ON_STARTUP: ${OCI_SYNC_ON_STARTUP:?}
+      OCI_DATASET_BUCKET: ${OCI_DATASET_BUCKET:?}
+      OCI_NAMESPACE: ${OCI_NAMESPACE:?}
+      OCI_PREFIX: ${OCI_PREFIX:?}
+      OCI_CLI_USER: ${OCI_CLI_USER:?}
+      OCI_CLI_TENANCY: ${OCI_CLI_TENANCY:?}
+      OCI_CLI_REGION: ${OCI_CLI_REGION:?}
+      OCI_CLI_FINGERPRINT: ${OCI_CLI_FINGERPRINT:?}
+      OCI_CLI_KEY_FILE: /run/secrets/oci_api_key.pem
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:?}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:?}
+      ML_INTERNAL_TOKEN: ${ML_INTERNAL_TOKEN:?}
+      SPACY_MODEL: ${SPACY_MODEL:?}
+      MODELO_EMBEDDINGS: ${MODELO_EMBEDDINGS:?}
+      MAX_USER_INDEX_CACHE: ${MAX_USER_INDEX_CACHE:?}
+      BATCH_SIZE_EMBEDDINGS: ${BATCH_SIZE_EMBEDDINGS:?}
+      DOCUMENTOS_POR_LOTE: ${DOCUMENTOS_POR_LOTE:?}
+      MAX_CATEGORIAS_POR_DOCUMENTO: ${MAX_CATEGORIAS_POR_DOCUMENTO:?}
+      UMBRAL_CONFIANZA: ${UMBRAL_CONFIANZA:?}
+      CONCEPTOS_TOP_POR_SECCION: ${CONCEPTOS_TOP_POR_SECCION:?}
+      CONFIANZA_MINIMA_RELACION: ${CONFIANZA_MINIMA_RELACION:?}
+      SCORE_MINIMO_CONCEPTO: ${SCORE_MINIMO_CONCEPTO:?}
+      TOP_K_NODOS: ${TOP_K_NODOS:?}
+      TOP_K_SECCIONES_FINAL: ${TOP_K_SECCIONES_FINAL:?}
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        python -c "from pathlib import Path; from settings import settings; from storage.oci_object_storage import sync_metadata_from_oci; sync_metadata_from_oci(settings); missing=[str(path) for path in (settings.FILE_GRAFO_JSON, settings.FILE_EMBEDDINGS_JSON) if not Path(path).is_file()]; raise SystemExit('Faltan artefactos GraphRAG base: ' + ', '.join(missing)) if missing else None"
+        && exec uvicorn src.api.app:app --host 0.0.0.0 --port 5000
+    volumes:
+      - graphrag-db:/app/db
+      - type: bind
+        source: ${OCI_CLI_KEY_FILE:?}
+        target: /run/secrets/oci_api_key.pem
+        read_only: true
+      - ml-models-cache:/app/.cache
+    depends_on:
+      seed-data:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # ── Spring Boot API ──────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    expose:
+      - "8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:?}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:?}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?}
+      ML_SERVICE_URL: http://ml-service:5000
+      ML_INTERNAL_TOKEN: ${ML_INTERNAL_TOKEN:?}
+      INDEX_RECONCILE_DELAY_MS: ${INDEX_RECONCILE_DELAY_MS:?}
+      SUPABASE_AUTH_URL: http://supabase-auth:9999
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:?}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY:?}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:?}
+      SUPABASE_JWKS_URL: ""
+      OCI_CLI_USER: ${OCI_CLI_USER:?}
+      OCI_CLI_TENANCY: ${OCI_CLI_TENANCY:?}
+      OCI_CLI_REGION: ${OCI_CLI_REGION:?}
+      OCI_CLI_FINGERPRINT: ${OCI_CLI_FINGERPRINT:?}
+      OCI_CLI_KEY_FILE: /run/secrets/oci_api_key.pem
+      OCI_DATASET_BUCKET: ${OCI_DATASET_BUCKET:?}
+      OCI_NAMESPACE: ${OCI_NAMESPACE:?}
+      OCI_PREFIX: ${OCI_PREFIX:?}
+      GRAFO_LOCAL_PATH: /app/db/output_json/grafo_nodos_subnodos_graphrag.json
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?}
+    volumes:
+      - type: bind
+        source: ${OCI_CLI_KEY_FILE:?}
+        target: /run/secrets/oci_api_key.pem
+        read_only: true
+      - graphrag-db:/app/db:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+      supabase-auth:
+        condition: service_started
+    restart: unless-stopped
+
+  # ── Frontend Web (Next.js) ───────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend/techisolutions
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?}
+    expose:
+      - "3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  supabase-db-data:
+  graphrag-db:
+  ml-models-cache:
