@@ -114,7 +114,7 @@ services:
     volumes:
       - graphrag-db:/app/db
       - type: bind
-        source: ${OCI_CLI_KEY_FILE:?}
+        source: /data/coolify/secrets/techcontent/oci_api_key.pem
         target: /run/secrets/oci_api_key.pem
         read_only: true
       - ml-models-cache:/app/.cache
@@ -154,7 +154,7 @@ services:
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?}
     volumes:
       - type: bind
-        source: ${OCI_CLI_KEY_FILE:?}
+        source: /data/coolify/secrets/techcontent/oci_api_key.pem
         target: /run/secrets/oci_api_key.pem
         read_only: true
       - graphrag-db:/app/db:ro
