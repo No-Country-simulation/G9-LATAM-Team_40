@@ -109,7 +109,7 @@ services:
       - /bin/sh
       - -c
       - >-
-        python -c "from pathlib import Path; from settings import settings; from storage.oci_object_storage import sync_metadata_from_oci; sync_metadata_from_oci(settings); missing=[str(path) for path in (settings.FILE_GRAFO_JSON, settings.FILE_EMBEDDINGS_JSON) if not Path(path).is_file()]; raise SystemExit('Faltan artefactos GraphRAG base: ' + ', '.join(missing)) if missing else None"
+        python -c "from pathlib import Path; from settings import settings; from storage.oci_object_storage import fetch_document_on_demand, sync_metadata_from_oci; sync_metadata_from_oci(settings); required=[settings.JSON_INPUT_DIR / name for name in ('cleaning_rules.json', 'rules.json', 'relations.json', 'glosario.json')] + [settings.FILE_TAXONOMIA_DESCUBIERTA]; [fetch_document_on_demand(settings, path) for path in required]; required.extend([settings.FILE_GRAFO_JSON, settings.FILE_EMBEDDINGS_JSON]); missing=[str(path) for path in required if not Path(path).is_file()]; raise SystemExit('Faltan artefactos GraphRAG base: ' + ', '.join(missing)) if missing else None"
         && exec uvicorn src.api.app:app --host 0.0.0.0 --port 5000
     volumes:
       - graphrag-db:/app/db
